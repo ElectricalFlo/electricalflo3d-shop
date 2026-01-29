@@ -57,6 +57,26 @@
         <textarea id="orderNotes" rows="3" placeholder="Example: black PETG, callsign N2CFX, include keyring…"></textarea>
       </label>
 
+      <label class="field">
+  <span>Preferred payment method</span>
+  <select id="paymentMethod">
+    <option value="PayPal">PayPal</option>
+    <option value="Venmo">Venmo</option>
+    <option value="Zelle">Zelle</option>
+  </select>
+</label>
+
+<label class="field checkbox">
+  <input type="checkbox" id="includeShippingNow">
+  <span>Include shipping address now (optional)</span>
+</label>
+
+<label class="field" id="shippingWrap" style="display:none">
+  <span>Shipping address</span>
+  <textarea id="shippingAddress" rows="3" placeholder="Street, City, State, ZIP"></textarea>
+</label>
+
+
       <button class="primary" id="emailCheckoutBtn">Email Order for Payment Info</button>
       <p class="fine">
         No payment is taken on this site. You’ll email the order and receive payment & shipping info.
