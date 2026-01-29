@@ -44,4 +44,6 @@ select{max-width:220px}
 .fine{color:var(--muted);font-size:12px;margin:0}
 .empty{color:var(--muted)}
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40}
+.checkbox{display:flex;gap:10px;align-items:center}
+.checkbox input{width:auto}
 
