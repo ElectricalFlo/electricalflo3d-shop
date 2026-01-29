@@ -18,7 +18,6 @@
     </div>
   </div>
 
-  <!-- ONLY Cart button on the page -->
   <button class="cartBtn" id="openCartBtn" type="button">
     Cart <span class="pill" id="cartCount">0</span>
   </button>
@@ -87,6 +86,10 @@
       Email Order for Payment Info
     </button>
 
+    <button class="ghost" id="copyOrderBtn" type="button">
+      Copy order details
+    </button>
+
     <button class="ghost" id="clearCartBtn" type="button">
       Clear cart
     </button>
@@ -137,12 +140,12 @@ function renderProducts(){
   grid.innerHTML = PRODUCTS.map(p => `
     <article class="card">
       <div class="thumb">
-        <img src="${p.image}" alt="${p.name}">
+        <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
       </div>
       <div class="cardBody">
         <h3>${p.name}</h3>
         <span class="price">${money(p.price)}</span>
-        <button class="primary" onclick="addToCart('${p.id}')">Add to cart</button>
+        <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
       </div>
     </article>
   `).join("");
@@ -153,7 +156,7 @@ function renderCart(){
   const items = Object.entries(cart).map(([id,qty])=>{
     const p = PRODUCTS.find(x=>x.id===id);
     if(!p) return null;
-    return {p,qty,line:p.price*qty};
+    return {p,qty,line:Number(p.price)*Number(qty)};
   }).filter(Boolean);
 
   if(!items.length){
@@ -165,12 +168,14 @@ function renderCart(){
   box.innerHTML = items.map(i=>`
     <div class="cartRow">
       <strong>${i.p.name}</strong> × ${i.qty}
+      <div class="muted">${money(i.p.price)} each • Line: ${money(i.line)}</div>
     </div>
   `).join("");
 
   document.getElementById("subtotal").textContent =
     money(items.reduce((a,b)=>a+b.line,0));
 }
+
 function buildEmailBody(){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
@@ -183,7 +188,7 @@ function buildEmailBody(){
     const p = PRODUCTS.find(x => x.id === id);
     if (!p) return null;
     const line = Number(p.price) * Number(qty);
-    return { name: p.name, price: Number(p.price), qty: Number(qty), line };
+    return { name: p.name, qty: Number(qty), line };
   }).filter(Boolean);
 
   const subtotal = items.reduce((a,b) => a + b.line, 0);
@@ -197,9 +202,7 @@ function buildEmailBody(){
   lines.push("");
 
   lines.push("Items:");
-  items.forEach(i => {
-    lines.push(`- ${i.name} (x${i.qty}) — $${i.line.toFixed(2)}`);
-  });
+  items.forEach(i => lines.push(`- ${i.name} (x${i.qty}) — $${i.line.toFixed(2)}`));
 
   lines.push("");
   lines.push(`Subtotal (before shipping): $${subtotal.toFixed(2)}`);
@@ -224,41 +227,70 @@ function buildEmailBody(){
   return lines.join("\n");
 }
 
-  
-  
 function emailCheckout(){
   if(!Object.keys(cart).length) return;
 
-  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} (${Object.values(cart).reduce((a,b)=>a+b,0)} item(s))`);
+  const itemCount = Object.values(cart).reduce((a,b)=>a+b,0);
+  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} (${itemCount} item${itemCount===1?"":"s"})`);
   const body = encodeURIComponent(buildEmailBody());
 
   window.location.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
 }
 
+async function copyOrderDetails(){
+  if(!Object.keys(cart).length) return;
+
+  const text = buildEmailBody();
+
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("Copied! Paste it into an email/text to send your order.");
+  }catch(e){
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly","");
+    ta.style.position = "absolute";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    alert("Copied! Paste it into an email/text to send your order.");
+  }
+}
 
 function openDrawer(){
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("backdrop");
   drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden","false");
   backdrop.hidden = false;
   renderCart();
 }
 
 function closeDrawer(){
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("backdrop");
   drawer.classList.remove("open");
+  drawer.setAttribute("aria-hidden","true");
   backdrop.hidden = true;
 }
 
 async function init(){
-  PRODUCTS = await (await fetch("products.json")).json();
+  PRODUCTS = await (await fetch("products.json", { cache: "no-store" })).json();
 
-  openCartBtn.onclick = openDrawer;
-  closeCartBtn.onclick = closeDrawer;
-  backdrop.onclick = closeDrawer;
-  emailCheckoutBtn.onclick = emailCheckout;
-  clearCartBtn.onclick = clearCart;
+  document.getElementById("openCartBtn").addEventListener("click", openDrawer);
+  document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
+  document.getElementById("backdrop").addEventListener("click", closeDrawer);
+
+  document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
+  document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
+  document.getElementById("clearCartBtn").addEventListener("click", clearCart);
 
   wireShippingToggle();
   saveCart();
   renderProducts();
+  renderCart();
 }
 
 init();
