@@ -8,318 +8,204 @@
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="header">
-    <div class="brandWrap">
-      <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
-      <div class="brand">
-        <h1>ElectricalFlo 3D</h1>
-        <p>3D printed gear • custom orders welcome</p>
-      </div>
+<!-- ================= HEADER ================= -->
+<header class="header">
+  <div class="brandWrap">
+    <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
+    <div class="brand">
+      <h1>ElectricalFlo 3D</h1>
+      <p>3D printed gear • custom orders welcome</p>
+    </div>
+  </div>
+
+  <!-- ONLY Cart button on the page -->
+  <button class="cartBtn" id="openCartBtn" type="button">
+    Cart <span class="pill" id="cartCount">0</span>
+  </button>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main class="wrap">
+  <section class="toolbar">
+    <input id="search" placeholder="Search items…" />
+    <select id="sort">
+      <option value="featured">Sort: Featured</option>
+      <option value="price_asc">Price: Low → High</option>
+      <option value="price_desc">Price: High → Low</option>
+      <option value="name_asc">Name: A → Z</option>
+    </select>
+  </section>
+
+  <section class="grid" id="grid"></section>
+</main>
+
+<!-- ================= CART DRAWER ================= -->
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawerHeader">
+    <h2>Your Cart</h2>
+    <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
+  </div>
+
+  <div class="drawerBody" id="cartItems"></div>
+
+  <div class="drawerFooter">
+    <div class="totalRow">
+      <span>Subtotal</span>
+      <strong id="subtotal">$0.00</strong>
     </div>
 
-    <button class="cartBtn" id="openCartBtn" type="button">
-      Cart <span class="pill" id="cartCount">0</span>
-    </button>
-  </header>
+    <label class="field">
+      <span>Your name (optional)</span>
+      <input id="customerName" />
+    </label>
 
-  <main class="wrap">
-    <section class="toolbar">
-      <input id="search" placeholder="Search items…" />
-      <select id="sort">
-        <option value="featured">Sort: Featured</option>
-        <option value="price_asc">Price: Low → High</option>
-        <option value="price_desc">Price: High → Low</option>
-        <option value="name_asc">Name: A → Z</option>
+    <label class="field">
+      <span>Notes (colors, callsign, etc.)</span>
+      <textarea id="orderNotes" rows="3"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Preferred payment method</span>
+      <select id="paymentMethod">
+        <option value="PayPal">PayPal</option>
+        <option value="Venmo">Venmo</option>
+        <option value="Zelle">Zelle</option>
       </select>
-    </section>
+    </label>
 
-    <section class="grid" id="grid"></section>
-  </main>
+    <label class="field checkbox">
+      <input type="checkbox" id="includeShippingNow" />
+      <span>Include shipping address now (optional)</span>
+    </label>
 
-  <!-- Cart Drawer -->
-  <aside class="drawer" id="drawer" aria-hidden="true">
-    <div class="drawerHeader">
-      <h2>Your Cart</h2>
-      <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
-    </div>
+    <label class="field" id="shippingWrap" style="display:none">
+      <span>Shipping address</span>
+      <textarea id="shippingAddress" rows="3"></textarea>
+    </label>
 
-    <div class="drawerBody" id="cartItems"></div>
+    <button class="primary" id="emailCheckoutBtn" type="button">
+      Email Order for Payment Info
+    </button>
 
-    <div class="drawerFooter">
-      <div class="totalRow">
-        <span>Subtotal</span>
-        <strong id="subtotal">$0.00</strong>
+    <button class="ghost" id="clearCartBtn" type="button">
+      Clear cart
+    </button>
+  </div>
+</aside>
+
+<div class="backdrop" id="backdrop" hidden></div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+const EMAIL_TO = "flores@n2cfx.com";
+const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
+
+let PRODUCTS = [];
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+
+const money = n => `$${Number(n).toFixed(2)}`;
+
+function wireShippingToggle(){
+  const cb = document.getElementById("includeShippingNow");
+  const wrap = document.getElementById("shippingWrap");
+  if (!cb || !wrap) return;
+  cb.addEventListener("change", () => {
+    wrap.style.display = cb.checked ? "block" : "none";
+  });
+}
+
+function saveCart(){
+  localStorage.setItem("cart", JSON.stringify(cart));
+  document.getElementById("cartCount").textContent =
+    Object.values(cart).reduce((a,b)=>a+b,0);
+}
+
+function addToCart(id){
+  cart[id] = (cart[id] || 0) + 1;
+  saveCart();
+  renderCart();
+}
+
+function clearCart(){
+  cart = {};
+  saveCart();
+  renderCart();
+}
+
+function renderProducts(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = PRODUCTS.map(p => `
+    <article class="card">
+      <div class="thumb">
+        <img src="${p.image}" alt="${p.name}">
       </div>
+      <div class="cardBody">
+        <h3>${p.name}</h3>
+        <span class="price">${money(p.price)}</span>
+        <button class="primary" onclick="addToCart('${p.id}')">Add to cart</button>
+      </div>
+    </article>
+  `).join("");
+}
 
-      <label class="field">
-        <span>Your name (optional)</span>
-        <input id="customerName" placeholder="Christopher / Your name" />
-      </label>
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  const items = Object.entries(cart).map(([id,qty])=>{
+    const p = PRODUCTS.find(x=>x.id===id);
+    if(!p) return null;
+    return {p,qty,line:p.price*qty};
+  }).filter(Boolean);
 
-      <label class="field">
-        <span>Notes (colors, callsign, etc.)</span>
-        <textarea id="orderNotes" rows="3" placeholder="Example: black PETG, callsign N2CFX, include keyring…"></textarea>
-      </label>
+  if(!items.length){
+    box.innerHTML = "<p class='empty'>Your cart is empty.</p>";
+    document.getElementById("subtotal").textContent = money(0);
+    return;
+  }
 
-      <label class="field">
-        <span>Preferred payment method</span>
-        <select id="paymentMethod">
-          <option value="PayPal">PayPal</option>
-          <option value="Venmo">Venmo</option>
-          <option value="Zelle">Zelle</option>
-        </select>
-      </label>
-
-      <label class="field checkbox">
-        <input type="checkbox" id="includeShippingNow" />
-        <span>Include shipping address now (optional)</span>
-      </label>
-
-      <label class="field" id="shippingWrap" style="display:none">
-        <span>Shipping address</span>
-        <textarea id="shippingAddress" rows="3" placeholder="Street, City, State, ZIP"></textarea>
-      </label>
-
-      <button class="primary" id="emailCheckoutBtn" type="button">Email Order for Payment Info</button>
-      <p class="fine">
-        No payment is taken on this site. You’ll email the order and receive payment &amp; shipping info.
-      </p>
-
-      <button class="ghost" id="clearCartBtn" type="button">Clear cart</button>
+  box.innerHTML = items.map(i=>`
+    <div class="cartRow">
+      <strong>${i.p.name}</strong> × ${i.qty}
     </div>
-  </aside>
+  `).join("");
 
-  <div class="backdrop" id="backdrop" hidden></div>
+  document.getElementById("subtotal").textContent =
+    money(items.reduce((a,b)=>a+b.line,0));
+}
 
-  <script>
-    const EMAIL_TO = "flores@n2cfx.com";
-    const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
+function emailCheckout(){
+  if(!Object.keys(cart).length) return;
+  const body = encodeURIComponent("Order request from ElectricalFlo3D site");
+  window.location.href =
+    `mailto:${EMAIL_TO}?subject=${EMAIL_SUBJECT_PREFIX}&body=${body}`;
+}
 
-    let PRODUCTS = [];
-    let cart = JSON.parse(localStorage.getItem("cart") || "{}"); // {productId: qty}
+function openDrawer(){
+  drawer.classList.add("open");
+  backdrop.hidden = false;
+  renderCart();
+}
 
-    const money = (n) => `$${Number(n).toFixed(2)}`;
+function closeDrawer(){
+  drawer.classList.remove("open");
+  backdrop.hidden = true;
+}
 
-    function wireShippingToggle() {
-      const cb = document.getElementById("includeShippingNow");
-      const wrap = document.getElementById("shippingWrap");
-      if (!cb || !wrap) return;
+async function init(){
+  PRODUCTS = await (await fetch("products.json")).json();
 
-      cb.addEventListener("change", () => {
-        wrap.style.display = cb.checked ? "block" : "none";
-      });
-    }
+  openCartBtn.onclick = openDrawer;
+  closeCartBtn.onclick = closeDrawer;
+  backdrop.onclick = closeDrawer;
+  emailCheckoutBtn.onclick = emailCheckout;
+  clearCartBtn.onclick = clearCart;
 
-    function saveCart() {
-      localStorage.setItem("cart", JSON.stringify(cart));
-      renderCartCount();
-    }
+  wireShippingToggle();
+  saveCart();
+  renderProducts();
+}
 
-    function cartCount() {
-      return Object.values(cart).reduce((a, b) => a + b, 0);
-    }
-
-    function renderCartCount() {
-      const el = document.getElementById("cartCount");
-      if (el) el.textContent = cartCount();
-    }
-
-    function addToCart(id) {
-      cart[id] = (cart[id] || 0) + 1;
-      saveCart();
-      renderCart();
-    }
-
-    function decFromCart(id) {
-      if (!cart[id]) return;
-      cart[id] -= 1;
-      if (cart[id] <= 0) delete cart[id];
-      saveCart();
-      renderCart();
-    }
-
-    function removeFromCart(id) {
-      delete cart[id];
-      saveCart();
-      renderCart();
-    }
-
-    function clearCart() {
-      cart = {};
-      saveCart();
-      renderCart();
-    }
-
-    function getFilteredSortedProducts() {
-      const q = document.getElementById("search").value.trim().toLowerCase();
-      const sort = document.getElementById("sort").value;
-
-      let list = PRODUCTS.filter(p =>
-        !q || (p.name + " " + (p.note || "")).toLowerCase().includes(q)
-      );
-
-      if (sort === "price_asc") list.sort((a, b) => a.price - b.price);
-      if (sort === "price_desc") list.sort((a, b) => b.price - a.price);
-      if (sort === "name_asc") list.sort((a, b) => a.name.localeCompare(b.name));
-      return list;
-    }
-
-    function renderProducts() {
-      const grid = document.getElementById("grid");
-      const list = getFilteredSortedProducts();
-
-      grid.innerHTML = list.map(p => `
-        <article class="card">
-          <div class="thumb">
-            <img src="${p.image || ""}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
-          </div>
-          <div class="cardBody">
-            <h3>${p.name}</h3>
-            <div class="meta">
-              <span class="price">${money(p.price)}</span>
-              <span class="note">${p.note || ""}</span>
-            </div>
-            <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
-          </div>
-        </article>
-      `).join("");
-    }
-
-    function renderCart() {
-      const box = document.getElementById("cartItems");
-      const items = Object.entries(cart).map(([id, qty]) => {
-        const p = PRODUCTS.find(x => x.id === id);
-        if (!p) return null;
-        const line = p.price * qty;
-        return { ...p, qty, line };
-      }).filter(Boolean);
-
-      if (items.length === 0) {
-        box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
-        document.getElementById("subtotal").textContent = money(0);
-        return;
-      }
-
-      box.innerHTML = items.map(i => `
-        <div class="cartRow">
-          <div class="cartInfo">
-            <strong>${i.name}</strong>
-            <div class="muted">${money(i.price)} each</div>
-            <div class="muted">Line: ${money(i.line)}</div>
-          </div>
-          <div class="qty">
-            <button class="iconBtn" type="button" onclick="decFromCart('${i.id}')">−</button>
-            <span>${i.qty}</span>
-            <button class="iconBtn" type="button" onclick="addToCart('${i.id}')">+</button>
-          </div>
-          <button class="link" type="button" onclick="removeFromCart('${i.id}')">Remove</button>
-        </div>
-      `).join("");
-
-      const subtotal = items.reduce((a, b) => a + b.line, 0);
-      document.getElementById("subtotal").textContent = money(subtotal);
-    }
-
-    function buildEmailBody() {
-      const name = document.getElementById("customerName").value.trim();
-      const notes = document.getElementById("orderNotes").value.trim();
-      const payment = document.getElementById("paymentMethod")?.value || "PayPal";
-
-      const includeShip = document.getElementById("includeShippingNow")?.checked;
-      const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
-
-      const items = Object.entries(cart).map(([id, qty]) => {
-        const p = PRODUCTS.find(x => x.id === id);
-        if (!p) return null;
-        return { p, qty, line: p.price * qty };
-      }).filter(Boolean);
-
-      const subtotal = items.reduce((a, b) => a + b.line, 0);
-
-      const lines = [];
-      lines.push("Hi! I'd like to place an order:");
-      lines.push("");
-
-      if (name) lines.push(`Name: ${name}`);
-      lines.push(`Preferred payment method: ${payment}`);
-      lines.push("");
-
-      lines.push("Items:");
-      items.forEach(({ p, qty, line }) => {
-        lines.push(`- ${p.name} (x${qty}) — ${money(line)}`);
-      });
-
-      lines.push("");
-      lines.push(`Subtotal (before shipping): ${money(subtotal)}`);
-      lines.push("");
-
-      if (notes) {
-        lines.push("Notes / customization:");
-        lines.push(notes);
-        lines.push("");
-      }
-
-      if (includeShip && shipAddr) {
-        lines.push("Shipping address:");
-        lines.push(shipAddr);
-        lines.push("");
-      } else {
-        lines.push("Shipping address: I can provide after you reply.");
-        lines.push("");
-      }
-
-      lines.push("Please reply with the total (including shipping) and your payment details for the method I selected. Thanks!");
-      return lines.join("\n");
-    }
-
-    function emailCheckout() {
-      if (cartCount() === 0) return;
-
-      const body = encodeURIComponent(buildEmailBody());
-      const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} (${cartCount()} item${cartCount() === 1 ? "" : "s"})`);
-      window.location.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
-    }
-
-    // Drawer open/close
-    function openDrawer() {
-      const d = document.getElementById("drawer");
-      d.classList.add("open");
-      d.setAttribute("aria-hidden", "false");
-      document.getElementById("backdrop").hidden = false;
-      renderCart();
-    }
-
-    function closeDrawer() {
-      const d = document.getElementById("drawer");
-      d.classList.remove("open");
-      d.setAttribute("aria-hidden", "true");
-      document.getElementById("backdrop").hidden = true;
-    }
-
-    async function init() {
-      const res = await fetch("products.json", { cache: "no-store" });
-      PRODUCTS = await res.json();
-
-      document.getElementById("search").addEventListener("input", renderProducts);
-      document.getElementById("sort").addEventListener("change", renderProducts);
-
-      document.getElementById("openCartBtn").addEventListener("click", openDrawer);
-      document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
-      document.getElementById("backdrop").addEventListener("click", closeDrawer);
-
-      document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
-      document.getElementById("clearCartBtn").addEventListener("click", clearCart);
-
-      wireShippingToggle();
-
-      renderCartCount();
-      renderProducts();
-      renderCart();
-    }
-
-    init();
-  </script>
+init();
+</script>
 
 </body>
 </html>
