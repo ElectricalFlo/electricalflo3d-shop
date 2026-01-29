@@ -28,6 +28,26 @@
   max-width:220px;
   object-fit:contain;
 }
+@media (max-width: 600px){
+  .header{
+    grid-template-columns: auto;
+    row-gap:12px;
+  }
+
+  .headerLeft,
+  .headerRight{
+    justify-self:center;
+  }
+
+  .headerRight{
+    order:3;
+  }
+
+  .headerCenter{
+    order:1;
+  }
+}
+
 
 :root{
   --bg:#0f1115;
