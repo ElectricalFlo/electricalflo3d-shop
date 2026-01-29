@@ -278,10 +278,24 @@ async function init() {
   document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
   document.getElementById("clearCartBtn").addEventListener("click", clearCart);
 
+  wireShippingToggle();
+
   renderCartCount();
   renderProducts();
   renderCart();
 }
+
+  <script>
+  function wireShippingToggle() {
+    const cb = document.getElementById("includeShippingNow");
+    const wrap = document.getElementById("shippingWrap");
+
+    if (!cb || !wrap) return;
+
+    cb.addEventListener("change", () => {
+      wrap.style.display = cb.checked ? "block" : "none";
+    });
+  }
 
 init();
 </script>
