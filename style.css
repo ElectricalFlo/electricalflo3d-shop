@@ -24,9 +24,11 @@
 }
 
 .logo{
-  height:48px;          /* adjust size here */
-  max-width:220px;
-  object-fit:contain;
+  height: 56px;      /* ← this is the main size control */
+  width: auto;       /* keep aspect ratio */
+  max-width: none;   /* prevents accidental shrinking */
+  object-fit: contain;
+  display: block;
 }
 @media (max-width: 600px){
   .header{
