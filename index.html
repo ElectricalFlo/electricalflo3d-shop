@@ -1,1 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ElectricalFlo 3D — Shop</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <h1>ElectricalFlo 3D</h1>
+      <p>3D printed gear • custom orders welcome</p>
+    </div>
+
+    <button class="cartBtn" id="openCartBtn">
+      Cart <span class="pill" id="cartCount">0</span>
+    </button>
+  </header>
+
+  <main class="wrap">
+    <section class="toolbar">
+      <input id="search" placeholder="Search items…" />
+      <select id="sort">
+        <option value="featured">Sort: Featured</option>
+        <option value="price_asc">Price: Low → High</option>
+        <option value="price_desc">Price: High → Low</option>
+        <option value="name_asc">Name: A → Z</option>
+      </select>
+    </section>
+
+    <section class="grid" id="grid"></section>
+  </main>
+
+  <!-- Cart Drawer -->
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawerHeader">
+      <h2>Your Cart</h2>
+      <button class="iconBtn" id="closeCartBtn">✕</button>
+    </div>
+
+    <div class="drawerBody" id="cartItems"></div>
+
+    <div class="drawerFooter">
+      <div class="totalRow">
+        <span>Subtotal</span>
+        <strong id="subtotal">$0.00</strong>
+      </div>
+
+      <label class="field">
+        <span>Your name (optional)</span>
+        <input id="customerName" placeholder="Christopher / Your name" />
+      </label>
+
+      <label class="field">
+        <span>Notes (colors, callsign, etc.)</span>
+        <textarea id="orderNotes" rows="3" placeholder="Example: black PETG, callsign N2CFX, include keyring…"></textarea>
+      </label>
+
+      <button class="primary" id="emailCheckoutBtn">Email Order for Payment Info</button>
+      <p class="fine">
+        No payment is taken on this site. You’ll email the order and receive payment & shipping info.
+      </p>
+
+      <button class="ghost" id="clearCartBtn">Clear cart</button>
+    </div>
+  </aside>
+
+  <div class="backdrop" id="backdrop" hidden></div>
+
+<script>
+const EMAIL_TO = "YOUREMAIL@domain.com";   // <-- change this
+const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
+
+let PRODUCTS = [];
+let cart = JSON.parse(localStorage.getItem("cart") || "{}"); // {productId: qty}
+
+const money = (n) => `$${Number(n).toFixed(2)}`;
+
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCartCount();
+}
+
+function cartCount() {
+  return Object.values(cart).reduce((a,b) => a + b, 0);
+}
+
+function renderCartCount() {
+  document.getElementById("cartCount").textContent = cartCount();
+}
+
+function addToCart(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  saveCart();
+  renderCart();
+}
+
+function decFromCart(id) {
+  if (!cart[id]) return;
+  cart[id] -= 1;
+  if (cart[id] <= 0) delete cart[id];
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  delete cart[id];
+  saveCart();
+  renderCart();
+}
+
+function clearCart() {
+  cart = {};
+  saveCart();
+  renderCart();
+}
+
+function getFilteredSortedProducts() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const sort = document.getElementById("sort").value;
+
+  let list = PRODUCTS.filter(p =>
+    !q || (p.name + " " + (p.note||"")).toLowerCase().includes(q)
+  );
+
+  if (sort === "price_asc") list.sort((a,b) => a.price - b.price);
+  if (sort === "price_desc") list.sort((a,b) => b.price - a.price);
+  if (sort === "name_asc") list.sort((a,b) => a.name.localeCompare(b.name));
+  return list;
+}
+
+function renderProducts() {
+  const grid = document.getElementById("grid");
+  const list = getFilteredSortedProducts();
+
+  grid.innerHTML = list.map(p => `
+    <article class="card">
+      <div class="thumb">
+        <img src="${p.image || ""}" alt="${p.name}" loading="lazy" onerror="this.style.display='none'">
+      </div>
+      <div class="cardBody">
+        <h3>${p.name}</h3>
+        <div class="meta">
+          <span class="price">${money(p.price)}</span>
+          <span class="note">${p.note || ""}</span>
+        </div>
+        <button class="primary" onclick="addToCart('${p.id}')">Add to cart</button>
+      </div>
+    </article>
+  `).join("");
+}
+
+function renderCart() {
+  const box = document.getElementById("cartItems");
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return null;
+    const line = p.price * qty;
+    return { ...p, qty, line };
+  }).filter(Boolean);
+
+  if (items.length === 0) {
+    box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
+    document.getElementById("subtotal").textContent = money(0);
+    return;
+  }
+
+  box.innerHTML = items.map(i => `
+    <div class="cartRow">
+      <div class="cartInfo">
+        <strong>${i.name}</strong>
+        <div class="muted">${money(i.price)} each</div>
+        <div class="muted">Line: ${money(i.line)}</div>
+      </div>
+      <div class="qty">
+        <button class="iconBtn" onclick="decFromCart('${i.id}')">−</button>
+        <span>${i.qty}</span>
+        <button class="iconBtn" onclick="addToCart('${i.id}')">+</button>
+      </div>
+      <button class="link" onclick="removeFromCart('${i.id}')">Remove</button>
+    </div>
+  `).join("");
+
+  const subtotal = items.reduce((a,b) => a + b.line, 0);
+  document.getElementById("subtotal").textContent = money(subtotal);
+}
+
+function buildEmailBody() {
+  const name = document.getElementById("customerName").value.trim();
+  const notes = document.getElementById("orderNotes").value.trim();
+
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return null;
+    return { p, qty, line: p.price * qty };
+  }).filter(Boolean);
+
+  const subtotal = items.reduce((a,b) => a + b.line, 0);
+
+  const lines = [];
+  lines.push("Hi! I'd like to place an order:");
+  lines.push("");
+  if (name) lines.push(`Name: ${name}`);
+  lines.push("");
+  lines.push("Items:");
+  items.forEach(({p, qty, line}) => {
+    lines.push(`- ${p.name} (x${qty}) — ${money(line)}`);
+  });
+  lines.push("");
+  lines.push(`Subtotal: ${money(subtotal)}`);
+  lines.push("");
+  if (notes) {
+    lines.push("Notes / customization:");
+    lines.push(notes);
+    lines.push("");
+  }
+  lines.push("Please send payment options and shipping total. Thanks!");
+  return lines.join("\n");
+}
+
+function emailCheckout() {
+  if (cartCount() === 0) return;
+
+  const body = encodeURIComponent(buildEmailBody());
+  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} (${cartCount()} item${cartCount()===1?"":"s"})`);
+  const mailto = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
+  window.location.href = mailto;
+}
+
+// Drawer open/close
+function openDrawer() {
+  const d = document.getElementById("drawer");
+  d.classList.add("open");
+  d.setAttribute("aria-hidden", "false");
+  document.getElementById("backdrop").hidden = false;
+  renderCart();
+}
+
+function closeDrawer() {
+  const d = document.getElementById("drawer");
+  d.classList.remove("open");
+  d.setAttribute("aria-hidden", "true");
+  document.getElementById("backdrop").hidden = true;
+}
+
+async function init() {
+  const res = await fetch("products.json", { cache: "no-store" });
+  PRODUCTS = await res.json();
+
+  document.getElementById("search").addEventListener("input", renderProducts);
+  document.getElementById("sort").addEventListener("change", renderProducts);
+
+  document.getElementById("openCartBtn").addEventListener("click", openDrawer);
+  document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
+  document.getElementById("backdrop").addEventListener("click", closeDrawer);
+
+  document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
+  document.getElementById("clearCartBtn").addEventListener("click", clearCart);
+
+  renderCartCount();
+  renderProducts();
+  renderCart();
+}
+
+init();
+</script>
+</body>
+</html>
 
