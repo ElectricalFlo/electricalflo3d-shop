@@ -20,8 +20,6 @@ body{
 
 /* ================= HEADER ================= */
 
-/* ================= HEADER ================= */
-
 .header{
   display:flex;
   align-items:center;
@@ -36,17 +34,21 @@ body{
 }
 
 .brandWrap{
-  display:flex;
-  align-items:center;
-  gap:14px;
+  display:flex;              /* ← THIS is the key line */
+  align-items:center;        /* vertical alignment */
+  gap:14px;                  /* space between logo & text */
 }
 
-/* LOGO SIZE — change this number only */
 .logo{
-  height: 56px;
+  height: 56px;              /* adjust size here */
   width: auto;
   display:block;
   object-fit:contain;
+}
+
+.brand{
+  display:flex;
+  flex-direction:column;
 }
 
 .brand h1{
