@@ -1,1 +1,16 @@
-
+[
+  {
+    "id": "apx-keychain-1",
+    "name": "APX-Inspired Keychain",
+    "price": 12.00,
+    "note": "Color options available",
+    "image": "images/apx-keychain.jpg"
+  },
+  {
+    "id": "n2cfx-plate-1",
+    "name": "N2CFX Mini License Plate",
+    "price": 15.00,
+    "note": "Custom callsign available",
+    "image": "images/n2cfx-plate.jpg"
+  }
+]
