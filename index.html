@@ -171,13 +171,70 @@ function renderCart(){
   document.getElementById("subtotal").textContent =
     money(items.reduce((a,b)=>a+b.line,0));
 }
+function buildEmailBody(){
+  const name = (document.getElementById("customerName")?.value || "").trim();
+  const notes = (document.getElementById("orderNotes")?.value || "").trim();
+  const payment = document.getElementById("paymentMethod")?.value || "PayPal";
 
+  const includeShip = document.getElementById("includeShippingNow")?.checked;
+  const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
+
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return null;
+    const line = Number(p.price) * Number(qty);
+    return { name: p.name, price: Number(p.price), qty: Number(qty), line };
+  }).filter(Boolean);
+
+  const subtotal = items.reduce((a,b) => a + b.line, 0);
+
+  const lines = [];
+  lines.push("Hi! I'd like to place an order:");
+  lines.push("");
+
+  if (name) lines.push(`Name: ${name}`);
+  lines.push(`Preferred payment method: ${payment}`);
+  lines.push("");
+
+  lines.push("Items:");
+  items.forEach(i => {
+    lines.push(`- ${i.name} (x${i.qty}) — $${i.line.toFixed(2)}`);
+  });
+
+  lines.push("");
+  lines.push(`Subtotal (before shipping): $${subtotal.toFixed(2)}`);
+  lines.push("");
+
+  if (notes) {
+    lines.push("Notes / customization:");
+    lines.push(notes);
+    lines.push("");
+  }
+
+  if (includeShip && shipAddr) {
+    lines.push("Shipping address:");
+    lines.push(shipAddr);
+    lines.push("");
+  } else {
+    lines.push("Shipping address: I can provide after you reply.");
+    lines.push("");
+  }
+
+  lines.push("Please reply with the total (including shipping) and your payment details for the method I selected. Thanks!");
+  return lines.join("\n");
+}
+
+  
+  
 function emailCheckout(){
   if(!Object.keys(cart).length) return;
-  const body = encodeURIComponent("Order request from ElectricalFlo3D site");
-  window.location.href =
-    `mailto:${EMAIL_TO}?subject=${EMAIL_SUBJECT_PREFIX}&body=${body}`;
+
+  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} (${Object.values(cart).reduce((a,b)=>a+b,0)} item(s))`);
+  const body = encodeURIComponent(buildEmailBody());
+
+  window.location.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
 }
+
 
 function openDrawer(){
   drawer.classList.add("open");
