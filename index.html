@@ -349,14 +349,25 @@ function productCardHTML(p){
 
       ${thumbs}
 
-      <div class="cardBody">
-        <h3>${p.name || "Untitled item"}</h3>
-        ${p.note ? `<div class="note">${p.note}</div>` : ""}
-        <span class="price">${money(p.price)}</span>
-        <button class="primary" type="button" data-action="addToCart" data-pid="${p.id}">
-          Add to cart
-        </button>
-      </div>
+  <div class="cardBody">
+  <h3>${p.name || "Untitled item"}</h3>
+  <span class="price">${money(p.price || 0)}</span>
+
+  ${Array.isArray(p.badges) && p.badges.length ? `
+    <div class="badges">
+      ${p.badges.map(b => `
+        <span class="badge ${/made to order|custom|glow/i.test(b) ? "badge--accent" : ""}">
+          ${b}
+        </span>
+      `).join("")}
+    </div>
+  ` : ""}
+
+  <button class="primary" type="button" onclick="addToCart('${p.id}')">
+    Add to cart
+  </button>
+</div>
+
     </article>
   `;
 }
