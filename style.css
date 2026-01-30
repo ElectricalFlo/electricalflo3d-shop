@@ -357,3 +357,159 @@ select{
   background:var(--accent);
 }
 
+/* ================= THUMBNAIL STRIP (replaces dots) ================= */
+
+.thumbStrip{
+  display:flex;
+  gap:8px;
+  padding:10px 12px 0;
+  overflow-x:auto;
+  scrollbar-width:thin;
+}
+
+.thumbBtn{
+  border:1px solid var(--border);
+  background:transparent;
+  border-radius:12px;
+  padding:0;
+  width:56px;
+  height:44px;
+  flex:0 0 auto;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.thumbBtn img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.thumbBtn.active{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,230,118,0.18);
+}
+
+/* ================= FULLSCREEN IMAGE MODAL ================= */
+
+.imgModal{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+}
+
+.imgModalBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.75);
+}
+
+.imgModalPanel{
+  position:relative;
+  margin:24px auto;
+  width:min(980px, 94vw);
+  height:min(86vh, 760px);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  z-index:1001;
+}
+
+.imgModalHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+}
+
+.imgModalTitle{
+  font-weight:700;
+}
+
+.imgModalMain{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px;
+  background:#0b0d11;
+}
+
+.imgModalMain img{
+  max-width:100%;
+  max-height:100%;
+  object-fit:contain;
+  border-radius:14px;
+  display:block;
+}
+
+.imgNavBtn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:22px;
+  line-height:1;
+}
+
+.imgNavBtn:hover{
+  border-color: var(--accent);
+}
+
+.imgModalThumbs{
+  display:flex;
+  gap:10px;
+  padding:12px;
+  border-top:1px solid var(--border);
+  overflow-x:auto;
+  background:rgba(15,17,21,.65);
+}
+
+.imgModalThumb{
+  border:1px solid var(--border);
+  background:transparent;
+  border-radius:12px;
+  padding:0;
+  width:86px;
+  height:62px;
+  flex:0 0 auto;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.imgModalThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.imgModalThumb.active{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(0,230,118,0.18);
+}
+
+@media (max-width: 600px){
+  .imgModalPanel{
+    margin:12px auto;
+    height:88vh;
+  }
+  .imgNavBtn{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+  }
+  .thumbBtn{
+    width:52px;
+    height:42px;
+  }
+}
