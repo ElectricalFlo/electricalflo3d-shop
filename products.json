@@ -4,6 +4,7 @@
     "name": "APX Cup Holder",
     "price": 35,
     "note": "Made to order. Custom Callsign in Glow in the Dark.",
+    "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark"],
     "images": [
       "images/IMG_1085.jpeg",
       "images/IMG_1086.jpeg",
@@ -15,6 +16,7 @@
     "name": "N2CFX Mini License Plate",
     "price": 15,
     "note": "Custom callsign available",
+    "badges": ["Custom Callsign"],
     "image": "images/n2cfx-plate.jpg"
   }
 ]
