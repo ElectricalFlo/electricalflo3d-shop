@@ -396,3 +396,30 @@ select{ max-width:220px }
     max-height:92px;
   }
 }
+/* ================= PRODUCT BADGES ================= */
+
+.badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:8px;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  border:1px solid var(--border);
+  background:rgba(15,17,21,.55);
+  color:var(--text);
+  font-size:12px;
+  padding:6px 10px;
+  border-radius:999px;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.badge--accent{
+  border-color: rgba(0,230,118,.45);
+  box-shadow: 0 0 0 2px rgba(0,230,118,.10);
+}
+
