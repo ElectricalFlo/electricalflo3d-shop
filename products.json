@@ -2,18 +2,18 @@
   {
     "id": "apx-cupholder",
     "name": "APX Cup Holder",
-    "price": 35.00,
+    "price": 35,
     "note": "Made to order. Custom Callsign in Glow in the Dark.",
     "images": [
       "images/IMG_1085.jpeg",
       "images/IMG_1086.jpeg",
-      "images/IMG_1090.jpeg",
+      "images/IMG_1090.jpeg"
     ]
   },
   {
     "id": "n2cfx-plate-1",
     "name": "N2CFX Mini License Plate",
-    "price": 15.00,
+    "price": 15,
     "note": "Custom callsign available",
     "image": "images/n2cfx-plate.jpg"
   }
