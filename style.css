@@ -143,8 +143,20 @@ select{
 .thumb img{
   max-width:100%;
   max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;   /* ← key line */
   display:block;
 }
+.thumb{
+  height:160px;
+  background:#0b0d11;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden; /* prevents bleed */
+}
+
 
 .cardBody{
   padding:14px;
