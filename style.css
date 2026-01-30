@@ -537,3 +537,9 @@ select{
   object-fit: contain !important;  /* use "cover" if you prefer cropping */
   display: block !important;
 }
+/* Product card images: show the FULL item (no cropping) */
+.thumb img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
