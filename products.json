@@ -11,12 +11,4 @@
       "images/IMG_1090.jpeg"
     ]
   },
-  {
-    "id": "n2cfx-plate-1",
-    "name": "N2CFX Mini License Plate",
-    "price": 15,
-    "note": "Custom callsign available",
-    "badges": ["Custom Callsign"],
-    "image": "images/n2cfx-plate.jpg"
-  }
-]
+ 
