@@ -7,9 +7,7 @@
   --muted:#9aa4b2;
 }
 
-*{
-  box-sizing:border-box;
-}
+*{ box-sizing:border-box }
 
 body{
   margin:0;
@@ -43,12 +41,6 @@ body{
   height:56px;
   width:auto;
   display:block;
-  object-fit:contain;
-}
-
-.brand{
-  display:flex;
-  flex-direction:column;
 }
 
 .brand h1{
@@ -62,11 +54,8 @@ body{
   font-size:13px;
 }
 
-/* Mobile tweak */
-@media (max-width: 600px){
-  .logo{
-    height:44px;
-  }
+@media (max-width:600px){
+  .logo{ height:44px }
 }
 
 /* ================= LAYOUT ================= */
@@ -86,9 +75,7 @@ body{
 
 /* ================= FORMS ================= */
 
-input,
-select,
-textarea{
+input, select, textarea{
   width:100%;
   padding:10px 12px;
   border-radius:12px;
@@ -97,16 +84,14 @@ textarea{
   color:var(--text);
 }
 
-select{
-  max-width:220px;
-}
+select{ max-width:220px }
 
 /* ================= PRODUCT GRID ================= */
 
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-  gap:14px;
+  gap:16px;
 }
 
 .card{
@@ -118,9 +103,10 @@ select{
   flex-direction:column;
 }
 
-/* Bigger product photo area for 4x5 images */
+/* ✅ TRUE 4:5 PRODUCT IMAGE BOX */
 .thumb{
-  height:320px;                 /* ← bigger to reduce side black bars */
+  aspect-ratio:4 / 5;
+  width:100%;
   background:#0b0d11;
   display:flex;
   align-items:center;
@@ -131,11 +117,9 @@ select{
 .thumb img{
   width:100%;
   height:100%;
-  object-fit:contain;            /* FULL item visible (no cropping) */
+  object-fit:cover;   /* fills card — no black bars */
   display:block;
 }
-
-/* If you ever want tighter “shop look” (cropping), change contain → cover */
 
 .cardBody{
   padding:14px;
@@ -149,21 +133,11 @@ select{
   font-size:16px;
 }
 
-.meta{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  align-items:center;
-}
-
-.price{
-  font-weight:700;
-}
+.price{ font-weight:700 }
 
 .note{
   color:var(--muted);
   font-size:12px;
-  text-align:right;
 }
 
 /* ================= BUTTONS ================= */
@@ -178,9 +152,7 @@ select{
   cursor:pointer;
 }
 
-.primary:hover{
-  filter:brightness(.95);
-}
+.primary:hover{ filter:brightness(.95) }
 
 .ghost{
   background:transparent;
@@ -209,6 +181,36 @@ select{
   border-radius:999px;
 }
 
+/* ================= THUMBNAIL STRIP ================= */
+
+.thumbStrip{
+  display:flex;
+  gap:8px;
+  padding:10px 12px 0;
+  overflow-x:auto;
+}
+
+.thumbBtn{
+  width:64px;
+  height:50px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:0;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.thumbBtn img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.thumbBtn.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(0,230,118,.18);
+}
+
 /* ================= CART DRAWER ================= */
 
 .drawer{
@@ -226,9 +228,7 @@ select{
   z-index:50;
 }
 
-.drawer.open{
-  transform:translateX(0);
-}
+.drawer.open{ transform:translateX(0) }
 
 .drawerHeader{
   display:flex;
@@ -259,108 +259,13 @@ select{
   margin-bottom:10px;
 }
 
-.cartInfo .muted{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:4px;
-}
-
-.qty{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  margin-top:10px;
-}
-
-.iconBtn{
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:6px 10px;
-  border-radius:12px;
-  cursor:pointer;
-}
-
-.link{
-  background:transparent;
-  border:none;
-  color:var(--accent);
-  cursor:pointer;
-  margin-top:8px;
-}
-
-.totalRow{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.field span{
-  display:block;
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:6px;
-}
-
-.fine{
-  color:var(--muted);
-  font-size:12px;
-  margin:0;
-}
-
-.empty{
-  color:var(--muted);
-}
+.empty{ color:var(--muted) }
 
 .backdrop{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.5);
   z-index:40;
-}
-
-.checkbox{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.checkbox input{
-  width:auto;
-}
-
-/* ================= THUMBNAIL STRIP ================= */
-
-.thumbStrip{
-  display:flex;
-  gap:8px;
-  padding:10px 12px 0;
-  overflow-x:auto;
-  scrollbar-width:thin;
-}
-
-.thumbBtn{
-  border:1px solid var(--border);
-  background:transparent;
-  border-radius:12px;
-  padding:0;
-  width:64px;
-  height:50px;
-  flex:0 0 auto;
-  overflow:hidden;
-  cursor:pointer;
-}
-
-.thumbBtn img{
-  width:100%;
-  height:100%;
-  object-fit:cover;             /* thumbnails should crop */
-  display:block;
-}
-
-.thumbBtn.active{
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(0,230,118,0.18);
 }
 
 /* ================= FULLSCREEN IMAGE MODAL ================= */
@@ -374,21 +279,20 @@ select{
 .imgModalBackdrop{
   position:absolute;
   inset:0;
-  background:rgba(0,0,0,0.75);
+  background:rgba(0,0,0,.75);
 }
 
 .imgModalPanel{
   position:relative;
   margin:24px auto;
-  width:min(980px, 94vw);
-  height:min(86vh, 760px);
+  width:min(980px,94vw);
+  height:min(86vh,760px);
   background:var(--card);
   border:1px solid var(--border);
   border-radius:18px;
   display:flex;
   flex-direction:column;
   overflow:hidden;
-  z-index:1001;
 }
 
 .imgModalHeader{
@@ -399,18 +303,13 @@ select{
   border-bottom:1px solid var(--border);
 }
 
-.imgModalTitle{
-  font-weight:700;
-}
-
 .imgModalMain{
   flex:1;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:10px;
-  padding:12px;
   background:#0b0d11;
+  padding:12px;
 }
 
 .imgModalMain img{
@@ -418,7 +317,6 @@ select{
   max-height:100%;
   object-fit:contain;
   border-radius:14px;
-  display:block;
 }
 
 .imgNavBtn{
@@ -429,13 +327,9 @@ select{
   height:44px;
   border-radius:14px;
   cursor:pointer;
-  font-size:22px;
-  line-height:1;
 }
 
-.imgNavBtn:hover{
-  border-color: var(--accent);
-}
+.imgNavBtn:hover{ border-color:var(--accent) }
 
 .imgModalThumbs{
   display:flex;
@@ -443,17 +337,13 @@ select{
   padding:12px;
   border-top:1px solid var(--border);
   overflow-x:auto;
-  background:rgba(15,17,21,.65);
 }
 
 .imgModalThumb{
-  border:1px solid var(--border);
-  background:transparent;
-  border-radius:12px;
-  padding:0;
   width:90px;
   height:66px;
-  flex:0 0 auto;
+  border:1px solid var(--border);
+  border-radius:12px;
   overflow:hidden;
   cursor:pointer;
 }
@@ -462,32 +352,9 @@ select{
   width:100%;
   height:100%;
   object-fit:cover;
-  display:block;
 }
 
 .imgModalThumb.active{
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(0,230,118,0.18);
-}
-
-@media (max-width: 600px){
-  .thumb{
-    height:300px;
-  }
-
-  .imgModalPanel{
-    margin:12px auto;
-    height:88vh;
-  }
-
-  .imgNavBtn{
-    width:40px;
-    height:40px;
-    border-radius:12px;
-  }
-
-  .thumbBtn{
-    width:60px;
-    height:48px;
-  }
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(0,230,118,.18);
 }
