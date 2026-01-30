@@ -1,10 +1,14 @@
 [
   {
-    "id": "apx-keychain-1",
-    "name": "APX-Inspired Keychain",
-    "price": 12.00,
-    "note": "Color options available",
-    "image": "images/apx-keychain.jpg"
+    "id": "apx-cupholder",
+    "name": "APX Cup Holder",
+    "price": 35.00,
+    "note": "Made to order. Custom Callsign in Glow in the Dark.",
+    "images": [
+      "images/IMG_1085.jpeg"
+      "images/IMG_1086.jpeg"
+      "images/IMG_1090.jpeg"
+    ]
   },
   {
     "id": "n2cfx-plate-1",
