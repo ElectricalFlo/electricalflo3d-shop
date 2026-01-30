@@ -3,12 +3,12 @@
     "id": "apx-cupholder",
     "name": "APX Cup Holder",
     "price": 35,
-    "note": "Cup holder for your APX 6k, 7k & 8k. Callsign or Custom text to glow in the dark",
+    "note": "Made to order. Custom Callsign in Glow in the Dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark"],
     "images": [
       "images/IMG_1085.jpeg",
       "images/IMG_1086.jpeg",
       "images/IMG_1090.jpeg"
     ]
-  },
- 
+  }
+]
