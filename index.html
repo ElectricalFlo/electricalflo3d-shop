@@ -354,6 +354,9 @@ function emailCheckout(){
   const body = encodeURIComponent(buildEmailBody(orderId));
 
   window.location.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
+  // 🔄 AUTO RESET order number after sending
+    localStorage.removeItem("ef_order_id");
+
 }
 
 async function copyOrderDetails(){
