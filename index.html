@@ -379,6 +379,8 @@ async function copyOrderDetails(){
     document.body.removeChild(ta);
     alert("Copied! Paste it into an email/text to send your order.");
   }
+  // 🔄 AUTO RESET order number after copy
+  localStorage.removeItem("ef_order_id");
 }
 
 /* ================= DRAWER ================= */
