@@ -4,8 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ElectricalFlo 3D — Shop</title>
- <link rel="stylesheet" href="style.css?v=20260130-5" />
-
+  <link rel="stylesheet" href="style.css?v=20260130-3" />
 </head>
 <body>
 
@@ -37,7 +36,7 @@
   <section class="grid" id="grid"></section>
 </main>
 
-<!-- ================= CART DRAWER ================= -->
+<!-- CART DRAWER -->
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="drawerHeader">
     <h2>Your Cart</h2>
@@ -54,12 +53,12 @@
 
     <label class="field">
       <span>Your name (optional)</span>
-      <input id="customerName" />
+      <input id="customerName" placeholder="Your name" />
     </label>
 
     <label class="field">
       <span>Notes (colors, callsign, etc.)</span>
-      <textarea id="orderNotes" rows="3"></textarea>
+      <textarea id="orderNotes" rows="3" placeholder="Example: black PETG, callsign N2CFX, include keyring…"></textarea>
     </label>
 
     <label class="field">
@@ -78,7 +77,7 @@
 
     <label class="field" id="shippingWrap" style="display:none">
       <span>Shipping address</span>
-      <textarea id="shippingAddress" rows="3"></textarea>
+      <textarea id="shippingAddress" rows="3" placeholder="Street, City, State, ZIP"></textarea>
     </label>
 
     <button class="primary" id="emailCheckoutBtn" type="button">
@@ -97,84 +96,31 @@
 
 <div class="backdrop" id="backdrop" hidden></div>
 
-<!-- ================= FULLSCREEN VIEWER MODAL ================= -->
-<div class="imgModal" id="imgModal" hidden aria-hidden="true">
-  <div class="imgModalBackdrop" id="imgModalBackdrop"></div>
-
-  <div class="imgModalPanel" role="dialog" aria-modal="true">
-    <div class="imgModalHeader">
-      <div class="imgModalTitle" id="imgModalTitle">Item</div>
-      <button class="iconBtn" id="imgModalCloseBtn" type="button">✕</button>
-    </div>
-
-    <div class="imgModalMain">
-      <button class="imgNavBtn" id="imgPrevBtn" type="button" aria-label="Previous image">‹</button>
-      <img id="imgModalMainImg" alt="Product image" />
-      <button class="imgNavBtn" id="imgNextBtn" type="button" aria-label="Next image">›</button>
-    </div>
-
-    <div class="imgModalThumbs" id="imgModalThumbs"></div>
-  </div>
-</div>
-
 <script>
+/* ================= CONFIG ================= */
 const EMAIL_TO = "flores@n2cfx.com";
 const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
 
+/* ================= STATE ================= */
 let PRODUCTS = [];
-let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+let cart = JSON.parse(localStorage.getItem("cart") || "{}"); // { productId: qty }
 
-// For per-product selected thumbnail on the product cards:
-let selectedImageIndex = JSON.parse(localStorage.getItem("selectedImageIndex") || "{}"); // { productId: idx }
+/* ================= HELPERS ================= */
+const money = n => `$${Number(n || 0).toFixed(2)}`;
 
-// For fullscreen viewer state:
-let viewerProductId = null;
-let viewerIndex = 0;
-
-const money = n => `$${Number(n).toFixed(2)}`;
-
-// ---------- Order Number ----------
-function generateOrderNumber(){
-  // Example: EF-20260130-7K2P
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,"0");
-  const day = String(d.getDate()).padStart(2,"0");
-  const rand = Math.random().toString(36).toUpperCase().slice(2,6);
-  return `EF-${y}${m}${day}-${rand}`;
+function getProductImages(p){
+  if (Array.isArray(p.images) && p.images.length) return p.images;
+  if (p.image) return [p.image];
+  return [];
 }
 
-function getOrderNumber(){
-  let orderNo = localStorage.getItem("currentOrderNo");
-  if (!orderNo) {
-    orderNo = generateOrderNumber();
-    localStorage.setItem("currentOrderNo", orderNo);
-  }
-  return orderNo;
-}
-
-function clearOrderNumber(){
-  localStorage.removeItem("currentOrderNo");
-}
-
-// ---------- UI helpers ----------
-function wireShippingToggle(){
-  const cb = document.getElementById("includeShippingNow");
-  const wrap = document.getElementById("shippingWrap");
-  if (!cb || !wrap) return;
-  cb.addEventListener("change", () => {
-    wrap.style.display = cb.checked ? "block" : "none";
-  });
-}
-
-function saveSelectedImageIndex(){
-  localStorage.setItem("selectedImageIndex", JSON.stringify(selectedImageIndex));
+function cartCount(){
+  return Object.values(cart).reduce((a,b)=>a+Number(b||0),0);
 }
 
 function saveCart(){
   localStorage.setItem("cart", JSON.stringify(cart));
-  document.getElementById("cartCount").textContent =
-    Object.values(cart).reduce((a,b)=>a+b,0);
+  document.getElementById("cartCount").textContent = cartCount();
 }
 
 function addToCart(id){
@@ -183,220 +129,169 @@ function addToCart(id){
   renderCart();
 }
 
+function decFromCart(id){
+  if (!cart[id]) return;
+  cart[id] -= 1;
+  if (cart[id] <= 0) delete cart[id];
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(id){
+  delete cart[id];
+  saveCart();
+  renderCart();
+}
+
 function clearCart(){
   cart = {};
   saveCart();
   renderCart();
-  clearOrderNumber(); // new order number next time
+  // Optional: clear order id when cart is cleared
+  localStorage.removeItem("ef_order_id");
 }
 
-function getProductImages(p){
-  if (Array.isArray(p.images) && p.images.length) return p.images;
-  if (p.image) return [p.image];
-  return [];
+/* ================= ORDER NUMBER (B) ================= */
+/* Format: EF-YYYYMMDD-##### */
+function pad2(n){ return String(n).padStart(2,"0"); }
+
+function generateOrderId(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = pad2(d.getMonth()+1);
+  const day = pad2(d.getDate());
+  const rand = Math.floor(10000 + Math.random()*90000); // 5 digits
+  return `EF-${y}${m}${day}-${rand}`;
 }
 
-function getFilteredSortedProducts() {
+function getOrCreateOrderId(){
+  // keep stable per "checkout session" so copy/email match
+  let id = localStorage.getItem("ef_order_id");
+  if (!id) {
+    id = generateOrderId();
+    localStorage.setItem("ef_order_id", id);
+  }
+  return id;
+}
+
+/* ================= FILTER/SORT ================= */
+function getFilteredSortedProducts(){
   const q = document.getElementById("search").value.trim().toLowerCase();
   const sort = document.getElementById("sort").value;
 
-  let list = PRODUCTS.filter(p =>
-    !q || (p.name + " " + (p.note||"")).toLowerCase().includes(q)
-  );
+  let list = PRODUCTS.filter(p => {
+    const hay = `${p.name||""} ${p.note||""}`.toLowerCase();
+    return !q || hay.includes(q);
+  });
 
-  if (sort === "price_asc") list.sort((a,b) => a.price - b.price);
-  if (sort === "price_desc") list.sort((a,b) => b.price - a.price);
-  if (sort === "name_asc") list.sort((a,b) => a.name.localeCompare(b.name));
+  if (sort === "price_asc") list.sort((a,b) => (a.price||0) - (b.price||0));
+  if (sort === "price_desc") list.sort((a,b) => (b.price||0) - (a.price||0));
+  if (sort === "name_asc") list.sort((a,b) => (a.name||"").localeCompare(b.name||""));
+  // featured = original order
+
   return list;
 }
 
-// ---------- Product rendering with thumbnails ----------
-function setCardImage(productId, idx){
-  selectedImageIndex[productId] = idx;
-  saveSelectedImageIndex();
-
-  const imgEl = document.getElementById(`img-${productId}`);
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!imgEl || !p) return;
-
-  const imgs = getProductImages(p);
-  if (imgs[idx]) imgEl.src = imgs[idx];
-
-  // Highlight selected thumbnail
-  const wrap = document.getElementById(`thumbs-${productId}`);
-  if (!wrap) return;
-  [...wrap.querySelectorAll("button")].forEach((btn, i) => {
-    btn.classList.toggle("active", i === idx);
-  });
-}
-
-function openViewer(productId, idx){
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!p) return;
-
-  const imgs = getProductImages(p);
-  if (!imgs.length) return;
-
-  viewerProductId = productId;
-  viewerIndex = Math.max(0, Math.min(idx, imgs.length - 1));
-
-  const modal = document.getElementById("imgModal");
-  const mainImg = document.getElementById("imgModalMainImg");
-  const title = document.getElementById("imgModalTitle");
-  const thumbs = document.getElementById("imgModalThumbs");
-
-  title.textContent = p.name || "Item";
-  mainImg.src = imgs[viewerIndex];
-
-  thumbs.innerHTML = imgs.map((src, i) => `
-    <button class="imgModalThumb ${i===viewerIndex ? "active" : ""}" type="button" aria-label="View image ${i+1}">
-      <img src="${src}" alt="">
-    </button>
-  `).join("");
-
-  // Bind thumb clicks
-  [...thumbs.querySelectorAll("button")].forEach((btn, i) => {
-    btn.addEventListener("click", () => setViewerIndex(i));
-  });
-
-  modal.hidden = false;
-  modal.setAttribute("aria-hidden","false");
-  document.body.style.overflow = "hidden";
-}
-
-function closeViewer(){
-  const modal = document.getElementById("imgModal");
-  modal.hidden = true;
-  modal.setAttribute("aria-hidden","true");
-  document.body.style.overflow = "";
-  viewerProductId = null;
-  viewerIndex = 0;
-}
-
-function setViewerIndex(i){
-  const p = PRODUCTS.find(x => x.id === viewerProductId);
-  if (!p) return;
-  const imgs = getProductImages(p);
-  if (!imgs.length) return;
-
-  viewerIndex = (i + imgs.length) % imgs.length;
-
-  document.getElementById("imgModalMainImg").src = imgs[viewerIndex];
-
-  const thumbs = document.getElementById("imgModalThumbs");
-  [...thumbs.querySelectorAll("button")].forEach((btn, idx) => {
-    btn.classList.toggle("active", idx === viewerIndex);
-  });
-}
-
-function viewerPrev(){
-  setViewerIndex(viewerIndex - 1);
-}
-function viewerNext(){
-  setViewerIndex(viewerIndex + 1);
-}
-
+/* ================= RENDER PRODUCTS ================= */
 function renderProducts(){
   const grid = document.getElementById("grid");
   const list = getFilteredSortedProducts();
 
-  if (!list.length){
+  if (!Array.isArray(list) || list.length === 0){
     grid.innerHTML = `<p class="empty">No products found.</p>`;
     return;
   }
 
   grid.innerHTML = list.map(p => {
     const imgs = getProductImages(p);
-    const idx = Number(selectedImageIndex[p.id] ?? 0);
-    const safeIdx = Math.max(0, Math.min(idx, imgs.length ? imgs.length - 1 : 0));
-    const mainSrc = imgs[safeIdx] || "";
+    const first = imgs[0] || "";
+
+    const thumbs = imgs.length > 1 ? `
+      <div class="thumbStrip" aria-label="More images">
+        ${imgs.map((src, i) => `
+          <button class="thumbBtn ${i===0 ? "active" : ""}"
+            type="button"
+            data-action="thumb"
+            data-pid="${p.id}"
+            data-idx="${i}"
+            aria-label="Show image ${i+1}">
+            <img src="${src}" alt="${p.name || "Thumbnail"}" loading="lazy">
+          </button>
+        `).join("")}
+      </div>
+    ` : "";
 
     return `
       <article class="card">
         <div class="thumb">
           <img
-            class="thumbMainImg"
-            src="${mainSrc}"
+            src="${first}"
             alt="${p.name || "Item"}"
             id="img-${p.id}"
+            data-action="openModal"
+            data-pid="${p.id}"
+            data-idx="0"
             loading="lazy"
             onerror="this.style.display='none'"
+            style="cursor: zoom-in;"
           >
         </div>
 
-        ${imgs.length > 1 ? `
-          <div class="thumbStrip" id="thumbs-${p.id}">
-            ${imgs.map((src, i) => `
-              <button class="thumbBtn ${i===safeIdx ? "active" : ""}" type="button" aria-label="Select image ${i+1}">
-                <img src="${src}" alt="">
-              </button>
-            `).join("")}
-          </div>
-        ` : ""}
+        ${thumbs}
 
         <div class="cardBody">
           <h3>${p.name || "Untitled item"}</h3>
-          <div class="meta">
-            <span class="price">${money(p.price || 0)}</span>
-            <span class="note">${p.note || ""}</span>
-          </div>
-          <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
+          ${p.note ? `<div class="note">${p.note}</div>` : ""}
+          <span class="price">${money(p.price)}</span>
+          <button class="primary" type="button" data-action="addToCart" data-pid="${p.id}">
+            Add to cart
+          </button>
         </div>
       </article>
     `;
   }).join("");
-
-  // Wire thumbnail clicks + fullscreen click
-  list.forEach(p => {
-    const imgs = getProductImages(p);
-    const imgEl = document.getElementById(`img-${p.id}`);
-
-    if (imgEl && imgs.length) {
-      imgEl.style.cursor = imgs.length > 1 ? "zoom-in" : "zoom-in";
-      imgEl.addEventListener("click", () => {
-        const idx = Number(selectedImageIndex[p.id] ?? 0);
-        openViewer(p.id, idx);
-      });
-    }
-
-    const strip = document.getElementById(`thumbs-${p.id}`);
-    if (strip) {
-      [...strip.querySelectorAll("button")].forEach((btn, i) => {
-        btn.addEventListener("click", () => setCardImage(p.id, i));
-      });
-    }
-  });
 }
 
-// ---------- Cart ----------
+/* ================= CART RENDER ================= */
 function renderCart(){
   const box = document.getElementById("cartItems");
-  const items = Object.entries(cart).map(([id,qty])=>{
-    const p = PRODUCTS.find(x=>x.id===id);
-    if(!p) return null;
-    return {p,qty,line:Number(p.price)*Number(qty)};
+
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return null;
+    const q = Number(qty||0);
+    const line = Number(p.price||0) * q;
+    return { id, p, qty:q, line };
   }).filter(Boolean);
 
-  if(!items.length){
-    box.innerHTML = "<p class='empty'>Your cart is empty.</p>";
+  if (!items.length){
+    box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
     document.getElementById("subtotal").textContent = money(0);
     return;
   }
 
-  box.innerHTML = items.map(i=>`
+  box.innerHTML = items.map(i => `
     <div class="cartRow">
-      <strong>${i.p.name}</strong> × ${i.qty}
-      <div class="muted">${money(i.p.price)} each • Line: ${money(i.line)}</div>
+      <div class="cartInfo">
+        <strong>${i.p.name}</strong>
+        <div class="muted">${money(i.p.price)} each • Line: ${money(i.line)}</div>
+
+        <div class="qty" style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+          <button class="iconBtn" type="button" data-action="dec" data-pid="${i.id}">−</button>
+          <span>${i.qty}</span>
+          <button class="iconBtn" type="button" data-action="inc" data-pid="${i.id}">+</button>
+          <button class="link" type="button" data-action="remove" data-pid="${i.id}" style="margin-left:auto;">Remove</button>
+        </div>
+      </div>
     </div>
   `).join("");
 
-  document.getElementById("subtotal").textContent =
-    money(items.reduce((a,b)=>a+b.line,0));
+  const subtotal = items.reduce((a,b)=>a+b.line,0);
+  document.getElementById("subtotal").textContent = money(subtotal);
 }
 
-// ---------- Checkout (with order number) ----------
-function buildEmailBody(){
-  const orderNo = getOrderNumber();
+/* ================= EMAIL BODY ================= */
+function buildEmailBody(orderId){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
   const payment = document.getElementById("paymentMethod")?.value || "PayPal";
@@ -411,10 +306,10 @@ function buildEmailBody(){
     return { name: p.name, qty: Number(qty), line };
   }).filter(Boolean);
 
-  const subtotal = items.reduce((a,b) => a + b.line, 0);
+  const subtotal = items.reduce((a,b)=>a+b.line,0);
 
   const lines = [];
-  lines.push(`Order #: ${orderNo}`);
+  lines.push(`Order Number: ${orderId}`);
   lines.push("");
   lines.push("Hi! I'd like to place an order:");
   lines.push("");
@@ -450,20 +345,22 @@ function buildEmailBody(){
 }
 
 function emailCheckout(){
-  if(!Object.keys(cart).length) return;
+  if (!Object.keys(cart).length) return;
 
-  const orderNo = getOrderNumber();
-  const itemCount = Object.values(cart).reduce((a,b)=>a+b,0);
+  const orderId = getOrCreateOrderId();
+  const itemCount = cartCount();
 
-  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} #${orderNo} (${itemCount} item${itemCount===1?"":"s"})`);
-  const body = encodeURIComponent(buildEmailBody());
+  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} ${orderId} (${itemCount} item${itemCount===1?"":"s"})`);
+  const body = encodeURIComponent(buildEmailBody(orderId));
 
   window.location.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
 }
 
 async function copyOrderDetails(){
-  if(!Object.keys(cart).length) return;
-  const text = buildEmailBody();
+  if (!Object.keys(cart).length) return;
+
+  const orderId = getOrCreateOrderId();
+  const text = buildEmailBody(orderId);
 
   try{
     await navigator.clipboard.writeText(text);
@@ -481,72 +378,281 @@ async function copyOrderDetails(){
   }
 }
 
-// ---------- Drawer ----------
+/* ================= DRAWER ================= */
 function openDrawer(){
-  document.getElementById("drawer").classList.add("open");
-  document.getElementById("drawer").setAttribute("aria-hidden","false");
-  document.getElementById("backdrop").hidden = false;
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("backdrop");
+  drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden","false");
+  backdrop.hidden = false;
   renderCart();
 }
 
 function closeDrawer(){
-  document.getElementById("drawer").classList.remove("open");
-  document.getElementById("drawer").setAttribute("aria-hidden","true");
-  document.getElementById("backdrop").hidden = true;
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("backdrop");
+  drawer.classList.remove("open");
+  drawer.setAttribute("aria-hidden","true");
+  backdrop.hidden = true;
 }
 
-// ---------- Init ----------
-async function init(){
-  const res = await fetch("./products.json", { cache: "no-store" });
-  if (!res.ok) throw new Error(`products.json fetch failed: ${res.status}`);
-
-  PRODUCTS = await res.json();
-
-  document.getElementById("search").addEventListener("input", renderProducts);
-  document.getElementById("sort").addEventListener("change", renderProducts);
-
-  document.getElementById("openCartBtn").onclick = openDrawer;
-  document.getElementById("closeCartBtn").onclick = closeDrawer;
-  document.getElementById("backdrop").onclick = closeDrawer;
-
-  document.getElementById("emailCheckoutBtn").onclick = emailCheckout;
-  document.getElementById("copyOrderBtn").onclick = copyOrderDetails;
-  document.getElementById("clearCartBtn").onclick = clearCart;
-
-  wireShippingToggle();
-  saveCart();
-  renderProducts();
-  renderCart();
-
-  // Modal wiring
-  document.getElementById("imgModalCloseBtn").addEventListener("click", closeViewer);
-  document.getElementById("imgModalBackdrop").addEventListener("click", closeViewer);
-  document.getElementById("imgPrevBtn").addEventListener("click", viewerPrev);
-  document.getElementById("imgNextBtn").addEventListener("click", viewerNext);
-
-  document.addEventListener("keydown", (e) => {
-    const modal = document.getElementById("imgModal");
-    if (modal.hidden) return;
-
-    if (e.key === "Escape") closeViewer();
-    if (e.key === "ArrowLeft") viewerPrev();
-    if (e.key === "ArrowRight") viewerNext();
+/* ================= SHIPPING TOGGLE ================= */
+function wireShippingToggle(){
+  const cb = document.getElementById("includeShippingNow");
+  const wrap = document.getElementById("shippingWrap");
+  if (!cb || !wrap) return;
+  cb.addEventListener("change", () => {
+    wrap.style.display = cb.checked ? "block" : "none";
   });
 }
 
-init().catch(err => {
-  console.error(err);
-  const grid = document.getElementById("grid");
-  grid.innerHTML = `
-    <article class="card">
-      <div class="cardBody">
-        <h3>Couldn’t load products</h3>
-        <p class="empty">${err.message}</p>
-        <p class="empty">Try opening: /products.json</p>
+/* ================= LIGHTBOX MODAL ================= */
+let modalState = null; // {productId, imgs, idx, title}
+
+function closeImageModal(){
+  const modal = document.querySelector(".imgModal");
+  if (modal) modal.remove();
+
+  modalState = null;
+
+  // unlock scroll
+  document.documentElement.style.overflow = "";
+  document.body.style.overflow = "";
+
+  window.removeEventListener("keydown", onModalKeyDown);
+}
+
+function updateModalImage(){
+  if (!modalState) return;
+  const { imgs, idx, title } = modalState;
+
+  const imgEl = document.getElementById("modalImg");
+  const counterEl = document.getElementById("modalCounter");
+  if (imgEl) imgEl.src = imgs[idx] || "";
+  if (counterEl) counterEl.textContent = `${idx+1} / ${imgs.length}`;
+
+  // active thumb
+  document.querySelectorAll(".imgModalThumb").forEach(btn => btn.classList.remove("active"));
+  const activeBtn = document.querySelector(`.imgModalThumb[data-idx="${idx}"]`);
+  if (activeBtn) activeBtn.classList.add("active");
+
+  const titleEl = document.getElementById("modalTitle");
+  if (titleEl) titleEl.textContent = title || "Image";
+}
+
+function modalPrev(){
+  if (!modalState) return;
+  modalState.idx = (modalState.idx - 1 + modalState.imgs.length) % modalState.imgs.length;
+  updateModalImage();
+}
+
+function modalNext(){
+  if (!modalState) return;
+  modalState.idx = (modalState.idx + 1) % modalState.imgs.length;
+  updateModalImage();
+}
+
+function onModalKeyDown(e){
+  if (!modalState) return;
+  if (e.key === "Escape") closeImageModal();
+  if (e.key === "ArrowLeft") modalPrev();
+  if (e.key === "ArrowRight") modalNext();
+}
+
+function openImageModal(productId, startIdx){
+  const product = PRODUCTS.find(p => p.id === productId);
+  if (!product) return;
+
+  const imgs = getProductImages(product);
+  if (!imgs.length) return;
+
+  modalState = {
+    productId,
+    imgs,
+    idx: Math.max(0, Math.min(Number(startIdx)||0, imgs.length-1)),
+    title: product.name || "Image"
+  };
+
+  // lock scroll
+  document.documentElement.style.overflow = "hidden";
+  document.body.style.overflow = "hidden";
+
+  const modal = document.createElement("div");
+  modal.className = "imgModal";
+  modal.innerHTML = `
+    <div class="imgModalBackdrop" data-action="closeModal"></div>
+    <div class="imgModalPanel" role="dialog" aria-modal="true" aria-label="Image viewer">
+      <div class="imgModalHeader">
+        <div class="imgModalTitle" id="modalTitle"></div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <span id="modalCounter" style="color:var(--muted);font-size:12px;"></span>
+          <button class="iconBtn" type="button" data-action="closeModal">✕</button>
+        </div>
       </div>
-    </article>
+
+      <div class="imgModalMain" id="modalMain">
+        <button class="imgNavBtn" type="button" data-action="prev" aria-label="Previous image">‹</button>
+        <img id="modalImg" alt="Product image" />
+        <button class="imgNavBtn" type="button" data-action="next" aria-label="Next image">›</button>
+      </div>
+
+      <div class="imgModalThumbs">
+        ${imgs.map((src, i) => `
+          <button class="imgModalThumb ${i===modalState.idx ? "active" : ""}" type="button" data-action="modalThumb" data-idx="${i}" aria-label="View image ${i+1}">
+            <img src="${src}" alt="Thumbnail ${i+1}" loading="lazy">
+          </button>
+        `).join("")}
+      </div>
+    </div>
   `;
-});
+
+  document.body.appendChild(modal);
+
+  // events
+  modal.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const act = btn.getAttribute("data-action");
+
+    if (act === "closeModal") closeImageModal();
+    if (act === "prev") modalPrev();
+    if (act === "next") modalNext();
+    if (act === "modalThumb") {
+      modalState.idx = Number(btn.getAttribute("data-idx")) || 0;
+      updateModalImage();
+    }
+  });
+
+  // swipe support (mobile + trackpads)
+  const main = document.getElementById("modalMain");
+  let sx = 0, sy = 0;
+  const THRESH = 50;
+
+  main.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    sx = t.clientX; sy = t.clientY;
+  }, { passive: true });
+
+  main.addEventListener("touchend", (e) => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+
+    // if mostly horizontal swipe
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > THRESH) {
+      if (dx < 0) modalNext();
+      else modalPrev();
+    }
+  }, { passive: true });
+
+  window.addEventListener("keydown", onModalKeyDown);
+
+  updateModalImage();
+}
+
+/* ================= GRID EVENT DELEGATION ================= */
+function wireGridHandlers(){
+  const grid = document.getElementById("grid");
+
+  grid.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-action]");
+    if (!el) return;
+
+    const action = el.getAttribute("data-action");
+    const pid = el.getAttribute("data-pid");
+
+    if (action === "addToCart") {
+      addToCart(pid);
+      return;
+    }
+
+    if (action === "thumb") {
+      const idx = Number(el.getAttribute("data-idx")) || 0;
+      const product = PRODUCTS.find(p => p.id === pid);
+      if (!product) return;
+
+      const imgs = getProductImages(product);
+      const imgEl = document.getElementById(`img-${pid}`);
+      if (imgEl && imgs[idx]) {
+        imgEl.src = imgs[idx];
+        imgEl.setAttribute("data-idx", String(idx));
+      }
+
+      // active thumb
+      const strip = el.parentElement;
+      strip.querySelectorAll(".thumbBtn").forEach(b => b.classList.remove("active"));
+      el.classList.add("active");
+      return;
+    }
+
+    if (action === "openModal") {
+      const idx = Number(el.getAttribute("data-idx")) || 0;
+      openImageModal(pid, idx);
+      return;
+    }
+  });
+}
+
+/* ================= CART EVENT DELEGATION ================= */
+function wireCartHandlers(){
+  const cartBox = document.getElementById("cartItems");
+  cartBox.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-action]");
+    if (!el) return;
+    const action = el.getAttribute("data-action");
+    const pid = el.getAttribute("data-pid");
+
+    if (action === "inc") addToCart(pid);
+    if (action === "dec") decFromCart(pid);
+    if (action === "remove") removeFromCart(pid);
+  });
+}
+
+/* ================= INIT ================= */
+async function init(){
+  try{
+    const res = await fetch("./products.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`Couldn't load products.json (${res.status})`);
+    const txt = await res.text();
+    PRODUCTS = JSON.parse(txt);
+
+    if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array of products.");
+
+    // UI listeners
+    document.getElementById("openCartBtn").addEventListener("click", openDrawer);
+    document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
+    document.getElementById("backdrop").addEventListener("click", closeDrawer);
+
+    document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
+    document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
+    document.getElementById("clearCartBtn").addEventListener("click", clearCart);
+
+    document.getElementById("search").addEventListener("input", renderProducts);
+    document.getElementById("sort").addEventListener("change", renderProducts);
+
+    wireShippingToggle();
+    wireGridHandlers();
+    wireCartHandlers();
+
+    saveCart();
+    renderProducts();
+    renderCart();
+  }catch(err){
+    console.error(err);
+    const grid = document.getElementById("grid");
+    grid.innerHTML = `
+      <article class="card">
+        <div class="cardBody">
+          <h3>Couldn’t load products</h3>
+          <p class="empty">${err.message}</p>
+          <p class="empty">Check: products.json exists and is valid JSON.</p>
+        </div>
+      </article>
+    `;
+  }
+}
+
+init();
 </script>
 
 </body>
