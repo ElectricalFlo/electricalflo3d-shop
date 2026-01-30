@@ -8,7 +8,6 @@
 </head>
 <body>
 
-
 <header class="header">
   <div class="brandWrap">
     <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
@@ -37,6 +36,7 @@
   <section class="grid" id="grid"></section>
 </main>
 
+<!-- ================= CART DRAWER ================= -->
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="drawerHeader">
     <h2>Your Cart</h2>
@@ -96,6 +96,26 @@
 
 <div class="backdrop" id="backdrop" hidden></div>
 
+<!-- ================= FULLSCREEN VIEWER MODAL ================= -->
+<div class="imgModal" id="imgModal" hidden aria-hidden="true">
+  <div class="imgModalBackdrop" id="imgModalBackdrop"></div>
+
+  <div class="imgModalPanel" role="dialog" aria-modal="true">
+    <div class="imgModalHeader">
+      <div class="imgModalTitle" id="imgModalTitle">Item</div>
+      <button class="iconBtn" id="imgModalCloseBtn" type="button">✕</button>
+    </div>
+
+    <div class="imgModalMain">
+      <button class="imgNavBtn" id="imgPrevBtn" type="button" aria-label="Previous image">‹</button>
+      <img id="imgModalMainImg" alt="Product image" />
+      <button class="imgNavBtn" id="imgNextBtn" type="button" aria-label="Next image">›</button>
+    </div>
+
+    <div class="imgModalThumbs" id="imgModalThumbs"></div>
+  </div>
+</div>
+
 <script>
 const EMAIL_TO = "flores@n2cfx.com";
 const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
@@ -103,9 +123,40 @@ const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
 let PRODUCTS = [];
 let cart = JSON.parse(localStorage.getItem("cart") || "{}");
 
+// For per-product selected thumbnail on the product cards:
+let selectedImageIndex = JSON.parse(localStorage.getItem("selectedImageIndex") || "{}"); // { productId: idx }
+
+// For fullscreen viewer state:
+let viewerProductId = null;
+let viewerIndex = 0;
+
 const money = n => `$${Number(n).toFixed(2)}`;
 
+// ---------- Order Number ----------
+function generateOrderNumber(){
+  // Example: EF-20260130-7K2P
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  const rand = Math.random().toString(36).toUpperCase().slice(2,6);
+  return `EF-${y}${m}${day}-${rand}`;
+}
 
+function getOrderNumber(){
+  let orderNo = localStorage.getItem("currentOrderNo");
+  if (!orderNo) {
+    orderNo = generateOrderNumber();
+    localStorage.setItem("currentOrderNo", orderNo);
+  }
+  return orderNo;
+}
+
+function clearOrderNumber(){
+  localStorage.removeItem("currentOrderNo");
+}
+
+// ---------- UI helpers ----------
 function wireShippingToggle(){
   const cb = document.getElementById("includeShippingNow");
   const wrap = document.getElementById("shippingWrap");
@@ -113,6 +164,10 @@ function wireShippingToggle(){
   cb.addEventListener("change", () => {
     wrap.style.display = cb.checked ? "block" : "none";
   });
+}
+
+function saveSelectedImageIndex(){
+  localStorage.setItem("selectedImageIndex", JSON.stringify(selectedImageIndex));
 }
 
 function saveCart(){
@@ -131,6 +186,7 @@ function clearCart(){
   cart = {};
   saveCart();
   renderCart();
+  clearOrderNumber(); // new order number next time
 }
 
 function getProductImages(p){
@@ -139,23 +195,127 @@ function getProductImages(p){
   return [];
 }
 
+function getFilteredSortedProducts() {
+  const q = document.getElementById("search").value.trim().toLowerCase();
+  const sort = document.getElementById("sort").value;
+
+  let list = PRODUCTS.filter(p =>
+    !q || (p.name + " " + (p.note||"")).toLowerCase().includes(q)
+  );
+
+  if (sort === "price_asc") list.sort((a,b) => a.price - b.price);
+  if (sort === "price_desc") list.sort((a,b) => b.price - a.price);
+  if (sort === "name_asc") list.sort((a,b) => a.name.localeCompare(b.name));
+  return list;
+}
+
+// ---------- Product rendering with thumbnails ----------
+function setCardImage(productId, idx){
+  selectedImageIndex[productId] = idx;
+  saveSelectedImageIndex();
+
+  const imgEl = document.getElementById(`img-${productId}`);
+  const p = PRODUCTS.find(x => x.id === productId);
+  if (!imgEl || !p) return;
+
+  const imgs = getProductImages(p);
+  if (imgs[idx]) imgEl.src = imgs[idx];
+
+  // Highlight selected thumbnail
+  const wrap = document.getElementById(`thumbs-${productId}`);
+  if (!wrap) return;
+  [...wrap.querySelectorAll("button")].forEach((btn, i) => {
+    btn.classList.toggle("active", i === idx);
+  });
+}
+
+function openViewer(productId, idx){
+  const p = PRODUCTS.find(x => x.id === productId);
+  if (!p) return;
+
+  const imgs = getProductImages(p);
+  if (!imgs.length) return;
+
+  viewerProductId = productId;
+  viewerIndex = Math.max(0, Math.min(idx, imgs.length - 1));
+
+  const modal = document.getElementById("imgModal");
+  const mainImg = document.getElementById("imgModalMainImg");
+  const title = document.getElementById("imgModalTitle");
+  const thumbs = document.getElementById("imgModalThumbs");
+
+  title.textContent = p.name || "Item";
+  mainImg.src = imgs[viewerIndex];
+
+  thumbs.innerHTML = imgs.map((src, i) => `
+    <button class="imgModalThumb ${i===viewerIndex ? "active" : ""}" type="button" aria-label="View image ${i+1}">
+      <img src="${src}" alt="">
+    </button>
+  `).join("");
+
+  // Bind thumb clicks
+  [...thumbs.querySelectorAll("button")].forEach((btn, i) => {
+    btn.addEventListener("click", () => setViewerIndex(i));
+  });
+
+  modal.hidden = false;
+  modal.setAttribute("aria-hidden","false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeViewer(){
+  const modal = document.getElementById("imgModal");
+  modal.hidden = true;
+  modal.setAttribute("aria-hidden","true");
+  document.body.style.overflow = "";
+  viewerProductId = null;
+  viewerIndex = 0;
+}
+
+function setViewerIndex(i){
+  const p = PRODUCTS.find(x => x.id === viewerProductId);
+  if (!p) return;
+  const imgs = getProductImages(p);
+  if (!imgs.length) return;
+
+  viewerIndex = (i + imgs.length) % imgs.length;
+
+  document.getElementById("imgModalMainImg").src = imgs[viewerIndex];
+
+  const thumbs = document.getElementById("imgModalThumbs");
+  [...thumbs.querySelectorAll("button")].forEach((btn, idx) => {
+    btn.classList.toggle("active", idx === viewerIndex);
+  });
+}
+
+function viewerPrev(){
+  setViewerIndex(viewerIndex - 1);
+}
+function viewerNext(){
+  setViewerIndex(viewerIndex + 1);
+}
+
 function renderProducts(){
   const grid = document.getElementById("grid");
+  const list = getFilteredSortedProducts();
 
-  if (!PRODUCTS.length){
-    grid.innerHTML = `<p class="empty">No products found in products.json.</p>`;
+  if (!list.length){
+    grid.innerHTML = `<p class="empty">No products found.</p>`;
     return;
   }
 
-  grid.innerHTML = PRODUCTS.map(p => {
+  grid.innerHTML = list.map(p => {
     const imgs = getProductImages(p);
-    const firstImg = imgs[0] || "";
+    const idx = Number(selectedImageIndex[p.id] ?? 0);
+    const safeIdx = Math.max(0, Math.min(idx, imgs.length ? imgs.length - 1 : 0));
+    const mainSrc = imgs[safeIdx] || "";
 
     return `
       <article class="card">
         <div class="thumb">
           <img
-            src="${firstImg}"
+            class="thumbMainImg"
+            src="${mainSrc}"
             alt="${p.name || "Item"}"
             id="img-${p.id}"
             loading="lazy"
@@ -164,11 +324,10 @@ function renderProducts(){
         </div>
 
         ${imgs.length > 1 ? `
-          <div class="thumbDots">
-            ${imgs.map((_, i) => `
-              <button class="dot" type="button"
-                onclick="swapImg('${p.id}', ${i})"
-                aria-label="View image ${i+1}">
+          <div class="thumbStrip" id="thumbs-${p.id}">
+            ${imgs.map((src, i) => `
+              <button class="thumbBtn ${i===safeIdx ? "active" : ""}" type="button" aria-label="Select image ${i+1}">
+                <img src="${src}" alt="">
               </button>
             `).join("")}
           </div>
@@ -176,23 +335,39 @@ function renderProducts(){
 
         <div class="cardBody">
           <h3>${p.name || "Untitled item"}</h3>
-          <span class="price">${money(p.price || 0)}</span>
+          <div class="meta">
+            <span class="price">${money(p.price || 0)}</span>
+            <span class="note">${p.note || ""}</span>
+          </div>
           <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
         </div>
       </article>
     `;
   }).join("");
+
+  // Wire thumbnail clicks + fullscreen click
+  list.forEach(p => {
+    const imgs = getProductImages(p);
+    const imgEl = document.getElementById(`img-${p.id}`);
+
+    if (imgEl && imgs.length) {
+      imgEl.style.cursor = imgs.length > 1 ? "zoom-in" : "zoom-in";
+      imgEl.addEventListener("click", () => {
+        const idx = Number(selectedImageIndex[p.id] ?? 0);
+        openViewer(p.id, idx);
+      });
+    }
+
+    const strip = document.getElementById(`thumbs-${p.id}`);
+    if (strip) {
+      [...strip.querySelectorAll("button")].forEach((btn, i) => {
+        btn.addEventListener("click", () => setCardImage(p.id, i));
+      });
+    }
+  });
 }
 
-function swapImg(productId, imgIndex){
-  const product = PRODUCTS.find(p => p.id === productId);
-  if (!product) return;
-
-  const imgs = getProductImages(product);
-  const imgEl = document.getElementById(`img-${productId}`);
-  if (imgEl && imgs[imgIndex]) imgEl.src = imgs[imgIndex];
-}
-
+// ---------- Cart ----------
 function renderCart(){
   const box = document.getElementById("cartItems");
   const items = Object.entries(cart).map(([id,qty])=>{
@@ -218,7 +393,9 @@ function renderCart(){
     money(items.reduce((a,b)=>a+b.line,0));
 }
 
+// ---------- Checkout (with order number) ----------
 function buildEmailBody(){
+  const orderNo = getOrderNumber();
   const name = (document.getElementById("customerName")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
   const payment = document.getElementById("paymentMethod")?.value || "PayPal";
@@ -236,6 +413,8 @@ function buildEmailBody(){
   const subtotal = items.reduce((a,b) => a + b.line, 0);
 
   const lines = [];
+  lines.push(`Order #: ${orderNo}`);
+  lines.push("");
   lines.push("Hi! I'd like to place an order:");
   lines.push("");
 
@@ -272,8 +451,10 @@ function buildEmailBody(){
 function emailCheckout(){
   if(!Object.keys(cart).length) return;
 
+  const orderNo = getOrderNumber();
   const itemCount = Object.values(cart).reduce((a,b)=>a+b,0);
-  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} (${itemCount} item${itemCount===1?"":"s"})`);
+
+  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} #${orderNo} (${itemCount} item${itemCount===1?"":"s"})`);
   const body = encodeURIComponent(buildEmailBody());
 
   window.location.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
@@ -281,8 +462,8 @@ function emailCheckout(){
 
 async function copyOrderDetails(){
   if(!Object.keys(cart).length) return;
-
   const text = buildEmailBody();
+
   try{
     await navigator.clipboard.writeText(text);
     alert("Copied! Paste it into an email/text to send your order.");
@@ -299,6 +480,7 @@ async function copyOrderDetails(){
   }
 }
 
+// ---------- Drawer ----------
 function openDrawer(){
   document.getElementById("drawer").classList.add("open");
   document.getElementById("drawer").setAttribute("aria-hidden","false");
@@ -312,54 +494,58 @@ function closeDrawer(){
   document.getElementById("backdrop").hidden = true;
 }
 
+// ---------- Init ----------
 async function init(){
-  
+  const res = await fetch("./products.json", { cache: "no-store" });
+  if (!res.ok) throw new Error(`products.json fetch failed: ${res.status}`);
 
-  try {
-    const res = await fetch("./products.json", { cache: "no-store" });
-  
+  PRODUCTS = await res.json();
 
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+  document.getElementById("search").addEventListener("input", renderProducts);
+  document.getElementById("sort").addEventListener("change", renderProducts);
 
-    const txt = await res.text();
-    // Show first bit of text so we know we're actually getting JSON
-    
+  document.getElementById("openCartBtn").onclick = openDrawer;
+  document.getElementById("closeCartBtn").onclick = closeDrawer;
+  document.getElementById("backdrop").onclick = closeDrawer;
 
-    PRODUCTS = JSON.parse(txt);
+  document.getElementById("emailCheckoutBtn").onclick = emailCheckout;
+  document.getElementById("copyOrderBtn").onclick = copyOrderDetails;
+  document.getElementById("clearCartBtn").onclick = clearCart;
 
-    if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array");
+  wireShippingToggle();
+  saveCart();
+  renderProducts();
+  renderCart();
 
-    
+  // Modal wiring
+  document.getElementById("imgModalCloseBtn").addEventListener("click", closeViewer);
+  document.getElementById("imgModalBackdrop").addEventListener("click", closeViewer);
+  document.getElementById("imgPrevBtn").addEventListener("click", viewerPrev);
+  document.getElementById("imgNextBtn").addEventListener("click", viewerNext);
 
-    document.getElementById("openCartBtn").onclick = openDrawer;
-    document.getElementById("closeCartBtn").onclick = closeDrawer;
-    document.getElementById("backdrop").onclick = closeDrawer;
-    document.getElementById("emailCheckoutBtn").onclick = emailCheckout;
-    document.getElementById("copyOrderBtn").onclick = copyOrderDetails;
-    document.getElementById("clearCartBtn").onclick = clearCart;
+  document.addEventListener("keydown", (e) => {
+    const modal = document.getElementById("imgModal");
+    if (modal.hidden) return;
 
-    wireShippingToggle();
-    saveCart();
-    renderProducts();
-    renderCart();
-  } catch (err) {
-    console.error(err);
-    
-
-    const grid = document.getElementById("grid");
-    grid.innerHTML = `
-      <article class="card">
-        <div class="cardBody">
-          <h3>Couldn’t load products</h3>
-          <p class="empty">${err.message}</p>
-          <p class="empty">Try opening: /products.json</p>
-        </div>
-      </article>
-    `;
-  }
+    if (e.key === "Escape") closeViewer();
+    if (e.key === "ArrowLeft") viewerPrev();
+    if (e.key === "ArrowRight") viewerNext();
+  });
 }
 
-init();
+init().catch(err => {
+  console.error(err);
+  const grid = document.getElementById("grid");
+  grid.innerHTML = `
+    <article class="card">
+      <div class="cardBody">
+        <h3>Couldn’t load products</h3>
+        <p class="empty">${err.message}</p>
+        <p class="empty">Try opening: /products.json</p>
+      </div>
+    </article>
+  `;
+});
 </script>
 
 </body>
