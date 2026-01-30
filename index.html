@@ -8,7 +8,11 @@
 </head>
 <body>
 
-<!-- ================= HEADER ================= -->
+<!-- DEBUG (remove later) -->
+<div id="debugBox" style="padding:10px 18px;border-bottom:1px solid #232a36;background:#151a22;color:#e6e6e6;font-size:13px;">
+  Loading…
+</div>
+
 <header class="header">
   <div class="brandWrap">
     <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
@@ -23,7 +27,6 @@
   </button>
 </header>
 
-<!-- ================= MAIN ================= -->
 <main class="wrap">
   <section class="toolbar">
     <input id="search" placeholder="Search items…" />
@@ -38,7 +41,6 @@
   <section class="grid" id="grid"></section>
 </main>
 
-<!-- ================= CART DRAWER ================= -->
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="drawerHeader">
     <h2>Your Cart</h2>
@@ -98,7 +100,6 @@
 
 <div class="backdrop" id="backdrop" hidden></div>
 
-<!-- ================= SCRIPT ================= -->
 <script>
 const EMAIL_TO = "flores@n2cfx.com";
 const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
@@ -108,7 +109,10 @@ let cart = JSON.parse(localStorage.getItem("cart") || "{}");
 
 const money = n => `$${Number(n).toFixed(2)}`;
 
-/* ---------- helpers ---------- */
+function setDebug(msg){
+  const el = document.getElementById("debugBox");
+  if (el) el.textContent = msg;
+}
 
 function wireShippingToggle(){
   const cb = document.getElementById("includeShippingNow");
@@ -137,17 +141,22 @@ function clearCart(){
   renderCart();
 }
 
-/* ---------- product rendering ---------- */
+function getProductImages(p){
+  if (Array.isArray(p.images) && p.images.length) return p.images;
+  if (p.image) return [p.image];
+  return [];
+}
 
 function renderProducts(){
   const grid = document.getElementById("grid");
 
-  grid.innerHTML = PRODUCTS.map(p => {
-    const imgs =
-      (Array.isArray(p.images) && p.images.length)
-        ? p.images
-        : (p.image ? [p.image] : []);
+  if (!PRODUCTS.length){
+    grid.innerHTML = `<p class="empty">No products found in products.json.</p>`;
+    return;
+  }
 
+  grid.innerHTML = PRODUCTS.map(p => {
+    const imgs = getProductImages(p);
     const firstImg = imgs[0] || "";
 
     return `
@@ -165,9 +174,7 @@ function renderProducts(){
         ${imgs.length > 1 ? `
           <div class="thumbDots">
             ${imgs.map((_, i) => `
-              <button
-                class="dot"
-                type="button"
+              <button class="dot" type="button"
                 onclick="swapImg('${p.id}', ${i})"
                 aria-label="View image ${i+1}">
               </button>
@@ -178,9 +185,7 @@ function renderProducts(){
         <div class="cardBody">
           <h3>${p.name || "Untitled item"}</h3>
           <span class="price">${money(p.price || 0)}</span>
-          <button class="primary" type="button" onclick="addToCart('${p.id}')">
-            Add to cart
-          </button>
+          <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
         </div>
       </article>
     `;
@@ -191,16 +196,10 @@ function swapImg(productId, imgIndex){
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product) return;
 
-  const imgs =
-    (Array.isArray(product.images) && product.images.length)
-      ? product.images
-      : (product.image ? [product.image] : []);
-
+  const imgs = getProductImages(product);
   const imgEl = document.getElementById(`img-${productId}`);
   if (imgEl && imgs[imgIndex]) imgEl.src = imgs[imgIndex];
 }
-
-/* ---------- cart ---------- */
 
 function renderCart(){
   const box = document.getElementById("cartItems");
@@ -226,8 +225,6 @@ function renderCart(){
   document.getElementById("subtotal").textContent =
     money(items.reduce((a,b)=>a+b.line,0));
 }
-
-/* ---------- checkout ---------- */
 
 function buildEmailBody(){
   const name = (document.getElementById("customerName")?.value || "").trim();
@@ -310,8 +307,6 @@ async function copyOrderDetails(){
   }
 }
 
-/* ---------- drawer ---------- */
-
 function openDrawer(){
   document.getElementById("drawer").classList.add("open");
   document.getElementById("drawer").setAttribute("aria-hidden","false");
@@ -325,16 +320,24 @@ function closeDrawer(){
   document.getElementById("backdrop").hidden = true;
 }
 
-/* ---------- init ---------- */
-
 async function init(){
-  const grid = document.getElementById("grid");
+  setDebug("Fetching products.json…");
 
   try {
-    const res = await fetch("products.json", { cache: "no-store" });
-    if (!res.ok) throw new Error(`products.json fetch failed (${res.status})`);
-    PRODUCTS = await res.json();
+    const res = await fetch("./products.json", { cache: "no-store" });
+    setDebug(`products.json HTTP status: ${res.status}`);
+
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
+
+    const txt = await res.text();
+    // Show first bit of text so we know we're actually getting JSON
+    setDebug(`products.json loaded (${txt.length} chars). Parsing…`);
+
+    PRODUCTS = JSON.parse(txt);
+
     if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array");
+
+    setDebug(`OK ✅ Loaded ${PRODUCTS.length} product(s). Rendering…`);
 
     document.getElementById("openCartBtn").onclick = openDrawer;
     document.getElementById("closeCartBtn").onclick = closeDrawer;
@@ -347,18 +350,17 @@ async function init(){
     saveCart();
     renderProducts();
     renderCart();
-
-    if (!PRODUCTS.length) {
-      grid.innerHTML = "<p class='empty'>No products found.</p>";
-    }
   } catch (err) {
     console.error(err);
+    setDebug(`ERROR ❌ ${err.message}`);
+
+    const grid = document.getElementById("grid");
     grid.innerHTML = `
       <article class="card">
         <div class="cardBody">
           <h3>Couldn’t load products</h3>
           <p class="empty">${err.message}</p>
-          <p class="empty">Check: /products.json</p>
+          <p class="empty">Try opening: /products.json</p>
         </div>
       </article>
     `;
