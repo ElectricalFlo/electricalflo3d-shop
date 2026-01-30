@@ -305,12 +305,15 @@ select{ max-width:220px }
 
 .imgModalMain{
   flex:1;
+  min-height:0;              /* IMPORTANT: prevents flex overflow crop */
   display:flex;
   align-items:center;
   justify-content:center;
   background:#0b0d11;
   padding:12px;
+  overflow:hidden;
 }
+
 
 
 /* Fullscreen viewer: NEVER crop image */
