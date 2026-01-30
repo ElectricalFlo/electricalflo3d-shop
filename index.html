@@ -8,10 +8,6 @@
 </head>
 <body>
 
-<!-- DEBUG (remove later) -->
-<div id="debugBox" style="padding:10px 18px;border-bottom:1px solid #232a36;background:#151a22;color:#e6e6e6;font-size:13px;">
-  Loading…
-</div>
 
 <header class="header">
   <div class="brandWrap">
@@ -109,10 +105,6 @@ let cart = JSON.parse(localStorage.getItem("cart") || "{}");
 
 const money = n => `$${Number(n).toFixed(2)}`;
 
-function setDebug(msg){
-  const el = document.getElementById("debugBox");
-  if (el) el.textContent = msg;
-}
 
 function wireShippingToggle(){
   const cb = document.getElementById("includeShippingNow");
@@ -321,23 +313,23 @@ function closeDrawer(){
 }
 
 async function init(){
-  setDebug("Fetching products.json…");
+  
 
   try {
     const res = await fetch("./products.json", { cache: "no-store" });
-    setDebug(`products.json HTTP status: ${res.status}`);
+  
 
     if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
 
     const txt = await res.text();
     // Show first bit of text so we know we're actually getting JSON
-    setDebug(`products.json loaded (${txt.length} chars). Parsing…`);
+    
 
     PRODUCTS = JSON.parse(txt);
 
     if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array");
 
-    setDebug(`OK ✅ Loaded ${PRODUCTS.length} product(s). Rendering…`);
+    
 
     document.getElementById("openCartBtn").onclick = openDrawer;
     document.getElementById("closeCartBtn").onclick = closeDrawer;
@@ -352,7 +344,7 @@ async function init(){
     renderCart();
   } catch (err) {
     console.error(err);
-    setDebug(`ERROR ❌ ${err.message}`);
+    
 
     const grid = document.getElementById("grid");
     grid.innerHTML = `
