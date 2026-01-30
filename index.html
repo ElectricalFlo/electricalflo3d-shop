@@ -5,26 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>ElectricalFlo 3D — Shop</title>
-  <meta name="description" content="ElectricalFlo 3D — 3D Printed Gear. Add items to cart, then email your order for PayPal, Venmo, or Zelle payment info." />
+  <meta name="description" content="ElectricalFlo 3D — 3D printed gear and custom orders. Add items to cart, then email your order for PayPal, Venmo, or Zelle payment info." />
 
-  <!-- Canonical -->
   <link rel="canonical" href="https://electricalflo.com/" />
 
-  <!-- OpenGraph (link previews on iMessage / FB / Discord / etc.) -->
+  <!-- OpenGraph / Link previews -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ElectricalFlo 3D — Shop" />
-  <meta property="og:description" content="3D Printed Gear. Add items to cart, then email your order for payment info." />
+  <meta property="og:description" content="3D printed gear • custom orders welcome. Add items to cart, then email your order for payment info." />
   <meta property="og:url" content="https://electricalflo.com/" />
-  <!-- Create this image: 1200x630, place at /images/social-preview.jpg -->
   <meta property="og:image" content="https://electricalflo.com/images/social-preview.jpg" />
 
-  <!-- Twitter / X -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="ElectricalFlo 3D — Shop" />
-  <meta name="twitter:description" content="3D Printed Gear. Add items to cart, then email your order for payment info." />
+  <meta name="twitter:description" content="3D printed gear • custom orders welcome. Add items to cart, then email your order for payment info." />
   <meta name="twitter:image" content="https://electricalflo.com/images/social-preview.jpg" />
 
-  <link rel="stylesheet" href="style.css?v=20260130-4" />
+  <link rel="stylesheet" href="style.css?v=20260130-6" />
 </head>
 <body>
 
@@ -33,26 +30,27 @@
     <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
     <div class="brand">
       <h1>ElectricalFlo 3D</h1>
-      <p>3D Printed Gear</p>
+      <p>3D printed gear • custom orders welcome</p>
     </div>
   </div>
 
-  <button class="cartBtn" id="openCartBtn" type="button">
-    Cart <span class="pill" id="cartCount">0</span>
-  </button>
+  <div class="headerRightWrap">
+    <nav class="catNav" aria-label="Shop categories">
+      <button class="catBtn" id="catRadioBtn" type="button" data-cat="radio" aria-pressed="true">
+        Radio Prints
+      </button>
+      <button class="catBtn" id="catFlashBtn" type="button" data-cat="flashlight" aria-pressed="false">
+        Flashlight Prints
+      </button>
+    </nav>
+
+    <button class="cartBtn" id="openCartBtn" type="button">
+      Cart <span class="pill" id="cartCount">0</span>
+    </button>
+  </div>
 </header>
 
 <main class="wrap">
-
-  <!-- Recently Viewed -->
-  <section id="recentWrap" style="display:none; margin-bottom:14px;">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;">
-      <h2 style="margin:0;font-size:16px;">Recently viewed</h2>
-      <button class="link" type="button" id="clearRecentBtn">Clear</button>
-    </div>
-    <section class="grid" id="recentGrid"></section>
-  </section>
-
   <section class="toolbar">
     <input id="search" placeholder="Search items…" />
     <select id="sort">
@@ -116,8 +114,6 @@
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button class="ghost" id="copyOrderBtn" type="button">Copy order details</button>
-      <button class="ghost" id="printOrderBtn" type="button">View / Print summary</button>
-      <button class="ghost" id="csvOrderBtn" type="button">Download CSV</button>
     </div>
 
     <button class="ghost" id="clearCartBtn" type="button">
@@ -136,19 +132,12 @@
 /* ================= CONFIG ================= */
 const SITE_URL = "https://electricalflo.com";
 const EMAIL_TO = "flores@n2cfx.com";
-
-/**
- * Optional BCC
- * - Many mail clients support mailto bcc=, some ignore it.
- * - If ignored, nothing breaks — it just won’t BCC.
- */
-const EMAIL_BCC = "flores@n2cfx.com"; // set "" to disable
-
 const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
 
 /* ================= STATE ================= */
 let PRODUCTS = [];
-let cart = JSON.parse(localStorage.getItem("cart") || "{}"); // { productId: qty }
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+let currentCategory = "radio"; // default
 let modalState = null; // {productId, imgs, idx, title}
 
 /* ================= HELPERS ================= */
@@ -169,35 +158,7 @@ function saveCart(){
   document.getElementById("cartCount").textContent = cartCount();
 }
 
-function addToCart(id){
-  cart[id] = (cart[id] || 0) + 1;
-  saveCart();
-  renderCart();
-  trackRecent(id);
-}
-
-function decFromCart(id){
-  if (!cart[id]) return;
-  cart[id] -= 1;
-  if (cart[id] <= 0) delete cart[id];
-  saveCart();
-  renderCart();
-}
-
-function removeFromCart(id){
-  delete cart[id];
-  saveCart();
-  renderCart();
-}
-
-function clearCart(){
-  cart = {};
-  saveCart();
-  renderCart();
-  resetOrderId();
-}
-
-/* ================= ORDER NUMBER (B) ================= */
+/* ================= ORDER NUMBER ================= */
 /* Format: EF-YYYYMMDD-##### */
 function pad2(n){ return String(n).padStart(2,"0"); }
 
@@ -223,84 +184,48 @@ function resetOrderId(){
   localStorage.removeItem("ef_order_id");
 }
 
-/* ================= RECENTLY VIEWED ================= */
-const RECENT_KEY = "ef_recent";
-const RECENT_MAX = 6;
+/* ================= CATEGORY (shareable links) ================= */
+function setCategory(cat, push=true){
+  const normalized = (cat === "flashlight") ? "flashlight" : "radio";
+  currentCategory = normalized;
 
-function getRecent(){
-  try{
-    const arr = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
-    return Array.isArray(arr) ? arr : [];
-  }catch{
-    return [];
-  }
-}
+  // Update button UI
+  const radioBtn = document.getElementById("catRadioBtn");
+  const flashBtn = document.getElementById("catFlashBtn");
 
-function setRecent(arr){
-  localStorage.setItem(RECENT_KEY, JSON.stringify(arr));
-}
+  radioBtn.classList.toggle("active", currentCategory === "radio");
+  flashBtn.classList.toggle("active", currentCategory === "flashlight");
 
-function trackRecent(productId){
-  if (!productId) return;
-  const arr = getRecent().filter(x => x !== productId);
-  arr.unshift(productId);
-  setRecent(arr.slice(0, RECENT_MAX));
-  renderRecent();
-}
+  radioBtn.setAttribute("aria-pressed", currentCategory === "radio" ? "true" : "false");
+  flashBtn.setAttribute("aria-pressed", currentCategory === "flashlight" ? "true" : "false");
 
-function clearRecent(){
-  localStorage.removeItem(RECENT_KEY);
-  renderRecent();
-}
-
-function renderRecent(){
-  const wrap = document.getElementById("recentWrap");
-  const grid = document.getElementById("recentGrid");
-  const ids = getRecent();
-  const list = ids.map(id => PRODUCTS.find(p => p.id === id)).filter(Boolean);
-
-  if (!list.length){
-    wrap.style.display = "none";
-    grid.innerHTML = "";
-    return;
+  // Update URL: ?cat=radio / ?cat=flashlight
+  if (push){
+    const url = new URL(window.location.href);
+    url.searchParams.set("cat", currentCategory);
+    history.replaceState({}, "", url.toString());
   }
 
-  wrap.style.display = "block";
-  grid.innerHTML = list.map(p => {
-    const imgs = getProductImages(p);
-    const first = imgs[0] || "";
-    return `
-      <article class="card">
-        <div class="thumb">
-          <img
-            src="${first}"
-            alt="${p.name || "Item"}"
-            loading="lazy"
-            data-action="openModal"
-            data-pid="${p.id}"
-            data-idx="0"
-            style="cursor: zoom-in;"
-          >
-        </div>
-        <div class="cardBody">
-          <h3>${p.name || "Untitled item"}</h3>
-          ${p.note ? `<div class="note">${p.note}</div>` : ""}
-          <span class="price">${money(p.price)}</span>
-          <button class="primary" type="button" data-action="addToCart" data-pid="${p.id}">
-            Add to cart
-          </button>
-        </div>
-      </article>
-    `;
-  }).join("");
+  // Re-render
+  renderProducts();
 }
 
-/* ================= FILTER/SORT ================= */
+function initCategoryFromUrl(){
+  const url = new URL(window.location.href);
+  const cat = (url.searchParams.get("cat") || "").toLowerCase();
+  setCategory(cat === "flashlight" ? "flashlight" : "radio", false);
+}
+
+/* ================= PRODUCTS FILTER/SORT ================= */
 function getFilteredSortedProducts(){
   const q = document.getElementById("search").value.trim().toLowerCase();
   const sort = document.getElementById("sort").value;
 
   let list = PRODUCTS.filter(p => {
+    // category defaults to "radio" if missing
+    const cat = (p.category || "radio").toLowerCase();
+    if (cat !== currentCategory) return false;
+
     const hay = `${p.name||""} ${p.note||""}`.toLowerCase();
     return !q || hay.includes(q);
   });
@@ -311,116 +236,32 @@ function getFilteredSortedProducts(){
   return list;
 }
 
-/* ================= PRODUCT CARD HTML ================= */
-function productCardHTML(p){
-  const imgs = getProductImages(p);
-  const first = imgs[0] || "";
-
-  const thumbs = imgs.length > 1 ? `
-    <div class="thumbStrip" aria-label="More images">
-      ${imgs.map((src, i) => `
-        <button class="thumbBtn ${i===0 ? "active" : ""}"
-          type="button"
-          data-action="thumb"
-          data-pid="${p.id}"
-          data-idx="${i}"
-          aria-label="Show image ${i+1}">
-          <img src="${src}" alt="${p.name || "Thumbnail"}" loading="lazy">
-        </button>
-      `).join("")}
-    </div>
-  ` : "";
-
-  return `
-    <article class="card">
-      <div class="thumb">
-        <img
-          src="${first}"
-          alt="${p.name || "Item"}"
-          id="img-${p.id}"
-          data-action="openModal"
-          data-pid="${p.id}"
-          data-idx="0"
-          loading="lazy"
-          onerror="this.style.display='none'"
-          style="cursor: zoom-in;"
-        >
-      </div>
-
-      ${thumbs}
-
-  <div class="cardBody">
-  <h3>${p.name || "Untitled item"}</h3>
-  <span class="price">${money(p.price || 0)}</span>
-
-  ${Array.isArray(p.badges) && p.badges.length ? `
-    <div class="badges">
-      ${p.badges.map(b => `
-        <span class="badge ${/made to order|custom|glow/i.test(b) ? "badge--accent" : ""}">
-          ${b}
-        </span>
-      `).join("")}
-    </div>
-  ` : ""}
-
-  <button class="primary" type="button" onclick="addToCart('${p.id}')">
-    Add to cart
-  </button>
-</div>
-
-    </article>
-  `;
+/* ================= CART ================= */
+function addToCart(id){
+  cart[id] = (cart[id] || 0) + 1;
+  saveCart();
+  renderCart();
 }
 
-/* ================= RENDER PRODUCTS ================= */
-function renderProducts(){
-  const grid = document.getElementById("grid");
-  const list = getFilteredSortedProducts();
-
-  if (!Array.isArray(list) || list.length === 0){
-    grid.innerHTML = `<p class="empty">No products found.</p>`;
-    return;
-  }
-
-  grid.innerHTML = list.map(productCardHTML).join("");
+function decFromCart(id){
+  if (!cart[id]) return;
+  cart[id] -= 1;
+  if (cart[id] <= 0) delete cart[id];
+  saveCart();
+  renderCart();
 }
 
-/* ================= CART RENDER ================= */
-function renderCart(){
-  const box = document.getElementById("cartItems");
+function removeFromCart(id){
+  delete cart[id];
+  saveCart();
+  renderCart();
+}
 
-  const items = Object.entries(cart).map(([id, qty]) => {
-    const p = PRODUCTS.find(x => x.id === id);
-    if (!p) return null;
-    const q = Number(qty||0);
-    const line = Number(p.price||0) * q;
-    return { id, p, qty:q, line };
-  }).filter(Boolean);
-
-  if (!items.length){
-    box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
-    document.getElementById("subtotal").textContent = money(0);
-    return;
-  }
-
-  box.innerHTML = items.map(i => `
-    <div class="cartRow">
-      <div class="cartInfo">
-        <strong>${i.p.name}</strong>
-        <div class="muted">${money(i.p.price)} each • Line: ${money(i.line)}</div>
-
-        <div class="qty" style="display:flex;gap:10px;align-items:center;margin-top:10px;">
-          <button class="iconBtn" type="button" data-action="dec" data-pid="${i.id}">−</button>
-          <span>${i.qty}</span>
-          <button class="iconBtn" type="button" data-action="inc" data-pid="${i.id}">+</button>
-          <button class="link" type="button" data-action="remove" data-pid="${i.id}" style="margin-left:auto;">Remove</button>
-        </div>
-      </div>
-    </div>
-  `).join("");
-
-  const subtotal = items.reduce((a,b)=>a+b.line,0);
-  document.getElementById("subtotal").textContent = money(subtotal);
+function clearCart(){
+  cart = {};
+  saveCart();
+  renderCart();
+  resetOrderId();
 }
 
 /* ================= SHIPPING TOGGLE ================= */
@@ -433,13 +274,13 @@ function wireShippingToggle(){
   });
 }
 
-/* ================= ORDER TEXT (EMAIL / COPY / PRINT / CSV) ================= */
+/* ================= ORDER TEXT ================= */
 function buildOrderItems(){
   return Object.entries(cart).map(([id, qty]) => {
     const p = PRODUCTS.find(x => x.id === id);
     if (!p) return null;
-    const line = Number(p.price) * Number(qty);
-    return { id, name: p.name, price: Number(p.price), qty: Number(qty), line };
+    const line = Number(p.price || 0) * Number(qty || 0);
+    return { id, name: p.name, price: Number(p.price||0), qty: Number(qty||0), line };
   }).filter(Boolean);
 }
 
@@ -490,7 +331,7 @@ function buildEmailBody(orderId){
   return lines.join("\n");
 }
 
-/* ================= EMAIL (with BCC if supported) ================= */
+/* ================= EMAIL / COPY ================= */
 function emailCheckout(){
   if (!Object.keys(cart).length) return;
 
@@ -499,17 +340,14 @@ function emailCheckout(){
 
   const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} ${orderId} (${itemCount} item${itemCount===1?"":"s"})`);
   const body = encodeURIComponent(buildEmailBody(orderId));
-
-  const bccPart = EMAIL_BCC ? `&bcc=${encodeURIComponent(EMAIL_BCC)}` : "";
-  const mailto = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}${bccPart}`;
+  const mailto = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
 
   window.location.href = mailto;
 
-  // ✅ AUTO-RESET after action
+  // auto-reset after action
   resetOrderId();
 }
 
-/* ================= COPY ================= */
 async function copyOrderDetails(){
   if (!Object.keys(cart).length) return;
 
@@ -531,184 +369,8 @@ async function copyOrderDetails(){
     alert("Copied! Paste it into an email/text to send your order.");
   }
 
-  // ✅ AUTO-RESET after action
+  // auto-reset after action
   resetOrderId();
-}
-
-/* ================= PRINTABLE SUMMARY ================= */
-function openPrintSummary(){
-  if (!Object.keys(cart).length) return;
-
-  const orderId = getOrCreateOrderId();
-  const name = (document.getElementById("customerName")?.value || "").trim();
-  const notes = (document.getElementById("orderNotes")?.value || "").trim();
-  const payment = document.getElementById("paymentMethod")?.value || "PayPal";
-  const includeShip = document.getElementById("includeShippingNow")?.checked;
-  const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
-
-  const items = buildOrderItems();
-  const subtotal = items.reduce((a,b)=>a+b.line,0);
-
-  const w = window.open("", "_blank", "noopener,noreferrer");
-  if (!w) return;
-
-  const rows = items.map(i => `
-    <tr>
-      <td style="padding:8px;border-bottom:1px solid #ddd;">${escapeHTML(i.name)}</td>
-      <td style="padding:8px;border-bottom:1px solid #ddd;text-align:center;">${i.qty}</td>
-      <td style="padding:8px;border-bottom:1px solid #ddd;text-align:right;">$${i.price.toFixed(2)}</td>
-      <td style="padding:8px;border-bottom:1px solid #ddd;text-align:right;">$${i.line.toFixed(2)}</td>
-    </tr>
-  `).join("");
-
-  w.document.write(`
-    <!doctype html>
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Order ${orderId}</title>
-        <style>
-          body{ font-family: system-ui,-apple-system,Segoe UI,Roboto,sans-serif; padding:24px; color:#111; }
-          h1{ margin:0 0 6px; font-size:20px; }
-          .muted{ color:#555; font-size:13px; margin:0 0 16px; }
-          .box{ border:1px solid #ddd; border-radius:12px; padding:14px; margin:14px 0; }
-          table{ width:100%; border-collapse:collapse; margin-top:10px; }
-          th{ text-align:left; padding:8px; border-bottom:2px solid #ddd; font-size:13px; }
-          .right{ text-align:right; }
-          .btnRow{ display:flex; gap:10px; margin-top:16px; }
-          button{ padding:10px 12px; border-radius:10px; border:1px solid #111; background:#111; color:#fff; cursor:pointer; }
-          button.secondary{ background:#fff; color:#111; }
-          @media print{
-            .btnRow{ display:none; }
-            body{ padding:0; }
-          }
-        </style>
-      </head>
-      <body>
-        <h1>ElectricalFlo 3D — Order Summary</h1>
-        <p class="muted">Order Number: <strong>${orderId}</strong></p>
-
-        <div class="box">
-          <div><strong>Name:</strong> ${name ? escapeHTML(name) : "—"}</div>
-          <div><strong>Payment:</strong> ${escapeHTML(payment)}</div>
-          <div><strong>Subtotal:</strong> $${subtotal.toFixed(2)} (before shipping)</div>
-        </div>
-
-        <div class="box">
-          <strong>Items</strong>
-          <table>
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th style="text-align:center;">Qty</th>
-                <th class="right">Each</th>
-                <th class="right">Line</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-          <div style="margin-top:10px;text-align:right;font-weight:700;">
-            Subtotal: $${subtotal.toFixed(2)}
-          </div>
-        </div>
-
-        <div class="box">
-          <strong>Notes / customization</strong>
-          <div style="white-space:pre-wrap;margin-top:8px;">${notes ? escapeHTML(notes) : "—"}</div>
-        </div>
-
-        <div class="box">
-          <strong>Shipping address</strong>
-          <div style="white-space:pre-wrap;margin-top:8px;">
-            ${includeShip && shipAddr ? escapeHTML(shipAddr) : "Will provide after you reply."}
-          </div>
-        </div>
-
-        <div class="btnRow">
-          <button onclick="window.print()">Print</button>
-          <button class="secondary" onclick="window.close()">Close</button>
-        </div>
-      </body>
-    </html>
-  `);
-  w.document.close();
-
-  // ✅ AUTO-RESET after action
-  resetOrderId();
-}
-
-/* ================= CSV EXPORT ================= */
-function downloadCSV(){
-  if (!Object.keys(cart).length) return;
-
-  const orderId = getOrCreateOrderId();
-  const name = (document.getElementById("customerName")?.value || "").trim();
-  const payment = document.getElementById("paymentMethod")?.value || "PayPal";
-
-  const includeShip = document.getElementById("includeShippingNow")?.checked;
-  const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
-  const notes = (document.getElementById("orderNotes")?.value || "").trim();
-
-  const items = buildOrderItems();
-  const subtotal = items.reduce((a,b)=>a+b.line,0);
-
-  // CSV rows
-  const lines = [];
-  lines.push(["OrderNumber", "Name", "Payment", "Subtotal", "Notes", "ShippingAddress"].map(csvEscape).join(","));
-  lines.push([orderId, name, payment, subtotal.toFixed(2), notes, includeShip ? shipAddr : ""].map(csvEscape).join(","));
-  lines.push("");
-  lines.push(["Item", "Qty", "Each", "Line"].map(csvEscape).join(","));
-  items.forEach(i => {
-    lines.push([i.name, String(i.qty), i.price.toFixed(2), i.line.toFixed(2)].map(csvEscape).join(","));
-  });
-
-  const csv = lines.join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${orderId}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-
-  URL.revokeObjectURL(url);
-
-  // ✅ AUTO-RESET after action
-  resetOrderId();
-}
-
-function csvEscape(v){
-  const s = String(v ?? "");
-  // wrap if contains comma/quote/newline
-  if (/[,"\n]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
-  return s;
-}
-
-function escapeHTML(s){
-  return String(s ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  }[c]));
-}
-
-/* ================= DRAWER ================= */
-function openDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
-  drawer.classList.add("open");
-  drawer.setAttribute("aria-hidden","false");
-  backdrop.hidden = false;
-  renderCart();
-}
-
-function closeDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
-  drawer.classList.remove("open");
-  drawer.setAttribute("aria-hidden","true");
-  backdrop.hidden = true;
 }
 
 /* ================= LIGHTBOX MODAL ================= */
@@ -716,10 +378,8 @@ function closeImageModal(){
   const modal = document.querySelector(".imgModal");
   if (modal) modal.remove();
   modalState = null;
-
   document.documentElement.style.overflow = "";
   document.body.style.overflow = "";
-
   window.removeEventListener("keydown", onModalKeyDown);
 }
 
@@ -766,8 +426,6 @@ function openImageModal(productId, startIdx){
   const imgs = getProductImages(product);
   if (!imgs.length) return;
 
-  trackRecent(productId);
-
   modalState = {
     productId,
     imgs,
@@ -806,7 +464,6 @@ function openImageModal(productId, startIdx){
       </div>
     </div>
   `;
-
   document.body.appendChild(modal);
 
   modal.addEventListener("click", (e) => {
@@ -823,7 +480,7 @@ function openImageModal(productId, startIdx){
     }
   });
 
-  // Swipe support
+  // swipe (mobile)
   const main = document.getElementById("modalMain");
   let sx = 0, sy = 0;
   const THRESH = 50;
@@ -845,16 +502,96 @@ function openImageModal(productId, startIdx){
   }, { passive: true });
 
   window.addEventListener("keydown", onModalKeyDown);
-
   updateModalImage();
+}
+
+/* ================= RENDER PRODUCTS ================= */
+function productCardHTML(p){
+  const imgs = getProductImages(p);
+  const first = imgs[0] || "";
+
+  const thumbs = imgs.length > 1 ? `
+    <div class="thumbStrip" aria-label="More images">
+      ${imgs.map((src, i) => `
+        <button class="thumbBtn ${i===0 ? "active" : ""}"
+          type="button"
+          data-action="thumb"
+          data-pid="${p.id}"
+          data-idx="${i}"
+          aria-label="Show image ${i+1}">
+          <img src="${src}" alt="${p.name || "Thumbnail"}" loading="lazy">
+        </button>
+      `).join("")}
+    </div>
+  ` : "";
+
+  const badgesHTML = (Array.isArray(p.badges) && p.badges.length) ? `
+    <div class="badges">
+      ${p.badges.map(b => `
+        <span class="badge ${/made to order|custom|glow/i.test(b) ? "badge--accent" : ""}">
+          ${b}
+        </span>
+      `).join("")}
+    </div>
+  ` : "";
+
+  return `
+    <article class="card">
+      <div class="thumb">
+        <img
+          src="${first}"
+          alt="${p.name || "Item"}"
+          id="img-${p.id}"
+          data-action="openModal"
+          data-pid="${p.id}"
+          data-idx="0"
+          loading="lazy"
+          onerror="this.style.display='none'"
+          style="cursor: zoom-in;"
+        >
+      </div>
+
+      ${thumbs}
+
+      <div class="cardBody">
+        <h3>${p.name || "Untitled item"}</h3>
+        ${p.note ? `<div class="note">${p.note}</div>` : ""}
+        <span class="price">${money(p.price)}</span>
+        ${badgesHTML}
+        <button class="primary" type="button" data-action="addToCart" data-pid="${p.id}">
+          Add to cart
+        </button>
+      </div>
+    </article>
+  `;
+}
+
+function renderProducts(){
+  const grid = document.getElementById("grid");
+  const list = getFilteredSortedProducts();
+
+  if (!Array.isArray(list) || list.length === 0){
+    grid.innerHTML = `
+      <article class="card">
+        <div class="cardBody">
+          <h3>No items found</h3>
+          <p class="empty">
+            ${currentCategory === "flashlight" ? "No flashlight items yet." : "No radio items yet."}
+          </p>
+        </div>
+      </article>
+    `;
+    return;
+  }
+
+  grid.innerHTML = list.map(productCardHTML).join("");
 }
 
 /* ================= GRID EVENT DELEGATION ================= */
 function wireGridHandlers(){
   const grid = document.getElementById("grid");
-  const recentGrid = document.getElementById("recentGrid");
 
-  function handler(e){
+  grid.addEventListener("click", (e) => {
     const el = e.target.closest("[data-action]");
     if (!el) return;
 
@@ -886,18 +623,53 @@ function wireGridHandlers(){
       openImageModal(pid, idx);
       return;
     }
-  }
-
-  grid.addEventListener("click", handler);
-  recentGrid.addEventListener("click", handler);
+  });
 }
 
-/* ================= CART EVENT DELEGATION ================= */
+/* ================= CART RENDER ================= */
+function renderCart(){
+  const box = document.getElementById("cartItems");
+
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return null;
+    const q = Number(qty||0);
+    const line = Number(p.price||0) * q;
+    return { id, p, qty:q, line };
+  }).filter(Boolean);
+
+  if (!items.length){
+    box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
+    document.getElementById("subtotal").textContent = money(0);
+    return;
+  }
+
+  box.innerHTML = items.map(i => `
+    <div class="cartRow">
+      <div class="cartInfo">
+        <strong>${i.p.name}</strong>
+        <div class="muted">${money(i.p.price)} each • Line: ${money(i.line)}</div>
+
+        <div class="qty" style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+          <button class="iconBtn" type="button" data-action="dec" data-pid="${i.id}">−</button>
+          <span>${i.qty}</span>
+          <button class="iconBtn" type="button" data-action="inc" data-pid="${i.id}">+</button>
+          <button class="link" type="button" data-action="remove" data-pid="${i.id}" style="margin-left:auto;">Remove</button>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  const subtotal = items.reduce((a,b)=>a+b.line,0);
+  document.getElementById("subtotal").textContent = money(subtotal);
+}
+
 function wireCartHandlers(){
   const cartBox = document.getElementById("cartItems");
   cartBox.addEventListener("click", (e) => {
     const el = e.target.closest("[data-action]");
     if (!el) return;
+
     const action = el.getAttribute("data-action");
     const pid = el.getAttribute("data-pid");
 
@@ -905,6 +677,24 @@ function wireCartHandlers(){
     if (action === "dec") decFromCart(pid);
     if (action === "remove") removeFromCart(pid);
   });
+}
+
+/* ================= DRAWER ================= */
+function openDrawer(){
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("backdrop");
+  drawer.classList.add("open");
+  drawer.setAttribute("aria-hidden","false");
+  backdrop.hidden = false;
+  renderCart();
+}
+
+function closeDrawer(){
+  const drawer = document.getElementById("drawer");
+  const backdrop = document.getElementById("backdrop");
+  drawer.classList.remove("open");
+  drawer.setAttribute("aria-hidden","true");
+  backdrop.hidden = true;
 }
 
 /* ================= INIT ================= */
@@ -917,21 +707,24 @@ async function init(){
 
     if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array of products.");
 
-    // UI
+    initCategoryFromUrl();
+
+    // header buttons
+    document.getElementById("catRadioBtn").addEventListener("click", () => setCategory("radio", true));
+    document.getElementById("catFlashBtn").addEventListener("click", () => setCategory("flashlight", true));
+
+    // drawer / actions
     document.getElementById("openCartBtn").addEventListener("click", openDrawer);
     document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
     document.getElementById("backdrop").addEventListener("click", closeDrawer);
 
     document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
     document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
-    document.getElementById("printOrderBtn").addEventListener("click", openPrintSummary);
-    document.getElementById("csvOrderBtn").addEventListener("click", downloadCSV);
     document.getElementById("clearCartBtn").addEventListener("click", clearCart);
 
+    // search/sort
     document.getElementById("search").addEventListener("input", renderProducts);
     document.getElementById("sort").addEventListener("change", renderProducts);
-
-    document.getElementById("clearRecentBtn").addEventListener("click", clearRecent);
 
     wireShippingToggle();
     wireGridHandlers();
@@ -940,7 +733,6 @@ async function init(){
     saveCart();
     renderProducts();
     renderCart();
-    renderRecent();
   }catch(err){
     console.error(err);
     const grid = document.getElementById("grid");
