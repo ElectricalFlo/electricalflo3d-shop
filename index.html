@@ -108,6 +108,8 @@ let cart = JSON.parse(localStorage.getItem("cart") || "{}");
 
 const money = n => `$${Number(n).toFixed(2)}`;
 
+/* ---------- helpers ---------- */
+
 function wireShippingToggle(){
   const cb = document.getElementById("includeShippingNow");
   const wrap = document.getElementById("shippingWrap");
@@ -135,28 +137,37 @@ function clearCart(){
   renderCart();
 }
 
+/* ---------- product rendering ---------- */
+
 function renderProducts(){
   const grid = document.getElementById("grid");
 
-  grid.innerHTML = PRODUCTS.map((p, idx) => {
-    const imgs = p.images && p.images.length ? p.images : [p.image];
+  grid.innerHTML = PRODUCTS.map(p => {
+    const imgs =
+      (Array.isArray(p.images) && p.images.length)
+        ? p.images
+        : (p.image ? [p.image] : []);
+
+    const firstImg = imgs[0] || "";
 
     return `
       <article class="card">
         <div class="thumb">
-          <img 
-            src="${imgs[0]}" 
-            alt="${p.name}" 
+          <img
+            src="${firstImg}"
+            alt="${p.name || "Item"}"
             id="img-${p.id}"
             loading="lazy"
+            onerror="this.style.display='none'"
           >
         </div>
 
         ${imgs.length > 1 ? `
           <div class="thumbDots">
             ${imgs.map((_, i) => `
-              <button 
-                class="dot" 
+              <button
+                class="dot"
+                type="button"
                 onclick="swapImg('${p.id}', ${i})"
                 aria-label="View image ${i+1}">
               </button>
@@ -165,8 +176,8 @@ function renderProducts(){
         ` : ""}
 
         <div class="cardBody">
-          <h3>${p.name}</h3>
-          <span class="price">${money(p.price)}</span>
+          <h3>${p.name || "Untitled item"}</h3>
+          <span class="price">${money(p.price || 0)}</span>
           <button class="primary" type="button" onclick="addToCart('${p.id}')">
             Add to cart
           </button>
@@ -176,6 +187,20 @@ function renderProducts(){
   }).join("");
 }
 
+function swapImg(productId, imgIndex){
+  const product = PRODUCTS.find(p => p.id === productId);
+  if (!product) return;
+
+  const imgs =
+    (Array.isArray(product.images) && product.images.length)
+      ? product.images
+      : (product.image ? [product.image] : []);
+
+  const imgEl = document.getElementById(`img-${productId}`);
+  if (imgEl && imgs[imgIndex]) imgEl.src = imgs[imgIndex];
+}
+
+/* ---------- cart ---------- */
 
 function renderCart(){
   const box = document.getElementById("cartItems");
@@ -201,6 +226,8 @@ function renderCart(){
   document.getElementById("subtotal").textContent =
     money(items.reduce((a,b)=>a+b.line,0));
 }
+
+/* ---------- checkout ---------- */
 
 function buildEmailBody(){
   const name = (document.getElementById("customerName")?.value || "").trim();
@@ -267,14 +294,12 @@ async function copyOrderDetails(){
   if(!Object.keys(cart).length) return;
 
   const text = buildEmailBody();
-
   try{
     await navigator.clipboard.writeText(text);
     alert("Copied! Paste it into an email/text to send your order.");
-  }catch(e){
+  }catch{
     const ta = document.createElement("textarea");
     ta.value = text;
-    ta.setAttribute("readonly","");
     ta.style.position = "absolute";
     ta.style.left = "-9999px";
     document.body.appendChild(ta);
@@ -285,50 +310,61 @@ async function copyOrderDetails(){
   }
 }
 
+/* ---------- drawer ---------- */
+
 function openDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
-  drawer.classList.add("open");
-  drawer.setAttribute("aria-hidden","false");
-  backdrop.hidden = false;
+  document.getElementById("drawer").classList.add("open");
+  document.getElementById("drawer").setAttribute("aria-hidden","false");
+  document.getElementById("backdrop").hidden = false;
   renderCart();
 }
 
 function closeDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
-  drawer.classList.remove("open");
-  drawer.setAttribute("aria-hidden","true");
-  backdrop.hidden = true;
+  document.getElementById("drawer").classList.remove("open");
+  document.getElementById("drawer").setAttribute("aria-hidden","true");
+  document.getElementById("backdrop").hidden = true;
 }
+
+/* ---------- init ---------- */
 
 async function init(){
-  PRODUCTS = await (await fetch("products.json", { cache: "no-store" })).json();
+  const grid = document.getElementById("grid");
 
-  document.getElementById("openCartBtn").addEventListener("click", openDrawer);
-  document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
-  document.getElementById("backdrop").addEventListener("click", closeDrawer);
+  try {
+    const res = await fetch("products.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`products.json fetch failed (${res.status})`);
+    PRODUCTS = await res.json();
+    if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array");
 
-  document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
-  document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
-  document.getElementById("clearCartBtn").addEventListener("click", clearCart);
+    document.getElementById("openCartBtn").onclick = openDrawer;
+    document.getElementById("closeCartBtn").onclick = closeDrawer;
+    document.getElementById("backdrop").onclick = closeDrawer;
+    document.getElementById("emailCheckoutBtn").onclick = emailCheckout;
+    document.getElementById("copyOrderBtn").onclick = copyOrderDetails;
+    document.getElementById("clearCartBtn").onclick = clearCart;
 
-  wireShippingToggle();
-  saveCart();
-  renderProducts();
-  renderCart();
-}
-function swapImg(productId, imgIndex){
-  const product = PRODUCTS.find(p => p.id === productId);
-  if (!product || !product.images) return;
+    wireShippingToggle();
+    saveCart();
+    renderProducts();
+    renderCart();
 
-  const imgEl = document.getElementById(`img-${productId}`);
-  if (imgEl) {
-    imgEl.src = product.images[imgIndex];
+    if (!PRODUCTS.length) {
+      grid.innerHTML = "<p class='empty'>No products found.</p>";
+    }
+  } catch (err) {
+    console.error(err);
+    grid.innerHTML = `
+      <article class="card">
+        <div class="cardBody">
+          <h3>Couldn’t load products</h3>
+          <p class="empty">${err.message}</p>
+          <p class="empty">Check: /products.json</p>
+        </div>
+      </article>
+    `;
   }
 }
 
-  
 init();
 </script>
 
