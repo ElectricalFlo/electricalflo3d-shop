@@ -525,3 +525,15 @@ select{
     height:42px;
   }
 }
+/* FORCE product image box size + prevent portrait images from exploding */
+.thumb{
+  height: 240px !important;
+  overflow: hidden !important;
+}
+
+.thumb img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;  /* use "cover" if you prefer cropping */
+  display: block !important;
+}
