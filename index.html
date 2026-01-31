@@ -287,7 +287,11 @@ function renderProducts(){
             <h3>${p.name || "Untitled item"}</h3>
             ${badges.length ? `
               <div class="badgeRow">
-                ${badges.map(b => `<span class="badge">${b}</span>`).join("")}
+                ${badges.map(b => {
+  const isGlow = /glow/i.test(b);
+  return `<span class="badge ${isGlow ? "badge--glow" : ""}">${b}</span>`;
+}).join("")}
+
               </div>
             ` : ""}
           </div>
