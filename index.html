@@ -5,23 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>ElectricalFlo 3D — Shop</title>
-  <meta name="description" content="ElectricalFlo 3D — 3D printed gear. Add items to cart, then email your order for PayPal, Venmo, or Zelle payment info." />
+  <meta name="description" content="ElectricalFlo 3D — 3D printed gear and custom orders. Add items to cart, then email your order for PayPal, Venmo, or Zelle payment info." />
 
   <link rel="canonical" href="https://electricalflo.com/" />
 
   <!-- OpenGraph / Link previews -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="ElectricalFlo 3D — Shop" />
-  <meta property="og:description" content="3D Printed Gear. Add items to cart, then email your order for payment info." />
+  <meta property="og:description" content="3D printed gear • custom orders welcome. Add items to cart, then email your order for payment info." />
   <meta property="og:url" content="https://electricalflo.com/" />
   <meta property="og:image" content="https://electricalflo.com/images/social-preview.jpg" />
 
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="ElectricalFlo 3D — Shop" />
-  <meta name="twitter:description" content="3D Printed Gear. Add items to cart, then email your order for payment info." />
+  <meta name="twitter:description" content="3D printed gear • custom orders welcome. Add items to cart, then email your order for payment info." />
   <meta name="twitter:image" content="https://electricalflo.com/images/social-preview.jpg" />
 
-  <link rel="stylesheet" href="style.css?v=20260130-6" />
+  <link rel="stylesheet" href="style.css?v=20260130-7" />
 </head>
 <body>
 
@@ -30,13 +30,13 @@
     <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
     <div class="brand">
       <h1>ElectricalFlo 3D</h1>
-      <p>3D Printed Gear</p>
+      <p>3D printed gear • custom orders welcome</p>
     </div>
   </div>
 
   <div class="headerRightWrap">
     <nav class="catNav" aria-label="Shop categories">
-      <button class="catBtn" id="catRadioBtn" type="button" data-cat="radio" aria-pressed="true">
+      <button class="catBtn active" id="catRadioBtn" type="button" data-cat="radio" aria-pressed="true">
         Radio Prints
       </button>
       <button class="catBtn" id="catFlashBtn" type="button" data-cat="flashlight" aria-pressed="false">
@@ -130,13 +130,14 @@
 
 <script>
 /* ================= CONFIG ================= */
-const SITE_URL = "https://electricalflo.com";
 const EMAIL_TO = "flores@n2cfx.com";
 const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
 
 /* ================= STATE ================= */
 let PRODUCTS = [];
-let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+let cart = JSON.parse(localStorage.getItem("cart") || "{}"); // { productId: qty }
+let variantSelections = JSON.parse(localStorage.getItem("ef_variants") || "{}"); // { productId: {model,color} }
+
 let currentCategory = "radio"; // default
 let modalState = null; // {productId, imgs, idx, title}
 
@@ -156,6 +157,29 @@ function cartCount(){
 function saveCart(){
   localStorage.setItem("cart", JSON.stringify(cart));
   document.getElementById("cartCount").textContent = cartCount();
+}
+
+function saveVariants(){
+  localStorage.setItem("ef_variants", JSON.stringify(variantSelections));
+}
+
+function hasVariants(p){
+  return !!(p && p.variants && (Array.isArray(p.variants.models) || Array.isArray(p.variants.colors)));
+}
+
+function ensureVariantDefaults(productId){
+  const p = PRODUCTS.find(x => x.id === productId);
+  if (!p || !hasVariants(p)) return;
+
+  const models = Array.isArray(p.variants.models) ? p.variants.models : [];
+  const colors = Array.isArray(p.variants.colors) ? p.variants.colors : [];
+
+  if (!variantSelections[productId]) variantSelections[productId] = {};
+
+  if (models.length && !variantSelections[productId].model) variantSelections[productId].model = models[0];
+  if (colors.length && !variantSelections[productId].color) variantSelections[productId].color = colors[0];
+
+  saveVariants();
 }
 
 /* ================= ORDER NUMBER ================= */
@@ -189,7 +213,6 @@ function setCategory(cat, push=true){
   const normalized = (cat === "flashlight") ? "flashlight" : "radio";
   currentCategory = normalized;
 
-  // Update button UI
   const radioBtn = document.getElementById("catRadioBtn");
   const flashBtn = document.getElementById("catFlashBtn");
 
@@ -199,14 +222,12 @@ function setCategory(cat, push=true){
   radioBtn.setAttribute("aria-pressed", currentCategory === "radio" ? "true" : "false");
   flashBtn.setAttribute("aria-pressed", currentCategory === "flashlight" ? "true" : "false");
 
-  // Update URL: ?cat=radio / ?cat=flashlight
   if (push){
     const url = new URL(window.location.href);
     url.searchParams.set("cat", currentCategory);
     history.replaceState({}, "", url.toString());
   }
 
-  // Re-render
   renderProducts();
 }
 
@@ -222,7 +243,6 @@ function getFilteredSortedProducts(){
   const sort = document.getElementById("sort").value;
 
   let list = PRODUCTS.filter(p => {
-    // category defaults to "radio" if missing
     const cat = (p.category || "radio").toLowerCase();
     if (cat !== currentCategory) return false;
 
@@ -238,6 +258,7 @@ function getFilteredSortedProducts(){
 
 /* ================= CART ================= */
 function addToCart(id){
+  ensureVariantDefaults(id); // if this product has variants, ensure defaults exist
   cart[id] = (cart[id] || 0) + 1;
   saveCart();
   renderCart();
@@ -279,8 +300,15 @@ function buildOrderItems(){
   return Object.entries(cart).map(([id, qty]) => {
     const p = PRODUCTS.find(x => x.id === id);
     if (!p) return null;
-    const line = Number(p.price || 0) * Number(qty || 0);
-    return { id, name: p.name, price: Number(p.price||0), qty: Number(qty||0), line };
+
+    const q = Number(qty || 0);
+    const line = Number(p.price || 0) * q;
+
+    const v = variantSelections[id] || {};
+    const model = v.model || "";
+    const color = v.color || "";
+
+    return { id, name: p.name, price: Number(p.price||0), qty: q, line, model, color, hasVars: hasVariants(p) };
   }).filter(Boolean);
 }
 
@@ -306,7 +334,10 @@ function buildEmailBody(orderId){
   lines.push("");
 
   lines.push("Items:");
-  items.forEach(i => lines.push(`- ${i.name} (x${i.qty}) — $${i.line.toFixed(2)}`));
+  items.forEach(i => {
+    const variantText = i.hasVars ? ` [Model: ${i.model || "—"}, Color: ${i.color || "—"}]` : "";
+    lines.push(`- ${i.name}${variantText} (x${i.qty}) — $${i.line.toFixed(2)}`);
+  });
 
   lines.push("");
   lines.push(`Subtotal (before shipping): $${subtotal.toFixed(2)}`);
@@ -344,7 +375,7 @@ function emailCheckout(){
 
   window.location.href = mailto;
 
-  // auto-reset after action
+  // auto-reset after action (as requested)
   resetOrderId();
 }
 
@@ -369,7 +400,7 @@ async function copyOrderDetails(){
     alert("Copied! Paste it into an email/text to send your order.");
   }
 
-  // auto-reset after action
+  // auto-reset after action (as requested)
   resetOrderId();
 }
 
@@ -505,7 +536,42 @@ function openImageModal(productId, startIdx){
   updateModalImage();
 }
 
-/* ================= RENDER PRODUCTS ================= */
+/* ================= PRODUCT CARD HTML ================= */
+function variantSelectorsHTML(p){
+  if (!hasVariants(p)) return "";
+
+  ensureVariantDefaults(p.id);
+
+  const sel = variantSelections[p.id] || {};
+  const models = Array.isArray(p.variants.models) ? p.variants.models : [];
+  const colors = Array.isArray(p.variants.colors) ? p.variants.colors : [];
+
+  const modelHTML = models.length ? `
+    <label class="vField">
+      <span>Model</span>
+      <select class="vSelect" data-action="setVariant" data-pid="${p.id}" data-key="model">
+        ${models.map(m => `<option value="${m}" ${sel.model===m ? "selected" : ""}>${m}</option>`).join("")}
+      </select>
+    </label>
+  ` : "";
+
+  const colorHTML = colors.length ? `
+    <label class="vField">
+      <span>Color</span>
+      <select class="vSelect" data-action="setVariant" data-pid="${p.id}" data-key="color">
+        ${colors.map(c => `<option value="${c}" ${sel.color===c ? "selected" : ""}>${c}</option>`).join("")}
+      </select>
+    </label>
+  ` : "";
+
+  return `
+    <div class="vRow">
+      ${modelHTML}
+      ${colorHTML}
+    </div>
+  `;
+}
+
 function productCardHTML(p){
   const imgs = getProductImages(p);
   const first = imgs[0] || "";
@@ -557,7 +623,10 @@ function productCardHTML(p){
         <h3>${p.name || "Untitled item"}</h3>
         ${p.note ? `<div class="note">${p.note}</div>` : ""}
         <span class="price">${money(p.price)}</span>
+
+        ${variantSelectorsHTML(p)}
         ${badgesHTML}
+
         <button class="primary" type="button" data-action="addToCart" data-pid="${p.id}">
           Add to cart
         </button>
@@ -566,6 +635,7 @@ function productCardHTML(p){
   `;
 }
 
+/* ================= RENDER PRODUCTS ================= */
 function renderProducts(){
   const grid = document.getElementById("grid");
   const list = getFilteredSortedProducts();
@@ -624,9 +694,57 @@ function wireGridHandlers(){
       return;
     }
   });
+
+  // Handle dropdown changes
+  grid.addEventListener("change", (e) => {
+    const el = e.target.closest("[data-action='setVariant']");
+    if (!el) return;
+
+    const pid = el.getAttribute("data-pid");
+    const key = el.getAttribute("data-key");
+    const val = el.value;
+
+    if (!variantSelections[pid]) variantSelections[pid] = {};
+    variantSelections[pid][key] = val;
+    saveVariants();
+
+    // Nothing else required — email/cart will read latest values
+  });
 }
 
 /* ================= CART RENDER ================= */
+function cartVariantControlsHTML(p){
+  if (!hasVariants(p)) return "";
+
+  ensureVariantDefaults(p.id);
+
+  const sel = variantSelections[p.id] || {};
+  const models = Array.isArray(p.variants.models) ? p.variants.models : [];
+  const colors = Array.isArray(p.variants.colors) ? p.variants.colors : [];
+
+  return `
+    <div class="vRow" style="margin-top:10px;">
+      ${models.length ? `
+        <label class="vField">
+          <span>Model</span>
+          <select class="vSelect" data-action="cartSetVariant" data-pid="${p.id}" data-key="model">
+            ${models.map(m => `<option value="${m}" ${sel.model===m ? "selected" : ""}>${m}</option>`).join("")}
+          </select>
+        </label>
+      ` : ""}
+
+      ${colors.length ? `
+        <label class="vField">
+          <span>Color</span>
+          <select class="vSelect" data-action="cartSetVariant" data-pid="${p.id}" data-key="color">
+            ${colors.map(c => `<option value="${c}" ${sel.color===c ? "selected" : ""}>${c}</option>`).join("")}
+          </select>
+        </label>
+      ` : ""}
+    </div>
+  `;
+}
+
 function renderCart(){
   const box = document.getElementById("cartItems");
 
@@ -650,6 +768,8 @@ function renderCart(){
         <strong>${i.p.name}</strong>
         <div class="muted">${money(i.p.price)} each • Line: ${money(i.line)}</div>
 
+        ${cartVariantControlsHTML(i.p)}
+
         <div class="qty" style="display:flex;gap:10px;align-items:center;margin-top:10px;">
           <button class="iconBtn" type="button" data-action="dec" data-pid="${i.id}">−</button>
           <span>${i.qty}</span>
@@ -666,6 +786,7 @@ function renderCart(){
 
 function wireCartHandlers(){
   const cartBox = document.getElementById("cartItems");
+
   cartBox.addEventListener("click", (e) => {
     const el = e.target.closest("[data-action]");
     if (!el) return;
@@ -676,6 +797,19 @@ function wireCartHandlers(){
     if (action === "inc") addToCart(pid);
     if (action === "dec") decFromCart(pid);
     if (action === "remove") removeFromCart(pid);
+  });
+
+  cartBox.addEventListener("change", (e) => {
+    const el = e.target.closest("[data-action='cartSetVariant']");
+    if (!el) return;
+
+    const pid = el.getAttribute("data-pid");
+    const key = el.getAttribute("data-key");
+    const val = el.value;
+
+    if (!variantSelections[pid]) variantSelections[pid] = {};
+    variantSelections[pid][key] = val;
+    saveVariants();
   });
 }
 
@@ -707,13 +841,14 @@ async function init(){
 
     if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array of products.");
 
+    // ensure variant defaults exist for any variant products
+    PRODUCTS.forEach(p => { if (p && p.id) ensureVariantDefaults(p.id); });
+
     initCategoryFromUrl();
 
-    // header buttons
     document.getElementById("catRadioBtn").addEventListener("click", () => setCategory("radio", true));
     document.getElementById("catFlashBtn").addEventListener("click", () => setCategory("flashlight", true));
 
-    // drawer / actions
     document.getElementById("openCartBtn").addEventListener("click", openDrawer);
     document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
     document.getElementById("backdrop").addEventListener("click", closeDrawer);
@@ -722,7 +857,6 @@ async function init(){
     document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
     document.getElementById("clearCartBtn").addEventListener("click", clearCart);
 
-    // search/sort
     document.getElementById("search").addEventListener("input", renderProducts);
     document.getElementById("sort").addEventListener("change", renderProducts);
 
