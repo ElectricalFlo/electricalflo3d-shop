@@ -76,14 +76,14 @@
     ]
   },
 ]
-"id": "GITD Single Emitter Gasket for Okluma Flashlights",
+"id": "okluma-gitd-single-emitter-gasket",
     "category": "flashlight",
     "name": "GITD Single Emitter Gasket for Okluma Flashlights",
     "price": 35,
     "note": "Choose model and color from the options.",
     "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
     "variants": {
-      "models": ["DC0", "DC1", "DC2"]
+      "models": ["DC0", "DC1", "DC2"],
       "colors": ["Green", "Blue", "Red-Orange"]
     },
     "images": [
