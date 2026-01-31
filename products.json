@@ -7,9 +7,9 @@
     "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark"],
     "images": [
-      "/images/IMG_1085.jpeg",
-      "/images/IMG_1086.jpeg",
-      "/images/IMG_1090.jpeg"
+      "images/IMG_1085.jpeg",
+      "images/IMG_1086.jpeg",
+      "images/IMG_1090.jpeg"
     ]
   },
 
@@ -25,10 +25,10 @@
       "colors": ["Green", "Blue", "Red-Orange"]
     },
     "images": [
-      "/images/Trio_Green_TailRings.jpg",
-      "/images/Quad_Green_TailRings.jpg",
-      "/images/Quad_Blue_TailRing.jpg",
-      "/images/Quad_Orange_TailRing.jpg"
+      "images/Trio_Green_TailRings.jpg",
+      "images/Quad_Green_TailRings.jpg",
+      "images/Quad_Blue_TailRing.jpg",
+      "images/Quad_Orange_TailRing.jpg"
     ]
   },
 
@@ -44,7 +44,7 @@
       "colors": ["Green", "Blue", "Red-Orange"]
     },
     "images": [
-      "/images/GITD_Orings.jpg"
+      "images/GITD_Orings.jpg"
     ]
   },
 
@@ -60,7 +60,7 @@
       "colors": ["Green", "Blue", "Red-Orange"]
     },
     "images": [
-      "/images/Tri_DC0_OpticHolder.jpg"
+      "images/Tri_DC0_OpticHolder.jpg"
     ]
   },
 
@@ -75,8 +75,8 @@
       "models": ["DC0", "DC1", "DC2"]
     },
     "images": [
-      "/images/Tail_Ring_DC1-2_Purple.JPG",
-      "/images/Tail_Ring_DC1-2_Purple_Model.jpg"
+      "images/Tail_Ring_DC1-2_Purple.jpg",
+      "images/Tail_Ring_DC1-2_Purple_Model.jpg"
     ]
   }
 ]
