@@ -1,12 +1,239 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta http-equiv="refresh" content="0; url=/radio/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ElectricalFlo</title>
+  <title>ElectricalFlo 3D — Shop</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <p>Redirecting… <a href="/radio/">Go to Radio Prints</a></p>
+
+<!-- ================= HEADER ================= -->
+<header class="header">
+  <div class="brandWrap">
+    <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
+    <div class="brand">
+      <h1>ElectricalFlo 3D</h1>
+      <p>3D Printed Gear</p>
+    </div>
+  </div>
+
+  <div class="headerRightWrap">
+    <nav class="catNav" aria-label="Shop categories">
+      <button class="catBtn active" data-cat="radio">Radio Prints</button>
+      <button class="catBtn" data-cat="flashlight">Flashlight Prints</button>
+    </nav>
+
+    <a class="tiktokBtn" id="tiktokLink"
+       href="https://www.tiktok.com/@n2cfx"
+       target="_blank" rel="noopener">
+      Radio TikTok
+    </a>
+
+    <button class="cartBtn" id="openCartBtn" type="button">
+      Cart <span class="pill" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- ================= MAIN ================= -->
+<main class="wrap">
+  <section class="toolbar">
+    <input id="search" placeholder="Search items…" />
+  </section>
+
+  <section class="grid" id="grid"></section>
+</main>
+
+<!-- ================= CART DRAWER ================= -->
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawerHeader">
+    <h2>Your Cart</h2>
+    <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
+  </div>
+
+  <div class="drawerBody" id="cartItems"></div>
+
+  <div class="drawerFooter">
+    <div class="totalRow">
+      <span>Subtotal</span>
+      <strong id="subtotal">$0.00</strong>
+    </div>
+
+    <label class="field">
+      <span>Your name (optional)</span>
+      <input id="customerName" />
+    </label>
+
+    <label class="field">
+      <span>Notes (colors, callsign, etc.)</span>
+      <textarea id="orderNotes" rows="3"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Preferred payment method</span>
+      <select id="paymentMethod">
+        <option>PayPal</option>
+        <option>Venmo</option>
+        <option>Zelle</option>
+      </select>
+    </label>
+
+    <button class="primary" id="emailCheckoutBtn" type="button">
+      Email Order for Payment Info
+    </button>
+
+    <button class="ghost" id="clearCartBtn" type="button">
+      Clear cart
+    </button>
+  </div>
+</aside>
+
+<div class="backdrop" id="backdrop" hidden></div>
+
+<!-- ================= SCRIPT ================= -->
+<script>
+const EMAIL_TO = "flores@n2cfx.com";
+const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
+
+const TIKTOK_RADIO_URL = "https://www.tiktok.com/@n2cfx";
+const TIKTOK_FLASHLIGHT_URL = "https://www.tiktok.com/@electricalflo3d";
+
+let PRODUCTS = [];
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+let currentCategory = "radio";
+
+const money = n => `$${Number(n).toFixed(2)}`;
+
+function saveCart(){
+  localStorage.setItem("cart", JSON.stringify(cart));
+  document.getElementById("cartCount").textContent =
+    Object.values(cart).reduce((a,b)=>a+b,0);
+}
+
+function addToCart(id){
+  cart[id] = (cart[id] || 0) + 1;
+  saveCart();
+  renderCart();
+}
+
+function clearCart(){
+  cart = {};
+  saveCart();
+  renderCart();
+}
+
+function getImages(p){
+  if (Array.isArray(p.images)) return p.images;
+  if (p.image) return [p.image];
+  return [];
+}
+
+function renderProducts(){
+  const grid = document.getElementById("grid");
+  const q = document.getElementById("search").value.toLowerCase();
+
+  const list = PRODUCTS.filter(p =>
+    p.category === currentCategory &&
+    (!q || p.name.toLowerCase().includes(q))
+  );
+
+  if (!list.length){
+    grid.innerHTML = `<p class="empty">No products found.</p>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const img = getImages(p)[0] || "";
+    return `
+      <article class="card">
+        <div class="thumb">
+          <img src="${img}" alt="${p.name}" loading="lazy">
+        </div>
+        <div class="cardBody">
+          <h3>${p.name}</h3>
+          <span class="price">${money(p.price)}</span>
+          <button class="primary" onclick="addToCart('${p.id}')">
+            Add to cart
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  const items = Object.entries(cart).map(([id,qty])=>{
+    const p = PRODUCTS.find(x=>x.id===id);
+    if(!p) return null;
+    return {p,qty,line:p.price*qty};
+  }).filter(Boolean);
+
+  if(!items.length){
+    box.innerHTML = "<p class='empty'>Your cart is empty.</p>";
+    document.getElementById("subtotal").textContent = money(0);
+    return;
+  }
+
+  box.innerHTML = items.map(i=>`
+    <div class="cartRow">
+      <strong>${i.p.name}</strong> × ${i.qty}
+      <div class="muted">${money(i.line)}</div>
+    </div>
+  `).join("");
+
+  document.getElementById("subtotal").textContent =
+    money(items.reduce((a,b)=>a+b.line,0));
+}
+
+function setCategory(cat){
+  currentCategory = cat;
+
+  document.querySelectorAll(".catBtn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.cat === cat);
+  });
+
+  const tiktok = document.getElementById("tiktokLink");
+  if (tiktok){
+    const isFlash = cat === "flashlight";
+    tiktok.href = isFlash ? TIKTOK_FLASHLIGHT_URL : TIKTOK_RADIO_URL;
+    tiktok.textContent = isFlash ? "Flashlight TikTok" : "Radio TikTok";
+  }
+
+  renderProducts();
+}
+
+function openDrawer(){
+  drawer.classList.add("open");
+  backdrop.hidden = false;
+  renderCart();
+}
+
+function closeDrawer(){
+  drawer.classList.remove("open");
+  backdrop.hidden = true;
+}
+
+async function init(){
+  PRODUCTS = await (await fetch("products.json",{cache:"no-store"})).json();
+
+  document.getElementById("search").oninput = renderProducts;
+  document.getElementById("openCartBtn").onclick = openDrawer;
+  document.getElementById("closeCartBtn").onclick = closeDrawer;
+  document.getElementById("backdrop").onclick = closeDrawer;
+  document.getElementById("clearCartBtn").onclick = clearCart;
+
+  document.querySelectorAll(".catBtn").forEach(btn=>{
+    btn.onclick = () => setCategory(btn.dataset.cat);
+  });
+
+  saveCart();
+  setCategory("radio");
+}
+
+init();
+</script>
+
 </body>
 </html>
