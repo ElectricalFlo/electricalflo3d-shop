@@ -74,5 +74,23 @@
       "images/Tail_Ring_DC1-2_Purple.JPG",
       "images/Tail_Ring_DC1-2_Purple_Model.jpg"
     ]
+  },
+]
+"id": "GITD Single Emitter Gasket for Okluma Flashlights",
+    "category": "flashlight",
+    "name": "GITD Single Emitter Gasket for Okluma Flashlights",
+    "price": 35,
+    "note": "Choose model and color from the options.",
+    "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
+    "variants": {
+      "models": ["DC0", "DC1", "DC2"]
+      "colors": ["Green", "Blue", "Red-Orange"]
+    },
+    "images": [
+      "images/DC0-single-emitter.JPG",
+      "images/DC0-single-emitter-model.jpg",
+      "images/DC1-DC2-Single-Emitter-2.JPG",
+      "images/DC1-DC2-Single-Emitter.jpg"
+       ]
   }
 ]
