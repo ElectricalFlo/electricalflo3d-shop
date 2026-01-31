@@ -92,5 +92,21 @@
       "images/DC1-DC2-Single-Emitter-2.JPG",
       "images/DC1-DC2-Single-Emitter.jpg"
     ]
-  }
+  },
+  {
+  "id": "okluma-gitd-triple-emitter-gasket-dc1-dc2",
+  "category": "flashlight",
+  "name": "GITD Triple Emitter Gasket for DC1 & DC2",
+  "price": 35,
+  "note": "Choose model and color from the options.",
+  "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
+  "variants": {
+    "models": ["DC1", "DC2"],
+    "colors": ["Green", "Blue", "Red-Orange"]
+  },
+  "images": [
+    "images/DC2-triple-emitter-model.jpg",
+    "images/DC2-triple-emitter.JPG"
+  ]
+}
 ]
