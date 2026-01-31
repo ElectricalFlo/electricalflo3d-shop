@@ -43,5 +43,21 @@
     "images": [
       "images/GITD_Orings.jpg"
     ]
-  }
+  },
 ]
+{
+  "id": "okluma-gitd-optic-holder-dc0",
+  "category": "flashlight",
+  "name": "GITD Optic Holder for Okluma DC0",
+  "price": 35,
+  "note": "Glow-in-the-dark optic holder for Okluma DC0 flashlights. Choose color from the dropdown.",
+  "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
+  "variants": {
+    "models": ["DC0"],
+    "colors": ["Green", "Blue", "Red-Orange"]
+  },
+  "images": [
+    "images/Tri_DC0_OpticHolder.jpg"
+  ]
+}
+
