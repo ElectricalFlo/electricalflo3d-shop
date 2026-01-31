@@ -3,46 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>ElectricalFlo 3D — Shop</title>
-  <meta name="description" content="ElectricalFlo 3D — Custom 3D Printed Gear. Add items to cart, then email your order for PayPal, Venmo, or Zelle payment info." />
-
-  <link rel="canonical" href="https://electricalflo.com/" />
-
-  <!-- OpenGraph / Link previews -->
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="ElectricalFlo 3D — Shop" />
-  <meta property="og:description" content="Custom 3D Printed Gear. Add items to cart, then email your order for payment info." />
-  <meta property="og:url" content="https://electricalflo.com/" />
-  <meta property="og:image" content="https://electricalflo.com/images/social-preview.jpg" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="ElectricalFlo 3D — Shop" />
-  <meta name="twitter:description" content="Custom 3D Printed Gear. Add items to cart, then email your order for payment info." />
-  <meta name="twitter:image" content="https://electricalflo.com/images/social-preview.jpg" />
-
-  <link rel="stylesheet" href="style.css?v=20260130-7" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
+<!-- ================= HEADER ================= -->
 <header class="header">
   <div class="brandWrap">
     <img src="images/logo.png" alt="ElectricalFlo 3D Logo" class="logo" />
     <div class="brand">
       <h1>ElectricalFlo 3D</h1>
-      <p>Custom 3D Printed Gear</p>
+      <p>3D Printed Gear</p>
     </div>
   </div>
 
   <div class="headerRightWrap">
     <nav class="catNav" aria-label="Shop categories">
-      <button class="catBtn active" id="catRadioBtn" type="button" data-cat="radio" aria-pressed="true">
-        Radio Prints
-      </button>
-      <button class="catBtn" id="catFlashBtn" type="button" data-cat="flashlight" aria-pressed="false">
-        Flashlight Prints
-      </button>
+      <button class="catBtn active" data-cat="radio">Radio Prints</button>
+      <button class="catBtn" data-cat="flashlight">Flashlight Prints</button>
     </nav>
+
+    <a class="tiktokBtn" id="tiktokLink"
+       href="https://www.tiktok.com/@n2cfx"
+       target="_blank" rel="noopener">
+      Radio TikTok
+    </a>
 
     <button class="cartBtn" id="openCartBtn" type="button">
       Cart <span class="pill" id="cartCount">0</span>
@@ -50,21 +36,16 @@
   </div>
 </header>
 
+<!-- ================= MAIN ================= -->
 <main class="wrap">
   <section class="toolbar">
     <input id="search" placeholder="Search items…" />
-    <select id="sort">
-      <option value="featured">Sort: Featured</option>
-      <option value="price_asc">Price: Low → High</option>
-      <option value="price_desc">Price: High → Low</option>
-      <option value="name_asc">Name: A → Z</option>
-    </select>
   </section>
 
   <section class="grid" id="grid"></section>
 </main>
 
-<!-- CART DRAWER -->
+<!-- ================= CART DRAWER ================= -->
 <aside class="drawer" id="drawer" aria-hidden="true">
   <div class="drawerHeader">
     <h2>Your Cart</h2>
@@ -81,199 +62,57 @@
 
     <label class="field">
       <span>Your name (optional)</span>
-      <input id="customerName" placeholder="Your name" />
+      <input id="customerName" />
     </label>
 
     <label class="field">
       <span>Notes (colors, callsign, etc.)</span>
-      <textarea id="orderNotes" rows="3" placeholder="Example: callsign N2CFX, Tailring Color Green…"></textarea>
+      <textarea id="orderNotes" rows="3"></textarea>
     </label>
 
     <label class="field">
       <span>Preferred payment method</span>
       <select id="paymentMethod">
-        <option value="PayPal">PayPal</option>
-        <option value="Venmo">Venmo</option>
-        <option value="Zelle">Zelle</option>
+        <option>PayPal</option>
+        <option>Venmo</option>
+        <option>Zelle</option>
       </select>
-    </label>
-
-    <label class="field checkbox">
-      <input type="checkbox" id="includeShippingNow" />
-      <span>Include shipping address now (optional)</span>
-    </label>
-
-    <label class="field" id="shippingWrap" style="display:none">
-      <span>Shipping address</span>
-      <textarea id="shippingAddress" rows="3" placeholder="Street, City, State, ZIP"></textarea>
     </label>
 
     <button class="primary" id="emailCheckoutBtn" type="button">
       Email Order for Payment Info
     </button>
 
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button class="ghost" id="copyOrderBtn" type="button">Copy order details</button>
-    </div>
-
     <button class="ghost" id="clearCartBtn" type="button">
       Clear cart
     </button>
-
-    <p class="fine" style="margin-top:6px;">
-      No payment is taken on this site. You’ll email the order and receive payment & shipping info.
-    </p>
   </div>
 </aside>
 
 <div class="backdrop" id="backdrop" hidden></div>
 
+<!-- ================= SCRIPT ================= -->
 <script>
-/* ================= CONFIG ================= */
 const EMAIL_TO = "flores@n2cfx.com";
 const EMAIL_SUBJECT_PREFIX = "ElectricalFlo 3D Order";
 
-/* ================= STATE ================= */
+const TIKTOK_RADIO_URL = "https://www.tiktok.com/@n2cfx";
+const TIKTOK_FLASHLIGHT_URL = "https://www.tiktok.com/@electricalflo3d";
+
 let PRODUCTS = [];
-let cart = JSON.parse(localStorage.getItem("cart") || "{}"); // { productId: qty }
-let variantSelections = JSON.parse(localStorage.getItem("ef_variants") || "{}"); // { productId: {model,color} }
+let cart = JSON.parse(localStorage.getItem("cart") || "{}");
+let currentCategory = "radio";
 
-let currentCategory = "radio"; // default
-let modalState = null; // {productId, imgs, idx, title}
-
-/* ================= HELPERS ================= */
-const money = n => `$${Number(n || 0).toFixed(2)}`;
-
-function getProductImages(p){
-  if (Array.isArray(p.images) && p.images.length) return p.images;
-  if (p.image) return [p.image];
-  return [];
-}
-
-function cartCount(){
-  return Object.values(cart).reduce((a,b)=>a+Number(b||0),0);
-}
+const money = n => `$${Number(n).toFixed(2)}`;
 
 function saveCart(){
   localStorage.setItem("cart", JSON.stringify(cart));
-  document.getElementById("cartCount").textContent = cartCount();
+  document.getElementById("cartCount").textContent =
+    Object.values(cart).reduce((a,b)=>a+b,0);
 }
 
-function saveVariants(){
-  localStorage.setItem("ef_variants", JSON.stringify(variantSelections));
-}
-
-function hasVariants(p){
-  return !!(p && p.variants && (Array.isArray(p.variants.models) || Array.isArray(p.variants.colors)));
-}
-
-function ensureVariantDefaults(productId){
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!p || !hasVariants(p)) return;
-
-  const models = Array.isArray(p.variants.models) ? p.variants.models : [];
-  const colors = Array.isArray(p.variants.colors) ? p.variants.colors : [];
-
-  if (!variantSelections[productId]) variantSelections[productId] = {};
-
-  if (models.length && !variantSelections[productId].model) variantSelections[productId].model = models[0];
-  if (colors.length && !variantSelections[productId].color) variantSelections[productId].color = colors[0];
-
-  saveVariants();
-}
-
-/* ================= ORDER NUMBER ================= */
-/* Format: EF-YYYYMMDD-##### */
-function pad2(n){ return String(n).padStart(2,"0"); }
-
-function generateOrderId(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = pad2(d.getMonth()+1);
-  const day = pad2(d.getDate());
-  const rand = Math.floor(10000 + Math.random()*90000); // 5 digits
-  return `EF-${y}${m}${day}-${rand}`;
-}
-
-function getOrCreateOrderId(){
-  let id = localStorage.getItem("ef_order_id");
-  if (!id) {
-    id = generateOrderId();
-    localStorage.setItem("ef_order_id", id);
-  }
-  return id;
-}
-
-function resetOrderId(){
-  localStorage.removeItem("ef_order_id");
-}
-
-/* ================= CATEGORY (shareable links) ================= */
-function setCategory(cat, push=true){
-  const normalized = (cat === "flashlight") ? "flashlight" : "radio";
-  currentCategory = normalized;
-
-  const radioBtn = document.getElementById("catRadioBtn");
-  const flashBtn = document.getElementById("catFlashBtn");
-
-  radioBtn.classList.toggle("active", currentCategory === "radio");
-  flashBtn.classList.toggle("active", currentCategory === "flashlight");
-
-  radioBtn.setAttribute("aria-pressed", currentCategory === "radio" ? "true" : "false");
-  flashBtn.setAttribute("aria-pressed", currentCategory === "flashlight" ? "true" : "false");
-
-  if (push){
-    const url = new URL(window.location.href);
-    url.searchParams.set("cat", currentCategory);
-    history.replaceState({}, "", url.toString());
-  }
-
-  renderProducts();
-}
-
-function initCategoryFromUrl(){
-  const url = new URL(window.location.href);
-  const cat = (url.searchParams.get("cat") || "").toLowerCase();
-  setCategory(cat === "flashlight" ? "flashlight" : "radio", false);
-}
-
-/* ================= PRODUCTS FILTER/SORT ================= */
-function getFilteredSortedProducts(){
-  const q = document.getElementById("search").value.trim().toLowerCase();
-  const sort = document.getElementById("sort").value;
-
-  let list = PRODUCTS.filter(p => {
-    const cat = (p.category || "radio").toLowerCase();
-    if (cat !== currentCategory) return false;
-
-    const hay = `${p.name||""} ${p.note||""}`.toLowerCase();
-    return !q || hay.includes(q);
-  });
-
-  if (sort === "price_asc") list.sort((a,b) => (a.price||0) - (b.price||0));
-  if (sort === "price_desc") list.sort((a,b) => (b.price||0) - (a.price||0));
-  if (sort === "name_asc") list.sort((a,b) => (a.name||"").localeCompare(b.name||""));
-  return list;
-}
-
-/* ================= CART ================= */
 function addToCart(id){
-  ensureVariantDefaults(id); // if this product has variants, ensure defaults exist
   cart[id] = (cart[id] || 0) + 1;
-  saveCart();
-  renderCart();
-}
-
-function decFromCart(id){
-  if (!cart[id]) return;
-  cart[id] -= 1;
-  if (cart[id] <= 0) delete cart[id];
-  saveCart();
-  renderCart();
-}
-
-function removeFromCart(id){
-  delete cart[id];
   saveCart();
   renderCart();
 }
@@ -282,604 +121,115 @@ function clearCart(){
   cart = {};
   saveCart();
   renderCart();
-  resetOrderId();
 }
 
-/* ================= SHIPPING TOGGLE ================= */
-function wireShippingToggle(){
-  const cb = document.getElementById("includeShippingNow");
-  const wrap = document.getElementById("shippingWrap");
-  if (!cb || !wrap) return;
-  cb.addEventListener("change", () => {
-    wrap.style.display = cb.checked ? "block" : "none";
-  });
+function getImages(p){
+  if (Array.isArray(p.images)) return p.images;
+  if (p.image) return [p.image];
+  return [];
 }
 
-/* ================= ORDER TEXT ================= */
-function buildOrderItems(){
-  return Object.entries(cart).map(([id, qty]) => {
-    const p = PRODUCTS.find(x => x.id === id);
-    if (!p) return null;
-
-    const q = Number(qty || 0);
-    const line = Number(p.price || 0) * q;
-
-    const v = variantSelections[id] || {};
-    const model = v.model || "";
-    const color = v.color || "";
-
-    return { id, name: p.name, price: Number(p.price||0), qty: q, line, model, color, hasVars: hasVariants(p) };
-  }).filter(Boolean);
-}
-
-function buildEmailBody(orderId){
-  const name = (document.getElementById("customerName")?.value || "").trim();
-  const notes = (document.getElementById("orderNotes")?.value || "").trim();
-  const payment = document.getElementById("paymentMethod")?.value || "PayPal";
-
-  const includeShip = document.getElementById("includeShippingNow")?.checked;
-  const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
-
-  const items = buildOrderItems();
-  const subtotal = items.reduce((a,b)=>a+b.line,0);
-
-  const lines = [];
-  lines.push(`Order Number: ${orderId}`);
-  lines.push("");
-  lines.push("Hi! I'd like to place an order:");
-  lines.push("");
-
-  if (name) lines.push(`Name: ${name}`);
-  lines.push(`Preferred payment method: ${payment}`);
-  lines.push("");
-
-  lines.push("Items:");
-  items.forEach(i => {
-    const variantText = i.hasVars ? ` [Model: ${i.model || "—"}, Color: ${i.color || "—"}]` : "";
-    lines.push(`- ${i.name}${variantText} (x${i.qty}) — $${i.line.toFixed(2)}`);
-  });
-
-  lines.push("");
-  lines.push(`Subtotal (before shipping): $${subtotal.toFixed(2)}`);
-  lines.push("");
-
-  if (notes) {
-    lines.push("Notes / customization:");
-    lines.push(notes);
-    lines.push("");
-  }
-
-  if (includeShip && shipAddr) {
-    lines.push("Shipping address:");
-    lines.push(shipAddr);
-    lines.push("");
-  } else {
-    lines.push("Shipping address: I can provide after you reply.");
-    lines.push("");
-  }
-
-  lines.push("Please reply with the total (including shipping) and your payment details for the method I selected. Thanks!");
-  return lines.join("\n");
-}
-
-/* ================= EMAIL / COPY ================= */
-function emailCheckout(){
-  if (!Object.keys(cart).length) return;
-
-  const orderId = getOrCreateOrderId();
-  const itemCount = cartCount();
-
-  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} ${orderId} (${itemCount} item${itemCount===1?"":"s"})`);
-  const body = encodeURIComponent(buildEmailBody(orderId));
-  const mailto = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
-
-  window.location.href = mailto;
-
-  // auto-reset after action (as requested)
-  resetOrderId();
-}
-
-async function copyOrderDetails(){
-  if (!Object.keys(cart).length) return;
-
-  const orderId = getOrCreateOrderId();
-  const text = buildEmailBody(orderId);
-
-  try{
-    await navigator.clipboard.writeText(text);
-    alert("Copied! Paste it into an email/text to send your order.");
-  }catch{
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "absolute";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    alert("Copied! Paste it into an email/text to send your order.");
-  }
-
-  // auto-reset after action (as requested)
-  resetOrderId();
-}
-
-/* ================= LIGHTBOX MODAL ================= */
-function closeImageModal(){
-  const modal = document.querySelector(".imgModal");
-  if (modal) modal.remove();
-  modalState = null;
-  document.documentElement.style.overflow = "";
-  document.body.style.overflow = "";
-  window.removeEventListener("keydown", onModalKeyDown);
-}
-
-function updateModalImage(){
-  if (!modalState) return;
-  const { imgs, idx, title } = modalState;
-
-  const imgEl = document.getElementById("modalImg");
-  const counterEl = document.getElementById("modalCounter");
-  if (imgEl) imgEl.src = imgs[idx] || "";
-  if (counterEl) counterEl.textContent = `${idx+1} / ${imgs.length}`;
-
-  document.querySelectorAll(".imgModalThumb").forEach(btn => btn.classList.remove("active"));
-  const activeBtn = document.querySelector(`.imgModalThumb[data-idx="${idx}"]`);
-  if (activeBtn) activeBtn.classList.add("active");
-
-  const titleEl = document.getElementById("modalTitle");
-  if (titleEl) titleEl.textContent = title || "Image";
-}
-
-function modalPrev(){
-  if (!modalState) return;
-  modalState.idx = (modalState.idx - 1 + modalState.imgs.length) % modalState.imgs.length;
-  updateModalImage();
-}
-
-function modalNext(){
-  if (!modalState) return;
-  modalState.idx = (modalState.idx + 1) % modalState.imgs.length;
-  updateModalImage();
-}
-
-function onModalKeyDown(e){
-  if (!modalState) return;
-  if (e.key === "Escape") closeImageModal();
-  if (e.key === "ArrowLeft") modalPrev();
-  if (e.key === "ArrowRight") modalNext();
-}
-
-function openImageModal(productId, startIdx){
-  const product = PRODUCTS.find(p => p.id === productId);
-  if (!product) return;
-
-  const imgs = getProductImages(product);
-  if (!imgs.length) return;
-
-  modalState = {
-    productId,
-    imgs,
-    idx: Math.max(0, Math.min(Number(startIdx)||0, imgs.length-1)),
-    title: product.name || "Image"
-  };
-
-  document.documentElement.style.overflow = "hidden";
-  document.body.style.overflow = "hidden";
-
-  const modal = document.createElement("div");
-  modal.className = "imgModal";
-  modal.innerHTML = `
-    <div class="imgModalBackdrop" data-action="closeModal"></div>
-    <div class="imgModalPanel" role="dialog" aria-modal="true" aria-label="Image viewer">
-      <div class="imgModalHeader">
-        <div class="imgModalTitle" id="modalTitle"></div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <span id="modalCounter" style="color:var(--muted);font-size:12px;"></span>
-          <button class="iconBtn" type="button" data-action="closeModal">✕</button>
-        </div>
-      </div>
-
-      <div class="imgModalMain" id="modalMain">
-        <button class="imgNavBtn" type="button" data-action="prev" aria-label="Previous image">‹</button>
-        <img id="modalImg" alt="Product image" />
-        <button class="imgNavBtn" type="button" data-action="next" aria-label="Next image">›</button>
-      </div>
-
-      <div class="imgModalThumbs">
-        ${imgs.map((src, i) => `
-          <button class="imgModalThumb ${i===modalState.idx ? "active" : ""}" type="button" data-action="modalThumb" data-idx="${i}" aria-label="View image ${i+1}">
-            <img src="${src}" alt="Thumbnail ${i+1}" loading="lazy">
-          </button>
-        `).join("")}
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  modal.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-action]");
-    if (!btn) return;
-    const act = btn.getAttribute("data-action");
-
-    if (act === "closeModal") closeImageModal();
-    if (act === "prev") modalPrev();
-    if (act === "next") modalNext();
-    if (act === "modalThumb") {
-      modalState.idx = Number(btn.getAttribute("data-idx")) || 0;
-      updateModalImage();
-    }
-  });
-
-  // swipe (mobile)
-  const main = document.getElementById("modalMain");
-  let sx = 0, sy = 0;
-  const THRESH = 50;
-
-  main.addEventListener("touchstart", (e) => {
-    const t = e.touches[0];
-    sx = t.clientX; sy = t.clientY;
-  }, { passive: true });
-
-  main.addEventListener("touchend", (e) => {
-    const t = e.changedTouches[0];
-    const dx = t.clientX - sx;
-    const dy = t.clientY - sy;
-
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > THRESH) {
-      if (dx < 0) modalNext();
-      else modalPrev();
-    }
-  }, { passive: true });
-
-  window.addEventListener("keydown", onModalKeyDown);
-  updateModalImage();
-}
-
-/* ================= PRODUCT CARD HTML ================= */
-function variantSelectorsHTML(p){
-  if (!hasVariants(p)) return "";
-
-  ensureVariantDefaults(p.id);
-
-  const sel = variantSelections[p.id] || {};
-  const models = Array.isArray(p.variants.models) ? p.variants.models : [];
-  const colors = Array.isArray(p.variants.colors) ? p.variants.colors : [];
-
-  const modelHTML = models.length ? `
-    <label class="vField">
-      <span>Model</span>
-      <select class="vSelect" data-action="setVariant" data-pid="${p.id}" data-key="model">
-        ${models.map(m => `<option value="${m}" ${sel.model===m ? "selected" : ""}>${m}</option>`).join("")}
-      </select>
-    </label>
-  ` : "";
-
-  const colorHTML = colors.length ? `
-    <label class="vField">
-      <span>Color</span>
-      <select class="vSelect" data-action="setVariant" data-pid="${p.id}" data-key="color">
-        ${colors.map(c => `<option value="${c}" ${sel.color===c ? "selected" : ""}>${c}</option>`).join("")}
-      </select>
-    </label>
-  ` : "";
-
-  return `
-    <div class="vRow">
-      ${modelHTML}
-      ${colorHTML}
-    </div>
-  `;
-}
-
-function productCardHTML(p){
-  const imgs = getProductImages(p);
-  const first = imgs[0] || "";
-
-  const thumbs = imgs.length > 1 ? `
-    <div class="thumbStrip" aria-label="More images">
-      ${imgs.map((src, i) => `
-        <button class="thumbBtn ${i===0 ? "active" : ""}"
-          type="button"
-          data-action="thumb"
-          data-pid="${p.id}"
-          data-idx="${i}"
-          aria-label="Show image ${i+1}">
-          <img src="${src}" alt="${p.name || "Thumbnail"}" loading="lazy">
-        </button>
-      `).join("")}
-    </div>
-  ` : "";
-
-  const badgesHTML = (Array.isArray(p.badges) && p.badges.length) ? `
-    <div class="badges">
-      ${p.badges.map(b => `
-        <span class="badge ${/made to order|custom|glow/i.test(b) ? "badge--accent" : ""}">
-          ${b}
-        </span>
-      `).join("")}
-    </div>
-  ` : "";
-
-  return `
-    <article class="card">
-      <div class="thumb">
-        <img
-          src="${first}"
-          alt="${p.name || "Item"}"
-          id="img-${p.id}"
-          data-action="openModal"
-          data-pid="${p.id}"
-          data-idx="0"
-          loading="lazy"
-          onerror="this.style.display='none'"
-          style="cursor: zoom-in;"
-        >
-      </div>
-
-      ${thumbs}
-
-      <div class="cardBody">
-        <h3>${p.name || "Untitled item"}</h3>
-        ${p.note ? `<div class="note">${p.note}</div>` : ""}
-        <span class="price">${money(p.price)}</span>
-
-        ${variantSelectorsHTML(p)}
-        ${badgesHTML}
-
-        <button class="primary" type="button" data-action="addToCart" data-pid="${p.id}">
-          Add to cart
-        </button>
-      </div>
-    </article>
-  `;
-}
-
-/* ================= RENDER PRODUCTS ================= */
 function renderProducts(){
   const grid = document.getElementById("grid");
-  const list = getFilteredSortedProducts();
+  const q = document.getElementById("search").value.toLowerCase();
 
-  if (!Array.isArray(list) || list.length === 0){
-    grid.innerHTML = `
-      <article class="card">
-        <div class="cardBody">
-          <h3>No items found</h3>
-          <p class="empty">
-            ${currentCategory === "flashlight" ? "No flashlight items yet." : "No radio items yet."}
-          </p>
-        </div>
-      </article>
-    `;
+  const list = PRODUCTS.filter(p =>
+    p.category === currentCategory &&
+    (!q || p.name.toLowerCase().includes(q))
+  );
+
+  if (!list.length){
+    grid.innerHTML = `<p class="empty">No products found.</p>`;
     return;
   }
 
-  grid.innerHTML = list.map(productCardHTML).join("");
-}
-
-/* ================= GRID EVENT DELEGATION ================= */
-function wireGridHandlers(){
-  const grid = document.getElementById("grid");
-
-  grid.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-action]");
-    if (!el) return;
-
-    const action = el.getAttribute("data-action");
-    const pid = el.getAttribute("data-pid");
-
-    if (action === "addToCart") { addToCart(pid); return; }
-
-    if (action === "thumb") {
-      const idx = Number(el.getAttribute("data-idx")) || 0;
-      const product = PRODUCTS.find(p => p.id === pid);
-      if (!product) return;
-
-      const imgs = getProductImages(product);
-      const imgEl = document.getElementById(`img-${pid}`);
-      if (imgEl && imgs[idx]) {
-        imgEl.src = imgs[idx];
-        imgEl.setAttribute("data-idx", String(idx));
-      }
-
-      const strip = el.parentElement;
-      strip.querySelectorAll(".thumbBtn").forEach(b => b.classList.remove("active"));
-      el.classList.add("active");
-      return;
-    }
-
-    if (action === "openModal") {
-      const idx = Number(el.getAttribute("data-idx")) || 0;
-      openImageModal(pid, idx);
-      return;
-    }
-  });
-
-  // Handle dropdown changes
-  grid.addEventListener("change", (e) => {
-    const el = e.target.closest("[data-action='setVariant']");
-    if (!el) return;
-
-    const pid = el.getAttribute("data-pid");
-    const key = el.getAttribute("data-key");
-    const val = el.value;
-
-    if (!variantSelections[pid]) variantSelections[pid] = {};
-    variantSelections[pid][key] = val;
-    saveVariants();
-
-    // Nothing else required — email/cart will read latest values
-  });
-}
-
-/* ================= CART RENDER ================= */
-function cartVariantControlsHTML(p){
-  if (!hasVariants(p)) return "";
-
-  ensureVariantDefaults(p.id);
-
-  const sel = variantSelections[p.id] || {};
-  const models = Array.isArray(p.variants.models) ? p.variants.models : [];
-  const colors = Array.isArray(p.variants.colors) ? p.variants.colors : [];
-
-  return `
-    <div class="vRow" style="margin-top:10px;">
-      ${models.length ? `
-        <label class="vField">
-          <span>Model</span>
-          <select class="vSelect" data-action="cartSetVariant" data-pid="${p.id}" data-key="model">
-            ${models.map(m => `<option value="${m}" ${sel.model===m ? "selected" : ""}>${m}</option>`).join("")}
-          </select>
-        </label>
-      ` : ""}
-
-      ${colors.length ? `
-        <label class="vField">
-          <span>Color</span>
-          <select class="vSelect" data-action="cartSetVariant" data-pid="${p.id}" data-key="color">
-            ${colors.map(c => `<option value="${c}" ${sel.color===c ? "selected" : ""}>${c}</option>`).join("")}
-          </select>
-        </label>
-      ` : ""}
-    </div>
-  `;
+  grid.innerHTML = list.map(p => {
+    const img = getImages(p)[0] || "";
+    return `
+      <article class="card">
+        <div class="thumb">
+          <img src="${img}" alt="${p.name}" loading="lazy">
+        </div>
+        <div class="cardBody">
+          <h3>${p.name}</h3>
+          <span class="price">${money(p.price)}</span>
+          <button class="primary" onclick="addToCart('${p.id}')">
+            Add to cart
+          </button>
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
 function renderCart(){
   const box = document.getElementById("cartItems");
-
-  const items = Object.entries(cart).map(([id, qty]) => {
-    const p = PRODUCTS.find(x => x.id === id);
-    if (!p) return null;
-    const q = Number(qty||0);
-    const line = Number(p.price||0) * q;
-    return { id, p, qty:q, line };
+  const items = Object.entries(cart).map(([id,qty])=>{
+    const p = PRODUCTS.find(x=>x.id===id);
+    if(!p) return null;
+    return {p,qty,line:p.price*qty};
   }).filter(Boolean);
 
-  if (!items.length){
-    box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
+  if(!items.length){
+    box.innerHTML = "<p class='empty'>Your cart is empty.</p>";
     document.getElementById("subtotal").textContent = money(0);
     return;
   }
 
-  box.innerHTML = items.map(i => `
+  box.innerHTML = items.map(i=>`
     <div class="cartRow">
-      <div class="cartInfo">
-        <strong>${i.p.name}</strong>
-        <div class="muted">${money(i.p.price)} each • Line: ${money(i.line)}</div>
-
-        ${cartVariantControlsHTML(i.p)}
-
-        <div class="qty" style="display:flex;gap:10px;align-items:center;margin-top:10px;">
-          <button class="iconBtn" type="button" data-action="dec" data-pid="${i.id}">−</button>
-          <span>${i.qty}</span>
-          <button class="iconBtn" type="button" data-action="inc" data-pid="${i.id}">+</button>
-          <button class="link" type="button" data-action="remove" data-pid="${i.id}" style="margin-left:auto;">Remove</button>
-        </div>
-      </div>
+      <strong>${i.p.name}</strong> × ${i.qty}
+      <div class="muted">${money(i.line)}</div>
     </div>
   `).join("");
 
-  const subtotal = items.reduce((a,b)=>a+b.line,0);
-  document.getElementById("subtotal").textContent = money(subtotal);
+  document.getElementById("subtotal").textContent =
+    money(items.reduce((a,b)=>a+b.line,0));
 }
 
-function wireCartHandlers(){
-  const cartBox = document.getElementById("cartItems");
+function setCategory(cat){
+  currentCategory = cat;
 
-  cartBox.addEventListener("click", (e) => {
-    const el = e.target.closest("[data-action]");
-    if (!el) return;
-
-    const action = el.getAttribute("data-action");
-    const pid = el.getAttribute("data-pid");
-
-    if (action === "inc") addToCart(pid);
-    if (action === "dec") decFromCart(pid);
-    if (action === "remove") removeFromCart(pid);
+  document.querySelectorAll(".catBtn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.cat === cat);
   });
 
-  cartBox.addEventListener("change", (e) => {
-    const el = e.target.closest("[data-action='cartSetVariant']");
-    if (!el) return;
+  const tiktok = document.getElementById("tiktokLink");
+  if (tiktok){
+    const isFlash = cat === "flashlight";
+    tiktok.href = isFlash ? TIKTOK_FLASHLIGHT_URL : TIKTOK_RADIO_URL;
+    tiktok.textContent = isFlash ? "Flashlight TikTok" : "Radio TikTok";
+  }
 
-    const pid = el.getAttribute("data-pid");
-    const key = el.getAttribute("data-key");
-    const val = el.value;
-
-    if (!variantSelections[pid]) variantSelections[pid] = {};
-    variantSelections[pid][key] = val;
-    saveVariants();
-  });
+  renderProducts();
 }
 
-/* ================= DRAWER ================= */
 function openDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
   drawer.classList.add("open");
-  drawer.setAttribute("aria-hidden","false");
   backdrop.hidden = false;
   renderCart();
 }
 
 function closeDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
   drawer.classList.remove("open");
-  drawer.setAttribute("aria-hidden","true");
   backdrop.hidden = true;
 }
 
-/* ================= INIT ================= */
 async function init(){
-  try{
-    const res = await fetch("./products.json", { cache: "no-store" });
-    if (!res.ok) throw new Error(`Couldn't load products.json (${res.status})`);
-    const txt = await res.text();
-    PRODUCTS = JSON.parse(txt);
+  PRODUCTS = await (await fetch("products.json",{cache:"no-store"})).json();
 
-    if (!Array.isArray(PRODUCTS)) throw new Error("products.json must be an array of products.");
+  document.getElementById("search").oninput = renderProducts;
+  document.getElementById("openCartBtn").onclick = openDrawer;
+  document.getElementById("closeCartBtn").onclick = closeDrawer;
+  document.getElementById("backdrop").onclick = closeDrawer;
+  document.getElementById("clearCartBtn").onclick = clearCart;
 
-    // ensure variant defaults exist for any variant products
-    PRODUCTS.forEach(p => { if (p && p.id) ensureVariantDefaults(p.id); });
+  document.querySelectorAll(".catBtn").forEach(btn=>{
+    btn.onclick = () => setCategory(btn.dataset.cat);
+  });
 
-    initCategoryFromUrl();
-
-    document.getElementById("catRadioBtn").addEventListener("click", () => setCategory("radio", true));
-    document.getElementById("catFlashBtn").addEventListener("click", () => setCategory("flashlight", true));
-
-    document.getElementById("openCartBtn").addEventListener("click", openDrawer);
-    document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
-    document.getElementById("backdrop").addEventListener("click", closeDrawer);
-
-    document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
-    document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
-    document.getElementById("clearCartBtn").addEventListener("click", clearCart);
-
-    document.getElementById("search").addEventListener("input", renderProducts);
-    document.getElementById("sort").addEventListener("change", renderProducts);
-
-    wireShippingToggle();
-    wireGridHandlers();
-    wireCartHandlers();
-
-    saveCart();
-    renderProducts();
-    renderCart();
-  }catch(err){
-    console.error(err);
-    const grid = document.getElementById("grid");
-    grid.innerHTML = `
-      <article class="card">
-        <div class="cardBody">
-          <h3>Couldn’t load products</h3>
-          <p class="empty">${err.message}</p>
-          <p class="empty">Check: products.json exists and is valid JSON.</p>
-        </div>
-      </article>
-    `;
-  }
+  saveCart();
+  setCategory("radio");
 }
 
 init();
