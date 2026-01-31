@@ -470,4 +470,27 @@ select{ max-width:220px }
     font-size:13px;
   }
 }
+/* ================= VARIANT SELECTORS (Model / Color) ================= */
+
+.vRow{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.vField{
+  flex:1 1 140px;
+}
+
+.vField span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+.vSelect{
+  width:100%;
+}
 
