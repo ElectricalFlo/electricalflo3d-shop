@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ElectricalFlo — Flashlight Prints</title>
+  <link rel="stylesheet" href="../style.css" />
+
+  <!-- OpenGraph (link previews) -->
+  <meta property="og:title" content="ElectricalFlo — Flashlight Prints" />
+  <meta property="og:description" content="GITD flashlight accessories by ElectricalFlo." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://electricalflo.com/flashlight/" />
+  <!-- Optional: set this to a real image you upload -->
+  <meta property="og:image" content="https://electricalflo.com/images/og-flashlight.jpg" />
+</head>
+<body>
+
+<header class="header">
+  <div class="brandWrap">
+    <img src="../images/logo.png" alt="ElectricalFlo Logo" class="logo" />
+    <div class="brand">
+      <h1>ElectricalFlo</h1>
+      <p>3D Printed Gear</p>
+    </div>
+  </div>
+
+  <div class="headerRightWrap">
+    <nav class="catNav" aria-label="Shop categories">
+      <button class="catBtn" data-cat="radio" type="button">Radio Prints</button>
+      <button class="catBtn active" data-cat="flashlight" type="button">Flashlight Prints</button>
+    </nav>
+
+    <a class="tiktokBtn" id="tiktokLink" href="https://www.tiktok.com/@electricalflo3d" target="_blank" rel="noopener">
+      Flashlight TikTok
+    </a>
+
+    <button class="cartBtn" id="openCartBtn" type="button">
+      Cart <span class="pill" id="cartCount">0</span>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="toolbar">
+    <input id="search" placeholder="Search items…" />
+  </section>
+
+  <section class="grid" id="grid"></section>
+</main>
+
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawerHeader">
+    <h2>Your Cart</h2>
+    <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
+  </div>
+
+  <div class="drawerBody" id="cartItems"></div>
+
+  <div class="drawerFooter">
+    <div class="totalRow">
+      <span>Subtotal</span>
+      <strong id="subtotal">$0.00</strong>
+    </div>
+
+    <label class="field">
+      <span>Your name (optional)</span>
+      <input id="customerName" />
+    </label>
+
+    <label class="field">
+      <span>Notes (colors, callsign, etc.)</span>
+      <textarea id="orderNotes" rows="3"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Preferred payment method</span>
+      <select id="paymentMethod">
+        <option>PayPal</option>
+        <option>Venmo</option>
+        <option>Zelle</option>
+      </select>
+    </label>
+
+    <button class="primary" id="emailCheckoutBtn" type="button">Email Order for Payment Info</button>
+    <button class="ghost" id="copyOrderBtn" type="button">Copy order details</button>
+    <button class="ghost" id="clearCartBtn" type="button">Clear cart</button>
+  </div>
+</aside>
+
+<div class="backdrop" id="backdrop" hidden></div>
+
+<script>
+/* ================= CONFIG ================= */
+const DEFAULT_CATEGORY = "flashlight";
+
+const EMAIL_TO = "flores@n2cfx.com";
+const EMAIL_SUBJECT_PREFIX = "ElectricalFlo Order";
+
+const TIKTOK_RADIO_URL = "https://www.tiktok.com/@n2cfx";
+const TIKTOK_FLASHLIGHT_URL = "https://www.tiktok.com/@electricalflo3d";
+
+/* ================= STATE ================= */
+let PRODUCTS = [];
+let currentCategory = DEFAULT_CATEGORY;
+
+// Cart v2: array of line items so variants can be saved per item
+// [{ id, qty, sel: { model, color } }]
+let cart = JSON.parse(localStorage.getItem("cart_v2") || "null");
+
+// Migrate old cart if needed (old format: { productId: qty })
+if (!Array.isArray(cart)) {
+  const old = JSON.parse(localStorage.getItem("cart") || "{}");
+  cart = Object.entries(old).map(([id, qty]) => ({ id, qty: Number(qty) || 1, sel: {} }));
+  localStorage.setItem("cart_v2", JSON.stringify(cart));
+}
+
+/* ================= HELPERS ================= */
+const money = n => `$${Number(n || 0).toFixed(2)}`;
+
+function getProduct(id){ return PRODUCTS.find(p => p.id === id); }
+
+function getImages(p){
+  if (Array.isArray(p.images) && p.images.length) return p.images;
+  if (p.image) return [p.image];
+  return [];
+}
+
+function getVariantOptions(p){
+  const v = p?.variants || {};
+  const models = Array.isArray(v.models) ? v.models : [];
+  const colors = Array.isArray(v.colors) ? v.colors : [];
+  return { models, colors };
+}
+
+function defaultSelection(p){
+  const { models, colors } = getVariantOptions(p);
+  const sel = {};
+  if (models.length) sel.model = models[0];
+  if (colors.length) sel.color = colors[0];
+  return sel;
+}
+
+function lineKey(line){
+  const m = line.sel?.model ? `m:${line.sel.model}` : "";
+  const c = line.sel?.color ? `c:${line.sel.color}` : "";
+  return `${line.id}|${m}|${c}`;
+}
+
+function normalizeCart(){
+  const map = new Map();
+  for (const line of cart){
+    const key = lineKey(line);
+    const prev = map.get(key);
+    if (prev) prev.qty += Number(line.qty) || 1;
+    else map.set(key, { ...line, qty: Number(line.qty) || 1 });
+  }
+  cart = Array.from(map.values()).filter(x => x.qty > 0);
+}
+
+function saveCart(){
+  normalizeCart();
+  localStorage.setItem("cart_v2", JSON.stringify(cart));
+  document.getElementById("cartCount").textContent = cart.reduce((a,b)=>a+(Number(b.qty)||0),0);
+}
+
+/* ================= PRODUCTS ================= */
+function renderProducts(){
+  const grid = document.getElementById("grid");
+  const q = document.getElementById("search").value.trim().toLowerCase();
+
+  const list = PRODUCTS.filter(p => {
+    if (p.category !== currentCategory) return false;
+    if (!q) return true;
+    const blob = `${p.name||""} ${p.note||""}`.toLowerCase();
+    return blob.includes(q);
+  });
+
+  if (!list.length){
+    grid.innerHTML = `<p class="empty">No products found.</p>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const firstImg = getImages(p)[0] || "";
+    return `
+      <article class="card">
+        <div class="thumb">
+          <img src="${firstImg}" alt="${p.name||"Item"}" loading="lazy" onerror="this.style.display='none'">
+        </div>
+        <div class="cardBody">
+          <h3>${p.name||"Untitled item"}</h3>
+          <div class="meta">
+            <span class="price">${money(p.price)}</span>
+            <span class="note">${p.note||""}</span>
+          </div>
+          <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+/* ================= CART ================= */
+function addToCart(productId){
+  const p = getProduct(productId);
+  if (!p) return;
+
+  cart.push({ id: productId, qty: 1, sel: defaultSelection(p) });
+  saveCart();
+  renderCart();
+}
+
+function changeQty(idx, delta){
+  cart[idx].qty = (Number(cart[idx].qty)||1) + delta;
+  if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  saveCart();
+  renderCart();
+}
+
+function removeLine(idx){
+  cart.splice(idx, 1);
+  saveCart();
+  renderCart();
+}
+
+function clearCart(){
+  cart = [];
+  saveCart();
+  renderCart();
+}
+
+function updateSelection(idx, field, value){
+  cart[idx].sel = cart[idx].sel || {};
+  cart[idx].sel[field] = value;
+  saveCart();
+  renderCart();
+}
+
+function renderCart(){
+  const box = document.getElementById("cartItems");
+  if (!cart.length){
+    box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
+    document.getElementById("subtotal").textContent = money(0);
+    return;
+  }
+
+  let subtotal = 0;
+
+  box.innerHTML = cart.map((line, idx) => {
+    const p = getProduct(line.id);
+    if (!p) return "";
+    const { models, colors } = getVariantOptions(p);
+
+    const qty = Number(line.qty)||1;
+    const lineTotal = (Number(p.price)||0) * qty;
+    subtotal += lineTotal;
+
+    const modelSelect = models.length ? `
+      <label class="field" style="margin-top:10px;">
+        <span>Model</span>
+        <select onchange="updateSelection(${idx}, 'model', this.value)">
+          ${models.map(m => `<option ${line.sel?.model===m?"selected":""}>${m}</option>`).join("")}
+        </select>
+      </label>
+    ` : "";
+
+    const colorSelect = colors.length ? `
+      <label class="field" style="margin-top:10px;">
+        <span>Color</span>
+        <select onchange="updateSelection(${idx}, 'color', this.value)">
+          ${colors.map(c => `<option ${line.sel?.color===c?"selected":""}>${c}</option>`).join("")}
+        </select>
+      </label>
+    ` : "";
+
+    const selText = [
+      line.sel?.model ? `Model: ${line.sel.model}` : "",
+      line.sel?.color ? `Color: ${line.sel.color}` : ""
+    ].filter(Boolean).join(" • ");
+
+    return `
+      <div class="cartRow">
+        <div class="cartInfo">
+          <strong>${p.name}</strong>
+          <div class="muted">${selText || ""}</div>
+          <div class="muted">${money(p.price)} each • Line: ${money(lineTotal)}</div>
+        </div>
+
+        ${modelSelect}
+        ${colorSelect}
+
+        <div class="qty">
+          <button class="iconBtn" type="button" onclick="changeQty(${idx}, -1)">−</button>
+          <span>${qty}</span>
+          <button class="iconBtn" type="button" onclick="changeQty(${idx}, 1)">+</button>
+        </div>
+
+        <button class="link" type="button" onclick="removeLine(${idx})">Remove</button>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("subtotal").textContent = money(subtotal);
+}
+
+/* ================= ORDER / EMAIL ================= */
+function nextOrderNumber(){
+  const key = "order_seq";
+  const last = Number(localStorage.getItem(key) || "1000");
+  const next = last + 1;
+  localStorage.setItem(key, String(next));
+  return next;
+}
+
+function buildOrderText(orderNo){
+  const name = (document.getElementById("customerName").value || "").trim();
+  const notes = (document.getElementById("orderNotes").value || "").trim();
+  const payment = document.getElementById("paymentMethod").value || "PayPal";
+
+  const lines = [];
+  lines.push(`Order #${orderNo}`);
+  lines.push("");
+  lines.push("Hi! I'd like to place an order:");
+  lines.push("");
+  if (name) lines.push(`Name: ${name}`);
+  lines.push(`Preferred payment method: ${payment}`);
+  lines.push("");
+
+  let subtotal = 0;
+  lines.push("Items:");
+  cart.forEach(line => {
+    const p = getProduct(line.id);
+    if (!p) return;
+    const qty = Number(line.qty)||1;
+    const total = (Number(p.price)||0) * qty;
+    subtotal += total;
+
+    const opts = [];
+    if (line.sel?.model) opts.push(line.sel.model);
+    if (line.sel?.color) opts.push(line.sel.color);
+
+    lines.push(`- ${p.name}${opts.length ? ` (${opts.join(", ")})` : ""} x${qty} — ${money(total)}`);
+  });
+
+  lines.push("");
+  lines.push(`Subtotal (before shipping): ${money(subtotal)}`);
+  lines.push("");
+  if (notes){
+    lines.push("Notes:");
+    lines.push(notes);
+    lines.push("");
+  }
+  lines.push("Please reply with the total (including shipping) and your payment details for the method I selected. Thanks!");
+  return lines.join("\n");
+}
+
+function emailCheckout(){
+  if (!cart.length) return;
+  const orderNo = nextOrderNumber();
+  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} #${orderNo}`);
+  const body = encodeURIComponent(buildOrderText(orderNo));
+  window.location.href = `mailto:${encodeURIComponent("flores@n2cfx.com")}?subject=${subject}&body=${body}`;
+}
+
+async function copyOrderDetails(){
+  if (!cart.length) return;
+  const orderNo = nextOrderNumber();
+  const text = buildOrderText(orderNo);
+  try{
+    await navigator.clipboard.writeText(text);
+    alert("Copied! Paste it into an email/text to send your order.");
+  }catch{
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "absolute";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    alert("Copied! Paste it into an email/text to send your order.");
+  }
+}
+
+/* ================= CATEGORY + UI ================= */
+function setCategory(cat){
+  currentCategory = cat;
+
+  document.querySelectorAll(".catBtn").forEach(btn=>{
+    btn.classList.toggle("active", btn.dataset.cat === cat);
+  });
+
+  const tiktok = document.getElementById("tiktokLink");
+  if (tiktok){
+    const isFlash = (cat === "flashlight");
+    tiktok.href = isFlash ? TIKTOK_FLASHLIGHT_URL : TIKTOK_RADIO_URL;
+    tiktok.textContent = isFlash ? "Flashlight TikTok" : "Radio TikTok";
+  }
+
+  renderProducts();
+}
+
+function openDrawer(){
+  document.getElementById("drawer").classList.add("open");
+  document.getElementById("backdrop").hidden = false;
+  renderCart();
+}
+
+function closeDrawer(){
+  document.getElementById("drawer").classList.remove("open");
+  document.getElementById("backdrop").hidden = true;
+}
+
+async function init(){
+  PRODUCTS = await (await fetch("../products.json", { cache: "no-store" })).json();
+
+  document.getElementById("search").addEventListener("input", renderProducts);
+
+  document.getElementById("openCartBtn").addEventListener("click", openDrawer);
+  document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
+  document.getElementById("backdrop").addEventListener("click", closeDrawer);
+
+  document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
+  document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
+  document.getElementById("clearCartBtn").addEventListener("click", clearCart);
+
+  document.querySelectorAll(".catBtn").forEach(btn=>{
+    btn.addEventListener("click", () => setCategory(btn.dataset.cat));
+  });
+
+  saveCart();
+  setCategory(DEFAULT_CATEGORY);
+  renderCart();
+}
+
+init();
+</script>
+</body>
+</html>
