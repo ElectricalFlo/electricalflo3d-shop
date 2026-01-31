@@ -7,7 +7,9 @@
   --muted:#9aa4b2;
 }
 
-*{ box-sizing:border-box }
+*{
+  box-sizing:border-box;
+}
 
 body{
   margin:0;
@@ -43,6 +45,11 @@ body{
   display:block;
 }
 
+.brand{
+  display:flex;
+  flex-direction:column;
+}
+
 .brand h1{
   margin:0;
   font-size:20px;
@@ -55,7 +62,7 @@ body{
 }
 
 @media (max-width:600px){
-  .logo{ height:44px }
+  .logo{ height:44px; }
 }
 
 /* ================= LAYOUT ================= */
@@ -75,7 +82,9 @@ body{
 
 /* ================= FORMS ================= */
 
-input, select, textarea{
+input,
+select,
+textarea{
   width:100%;
   padding:10px 12px;
   border-radius:12px;
@@ -84,13 +93,15 @@ input, select, textarea{
   color:var(--text);
 }
 
-select{ max-width:220px }
+select{
+  max-width:220px;
+}
 
 /* ================= PRODUCT GRID ================= */
 
 .grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
   gap:16px;
 }
 
@@ -103,7 +114,7 @@ select{ max-width:220px }
   flex-direction:column;
 }
 
-/* ✅ TRUE 4:5 PRODUCT IMAGE BOX */
+/* 4:5 product image box */
 .thumb{
   aspect-ratio:4 / 5;
   width:100%;
@@ -133,11 +144,21 @@ select{ max-width:220px }
   font-size:16px;
 }
 
-.price{ font-weight:700 }
+.meta{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+
+.price{
+  font-weight:700;
+}
 
 .note{
   color:var(--muted);
   font-size:12px;
+  text-align:right;
 }
 
 /* ================= BUTTONS ================= */
@@ -152,7 +173,9 @@ select{ max-width:220px }
   cursor:pointer;
 }
 
-.primary:hover{ filter:brightness(.95) }
+.primary:hover{
+  filter:brightness(.95);
+}
 
 .ghost{
   background:transparent;
@@ -181,7 +204,7 @@ select{ max-width:220px }
   border-radius:999px;
 }
 
-/* ================= THUMBNAIL STRIP ================= */
+/* ================= THUMB STRIP ================= */
 
 .thumbStrip{
   display:flex;
@@ -198,14 +221,12 @@ select{ max-width:220px }
   padding:0;
   overflow:hidden;
   cursor:pointer;
-  background:transparent;
 }
 
 .thumbBtn img{
   width:100%;
   height:100%;
   object-fit:cover;
-  display:block;
 }
 
 .thumbBtn.active{
@@ -230,7 +251,9 @@ select{ max-width:220px }
   z-index:50;
 }
 
-.drawer.open{ transform:translateX(0) }
+.drawer.open{
+  transform:translateX(0);
+}
 
 .drawerHeader{
   display:flex;
@@ -261,13 +284,68 @@ select{ max-width:220px }
   margin-bottom:10px;
 }
 
-.empty{ color:var(--muted) }
+.qty{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-top:10px;
+}
+
+.iconBtn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:6px 10px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.link{
+  background:transparent;
+  border:none;
+  color:var(--accent);
+  cursor:pointer;
+  margin-top:8px;
+}
+
+.totalRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.field span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+.fine{
+  color:var(--muted);
+  font-size:12px;
+  margin:0;
+}
+
+.empty{
+  color:var(--muted);
+}
 
 .backdrop{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.5);
   z-index:40;
+}
+
+.checkbox{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.checkbox input{
+  width:auto;
 }
 
 /* ================= FULLSCREEN IMAGE MODAL ================= */
@@ -284,13 +362,11 @@ select{ max-width:220px }
   background:rgba(0,0,0,.75);
 }
 
-/* ✅ Make the modal use more of the viewport (prevents “cropping” look) */
 .imgModalPanel{
   position:relative;
-  margin:16px auto;
-  width:min(1100px, 96vw);
-  height:calc(100vh - 32px);        /* ← full usable height */
-  max-height:calc(100vh - 32px);
+  margin:24px auto;
+  width:min(980px,94vw);
+  height:min(86vh,760px);
   background:var(--card);
   border:1px solid var(--border);
   border-radius:18px;
@@ -305,13 +381,11 @@ select{ max-width:220px }
   align-items:center;
   padding:12px 14px;
   border-bottom:1px solid var(--border);
-  flex:0 0 auto;
 }
 
-/* ✅ This is the key: allow the image area to truly flex */
 .imgModalMain{
-  flex:1 1 auto;
-  min-height:0;                    /* critical for flex layouts */
+  flex:1;
+  min-height:0;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -320,40 +394,20 @@ select{ max-width:220px }
   overflow:hidden;
 }
 
-/* ✅ Fullscreen viewer: NEVER crop */
 .imgModalMain img{
-  width:auto;
-  height:auto;
   max-width:100%;
   max-height:100%;
-  object-fit:contain;
+  object-fit:contain;   /* NEVER crop fullscreen image */
   border-radius:14px;
   display:block;
 }
 
-.imgNavBtn{
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  width:44px;
-  height:44px;
-  border-radius:14px;
-  cursor:pointer;
-  flex:0 0 auto;
-}
-
-.imgNavBtn:hover{ border-color:var(--accent) }
-
-/* ✅ Thumbs area: fixed height so it can’t steal space from the main image */
 .imgModalThumbs{
-  flex:0 0 auto;
   display:flex;
   gap:10px;
-  padding:10px 12px;
+  padding:12px;
   border-top:1px solid var(--border);
   overflow-x:auto;
-  background:rgba(15,17,21,.65);
-  max-height:96px;                 /* prevents squeezing main image */
 }
 
 .imgModalThumb{
@@ -363,134 +417,15 @@ select{ max-width:220px }
   border-radius:12px;
   overflow:hidden;
   cursor:pointer;
-  background:transparent;
-  flex:0 0 auto;
 }
 
 .imgModalThumb img{
   width:100%;
   height:100%;
   object-fit:cover;
-  display:block;
 }
 
 .imgModalThumb.active{
   border-color:var(--accent);
   box-shadow:0 0 0 2px rgba(0,230,118,.18);
 }
-
-@media (max-width:600px){
-  .imgModalPanel{
-    margin:10px auto;
-    width:96vw;
-    height:calc(100vh - 20px);
-    max-height:calc(100vh - 20px);
-    border-radius:16px;
-  }
-  .imgNavBtn{
-    width:40px;
-    height:40px;
-    border-radius:12px;
-  }
-  .imgModalThumbs{
-    max-height:92px;
-  }
-}
-/* ================= PRODUCT BADGES ================= */
-
-.badges{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  margin-top:8px;
-}
-
-.badge{
-  display:inline-flex;
-  align-items:center;
-  border:1px solid var(--border);
-  background:rgba(15,17,21,.55);
-  color:var(--text);
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:999px;
-  line-height:1;
-  white-space:nowrap;
-}
-
-.badge--accent{
-  border-color: rgba(0,230,118,.45);
-  box-shadow: 0 0 0 2px rgba(0,230,118,.10);
-}
-/* ================= CATEGORY NAV (Radio / Flashlight) ================= */
-
-.headerRightWrap{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.catNav{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.catBtn{
-  background:transparent;
-  border:1px solid var(--border);
-  color:var(--text);
-  padding:10px 12px;
-  border-radius:14px;
-  cursor:pointer;
-  font-weight:700;
-  white-space:nowrap;
-}
-
-.catBtn:hover{
-  border-color: rgba(0,230,118,.45);
-}
-
-.catBtn.active{
-  border-color: rgba(0,230,118,.65);
-  box-shadow: 0 0 0 2px rgba(0,230,118,.14);
-}
-
-/* Mobile: stack buttons nicely */
-@media (max-width: 720px){
-  .headerRightWrap{
-    gap:10px;
-  }
-  .catNav{
-    gap:8px;
-  }
-  .catBtn{
-    padding:9px 10px;
-    border-radius:12px;
-    font-size:13px;
-  }
-}
-/* ================= VARIANT SELECTORS (Model / Color) ================= */
-
-.vRow{
-  display:flex;
-  gap:10px;
-  flex-wrap:wrap;
-  margin-top:10px;
-}
-
-.vField{
-  flex:1 1 140px;
-}
-
-.vField span{
-  display:block;
-  color:var(--muted);
-  font-size:12px;
-  margin-bottom:6px;
-}
-
-.vSelect{
-  width:100%;
-}
-
