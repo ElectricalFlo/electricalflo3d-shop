@@ -105,8 +105,8 @@
     "colors": ["Green", "Blue", "Red-Orange"]
   },
   "images": [
-    "images/DC2-triple-emitter-model.jpg",
-    "images/DC2-triple-emitter.JPG"
+    "images/DC2-triple-emitter.JPG",
+    "images/DC2-triple-emitter-model.jpg"
   ]
 }
 ]
