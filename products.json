@@ -29,5 +29,21 @@
       "images/Quad_Blue_TailRing.jpg",
       "images/Quad_Orange_TailRing.jpg"
     ]
-  }
+  },
+  {
+  "id": "okluma-gitd-orings",
+  "category": "flashlight",
+  "name": "GITD O-Rings for Okluma Flashlights",
+  "price": 15,
+  "note": "Glow-in-the-dark O-rings for Okluma DC0, DC1, and DC2 flashlights. Choose model and color from the dropdowns.",
+  "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
+  "variants": {
+    "models": ["DC0", "DC1", "DC2"],
+    "colors": ["Green", "Blue", "Red-Orange"]
+  },
+  "image": [
+    "images/GITD_Orings.jpg",
+  ]
+}
+
 ]
