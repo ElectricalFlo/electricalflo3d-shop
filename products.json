@@ -4,7 +4,7 @@
     "category": "radio",
     "name": "APX Cup Holder",
     "price": 35,
-    "note": "Made to order. Custom Callsign in Glow in the Dark.",
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark"],
     "images": [
       "images/IMG_1085.jpeg",
@@ -12,12 +12,14 @@
       "images/IMG_1090.jpeg"
     ]
   },
+
   {
     "id": "okluma-gitd-tailrings",
     "category": "flashlight",
-    "name": "GITD Tailrings for Okluma Flashlights",
+    "name": "GITD Tail Rings for Okluma Flashlights",
     "price": 35,
-    "note": "Choose model + color from the dropdowns.",
+    "note": "Choose model and color from the options.",
+    "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
     "variants": {
       "models": ["DC0", "DC1", "DC2"],
       "colors": ["Green", "Blue", "Red-Orange"]
@@ -29,12 +31,13 @@
       "images/Quad_Orange_TailRing.jpg"
     ]
   },
+
   {
     "id": "okluma-gitd-orings",
     "category": "flashlight",
     "name": "GITD O-Rings for Okluma Flashlights",
     "price": 15,
-    "note": "Glow-in-the-dark O-rings for Okluma DC0, DC1, and DC2 flashlights. Choose model and color from the dropdowns.",
+    "note": "Glow-in-the-dark O-rings. Choose model and color.",
     "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
     "variants": {
       "models": ["DC0", "DC1", "DC2"],
@@ -44,12 +47,13 @@
       "images/GITD_Orings.jpg"
     ]
   },
+
   {
     "id": "okluma-gitd-optic-holder-dc0",
     "category": "flashlight",
     "name": "GITD Optic Holder for Okluma DC0",
     "price": 35,
-    "note": "Glow-in-the-dark optic holder for Okluma DC0 flashlights. Choose color from the dropdown.",
+    "note": "Glow-in-the-dark optic holder for DC0.",
     "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
     "variants": {
       "models": ["DC0"],
@@ -59,18 +63,19 @@
       "images/Tri_DC0_OpticHolder.jpg"
     ]
   },
+
   {
     "id": "okluma-purple-tailrings",
     "category": "flashlight",
     "name": "Purple Tail Rings for Okluma Flashlights",
     "price": 35,
-    "note": "Purple tail rings for Okluma DC0, DC1, and DC2 flashlights. Color-matched to the Purple Okluma Centering Ring.",
+    "note": "Matches the Purple Okluma Centering Ring.",
     "badges": ["Okluma Compatible", "Color Matched"],
     "variants": {
       "models": ["DC0", "DC1", "DC2"]
     },
     "images": [
-      "images/Tail_Ring_DC1-2_Purple.jpg",
+      "images/Tail_Ring_DC1-2_Purple.JPG",
       "images/Tail_Ring_DC1-2_Purple_Model.jpg"
     ]
   }
