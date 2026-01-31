@@ -17,7 +17,7 @@
     "category": "flashlight",
     "name": "GITD Tailrings for Okluma Flashlights",
     "price": 35,
-    "note": "Choose model + color from the dropdowns. Installation tool is included",
+    "note": "Installation tools are included. Choose model + color from the dropdowns.",
     "badges": ["Glow-in-the-Dark", "Okluma Compatible"],
     "variants": {
       "models": ["DC0", "DC1", "DC2"],
