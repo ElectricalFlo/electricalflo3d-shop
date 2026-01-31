@@ -75,8 +75,8 @@
       "images/Tail_Ring_DC1-2_Purple_Model.jpg"
     ]
   },
-]
-"id": "okluma-gitd-single-emitter-gasket",
+  {
+    "id": "okluma-gitd-single-emitter-gasket",
     "category": "flashlight",
     "name": "GITD Single Emitter Gasket for Okluma Flashlights",
     "price": 35,
@@ -91,7 +91,6 @@
       "images/DC0-single-emitter-model.jpg",
       "images/DC1-DC2-Single-Emitter-2.JPG",
       "images/DC1-DC2-Single-Emitter.jpg"
-      ]
-    }
-  ]
-
+    ]
+  }
+]
