@@ -229,6 +229,38 @@ select{ max-width:260px }
   color:var(--text);
   background: rgba(15,17,21,.35);
 }
+/* Glow-in-the-Dark badge */
+.badge--glow{
+  border-color: rgba(0,230,118,.85);
+  background: rgba(0,230,118,.14);
+  color: #b6ffd5;
+
+  box-shadow:
+    0 0 0 1px rgba(0,230,118,.22),
+    0 0 10px rgba(0,230,118,.55),
+    0 0 22px rgba(0,230,118,.28);
+}
+
+/* Optional: subtle pulse to sell the effect */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(0,230,118,.22),
+      0 0 10px rgba(0,230,118,.45),
+      0 0 22px rgba(0,230,118,.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(0,230,118,.32),
+      0 0 14px rgba(0,230,118,.75),
+      0 0 30px rgba(0,230,118,.35);
+  }
+}
+
+.badge--glow{
+  animation: glowPulse 2.2s ease-in-out infinite;
+}
+
 
 .noteLine{
   color:var(--muted);
