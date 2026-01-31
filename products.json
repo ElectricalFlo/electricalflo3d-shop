@@ -11,5 +11,25 @@
       "images/IMG_1086.jpeg",
       "images/IMG_1090.jpeg"
     ]
+  },
+  
+  {
+    "id": "okluma-gitd-tailrings",
+    "category": "flashlight",
+    "name": "GITD Tailcaps for Okluma Flashlights",
+    "price": 35,
+    "note": "Choose model + color from the dropdowns.",
+    "variants": {
+      "models": ["DC0", "DC1", "DC2"],
+      "colors": ["Green", "Blue", "Red-Orange"]
+    },
+    "images": [
+      "images/Trio_Green_TailRings.jpg",
+      "images/Quad_Green_TailRings.jpg",
+      "images/Quad_Blue_TailRing.jpg",
+      "images/Quad_Orange_TailRing.jpg"
+    ]
   }
+]
+
 ]
