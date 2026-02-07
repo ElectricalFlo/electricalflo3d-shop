@@ -131,9 +131,11 @@
 
     <div class="imgModalMain">
       <button class="imgNavBtn" id="imgPrev" type="button" aria-label="Previous image">‹</button>
+
       <div id="modalMedia" class="modalMedia">
-  <img id="imgModalImg" alt="" />
-</div>
+        <img id="imgModalImg" alt="" />
+      </div>
+
       <button class="imgNavBtn" id="imgNext" type="button" aria-label="Next image">›</button>
     </div>
 
@@ -290,10 +292,9 @@ function renderProducts(){
             ${badges.length ? `
               <div class="badgeRow">
                 ${badges.map(b => {
-  const isGlow = /glow/i.test(b);
-  return `<span class="badge ${isGlow ? "badge--glow" : ""}">${b}</span>`;
-}).join("")}
-
+                  const isGlow = /glow/i.test(b);
+                  return `<span class="badge ${isGlow ? "badge--glow" : ""}">${b}</span>`;
+                }).join("")}
               </div>
             ` : ""}
           </div>
@@ -327,12 +328,12 @@ function renderProducts(){
           ` : ""}
 
           <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
-          ${p.tiktok ? `
-  <button class="ghost" type="button" onclick="openTikTok('${p.id}')">
-    Watch demo
-  </button>
-` : ""}
 
+          ${p.tiktok ? `
+            <button class="ghost" type="button" onclick="openTikTok('${p.id}')">
+              Watch demo
+            </button>
+          ` : ""}
         </div>
       </article>
     `;
@@ -578,11 +579,72 @@ function swapImg(productId, imgIndex){
   }
 }
 
+/* ================= TIKTOK (MODAL) ================= */
+function ensureTikTokScript(){
+  if (window.__tiktokEmbedLoaded) return Promise.resolve();
+  return new Promise((resolve) => {
+    const s = document.createElement("script");
+    s.src = "https://www.tiktok.com/embed.js";
+    s.async = true;
+    s.onload = () => { window.__tiktokEmbedLoaded = true; resolve(); };
+    document.body.appendChild(s);
+  });
+}
+
+function clearTikTokFromModal(){
+  const media = document.getElementById("modalMedia");
+  if (!media) return;
+  const wrap = media.querySelector(".tiktokWrap");
+  if (wrap) wrap.remove();
+}
+
+function setModalToImageMode(){
+  const img = document.getElementById("imgModalImg");
+  if (img) img.style.display = "block";
+
+  document.getElementById("imgPrev").style.display = "";
+  document.getElementById("imgNext").style.display = "";
+  document.getElementById("imgModalThumbs").style.display = "";
+
+  clearTikTokFromModal();
+}
+
+async function openTikTok(productId){
+  const p = PRODUCTS.find(x => x.id === productId);
+  if (!p || !p.tiktok) return;
+
+  document.getElementById("imgModalTitle").textContent = `${p.name || "Demo"} — TikTok`;
+  document.getElementById("imgModal").hidden = false;
+  document.body.style.overflow = "hidden";
+
+  const img = document.getElementById("imgModalImg");
+  if (img) img.style.display = "none";
+
+  document.getElementById("imgPrev").style.display = "none";
+  document.getElementById("imgNext").style.display = "none";
+  document.getElementById("imgModalThumbs").style.display = "none";
+
+  clearTikTokFromModal();
+
+  const media = document.getElementById("modalMedia");
+  media.insertAdjacentHTML("beforeend", `
+    <div class="tiktokWrap">
+      <blockquote class="tiktok-embed" cite="${p.tiktok}" style="max-width: 605px; min-width: 325px;">
+        <section></section>
+      </blockquote>
+    </div>
+  `);
+
+  await ensureTikTokScript();
+}
+
 /* ================= LIGHTBOX ================= */
 let lbProductId = null;
 let lbIndex = 0;
 
 function openLightbox(productId, idx){
+  setModalToImageMode(); // <-- IMPORTANT: undo TikTok mode if it was used
+
   const p = PRODUCTS.find(x => x.id === productId);
   if (!p) return;
 
@@ -604,8 +666,6 @@ function openLightbox(productId, idx){
   `).join("");
 
   document.getElementById("imgModal").hidden = false;
-
-  // prevent background scroll
   document.body.style.overflow = "hidden";
 }
 
@@ -614,6 +674,9 @@ function closeLightbox(){
   document.body.style.overflow = "";
   lbProductId = null;
   lbIndex = 0;
+
+  // cleanup TikTok + restore image UI
+  setModalToImageMode();
 }
 
 function setLightboxIndex(i){
@@ -711,6 +774,7 @@ async function init(){
 window.addToCart = addToCart;
 window.swapImg = swapImg;
 window.openLightbox = openLightbox;
+window.openTikTok = openTikTok;
 
 init();
 </script>
