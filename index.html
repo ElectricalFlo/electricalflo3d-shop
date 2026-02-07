@@ -327,6 +327,12 @@ function renderProducts(){
           ` : ""}
 
           <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
+          ${p.tiktok ? `
+  <button class="ghost" type="button" onclick="openTikTok('${p.id}')">
+    Watch demo
+  </button>
+` : ""}
+
         </div>
       </article>
     `;
