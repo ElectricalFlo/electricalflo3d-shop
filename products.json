@@ -12,22 +12,19 @@
       "images/IMG_1090.jpeg"
     ]
   },
-
-   {
+  {
     "id": "r7-cupholder",
     "category": "radio",
     "name": "Cup Holder for Motorola R7",
     "price": 35,
     "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark"],
-     "tiktok": "https://www.tiktok.com/@n2cfx/video/7603434974557015326",
+    "tiktok": "https://www.tiktok.com/@n2cfx/video/7603434974557015326",
     "images": [
       "images/63B5E171-C05F-4391-8B0B-16D1B8319C75_1_105_c.jpeg"
-      
-     ]
+    ]
   },
-  
-    {
+  {
     "id": "xpr-cupholder",
     "category": "radio",
     "name": "Cup Holder for XPR7550/E",
@@ -36,9 +33,8 @@
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark"],
     "images": [
       "images/3A679986-23CA-4666-BBE3-BD70255B6A45_1_201_a.jpeg"
-     ]
+    ]
   },
-
   {
     "id": "okluma-gitd-tailrings",
     "category": "flashlight",
@@ -72,7 +68,6 @@
       "images/Tail_Ring_DC1-2_Purple_Model.jpg"
     ]
   },
-
   {
     "id": "okluma-gitd-single-emitter-gasket",
     "category": "flashlight",
@@ -122,7 +117,6 @@
       "images/Tri_DC0_OpticHolder.jpg"
     ]
   },
-
   {
     "id": "okluma-gitd-orings",
     "category": "flashlight",
