@@ -570,7 +570,6 @@ function swapImg(productId, imgIndex){
   const imgEl = document.getElementById(`img-${productId}`);
   if (imgEl && imgs[imgIndex]) imgEl.src = imgs[imgIndex];
 
-  // update active thumb
   const card = imgEl?.closest(".card");
   if (card){
     card.querySelectorAll(".thumbBtn").forEach((b, idx) => {
@@ -579,16 +578,10 @@ function swapImg(productId, imgIndex){
   }
 }
 
-/* ================= TIKTOK (MODAL) ================= */
-function ensureTikTokScript(){
-  if (window.__tiktokEmbedLoaded) return Promise.resolve();
-  return new Promise((resolve) => {
-    const s = document.createElement("script");
-    s.src = "https://www.tiktok.com/embed.js";
-    s.async = true;
-    s.onload = () => { window.__tiktokEmbedLoaded = true; resolve(); };
-    document.body.appendChild(s);
-  });
+/* ================= TIKTOK (MODAL) — IFRAME PLAYER ================= */
+function getTikTokId(url){
+  const m = String(url || "").match(/\/video\/(\d+)/);
+  return m ? m[1] : "";
 }
 
 function clearTikTokFromModal(){
@@ -613,6 +606,12 @@ async function openTikTok(productId){
   const p = PRODUCTS.find(x => x.id === productId);
   if (!p || !p.tiktok) return;
 
+  const postId = getTikTokId(p.tiktok);
+  if (!postId){
+    alert("TikTok link must look like https://www.tiktok.com/@user/video/###########");
+    return;
+  }
+
   document.getElementById("imgModalTitle").textContent = `${p.name || "Demo"} — TikTok`;
   document.getElementById("imgModal").hidden = false;
   document.body.style.overflow = "hidden";
@@ -629,13 +628,15 @@ async function openTikTok(productId){
   const media = document.getElementById("modalMedia");
   media.insertAdjacentHTML("beforeend", `
     <div class="tiktokWrap">
-      <blockquote class="tiktok-embed" cite="${p.tiktok}" style="max-width: 605px; min-width: 325px;">
-        <section></section>
-      </blockquote>
+      <iframe
+        src="https://www.tiktok.com/player/v1/${postId}?music_info=1&description=1"
+        title="TikTok video player"
+        style="width:min(520px,92vw); height:min(740px,74vh); border:0; border-radius:14px; overflow:hidden;"
+        allow="fullscreen"
+        allowfullscreen
+      ></iframe>
     </div>
   `);
-
-  await ensureTikTokScript();
 }
 
 /* ================= LIGHTBOX ================= */
@@ -643,7 +644,7 @@ let lbProductId = null;
 let lbIndex = 0;
 
 function openLightbox(productId, idx){
-  setModalToImageMode(); // <-- IMPORTANT: undo TikTok mode if it was used
+  setModalToImageMode();
 
   const p = PRODUCTS.find(x => x.id === productId);
   if (!p) return;
@@ -675,7 +676,6 @@ function closeLightbox(){
   lbProductId = null;
   lbIndex = 0;
 
-  // cleanup TikTok + restore image UI
   setModalToImageMode();
 }
 
@@ -717,7 +717,7 @@ function wireLightboxSwipe(){
     const endX = e.changedTouches[0].clientX;
     const dx = endX - startX;
     startX = null;
-    if (Math.abs(dx) < 40) return; // threshold
+    if (Math.abs(dx) < 40) return;
     if (dx < 0) stepLightbox(+1);
     else stepLightbox(-1);
   }, {passive:true});
@@ -730,12 +730,10 @@ async function init(){
   const res = await fetch("./products.json", { cache: "no-store" });
   PRODUCTS = await res.json();
 
-  // tab click
   document.querySelectorAll(".tabBtn").forEach(btn => {
     btn.addEventListener("click", () => setActiveTab(btn.dataset.cat));
   });
 
-  // apply active tab from URL
   setActiveTab(activeCategory);
 
   document.getElementById("search").addEventListener("input", renderProducts);
@@ -751,7 +749,6 @@ async function init(){
 
   wireShippingToggle();
 
-  // lightbox buttons
   document.getElementById("imgModalClose").addEventListener("click", closeLightbox);
   document.getElementById("imgModalBackdrop").addEventListener("click", closeLightbox);
   document.getElementById("imgPrev").addEventListener("click", () => stepLightbox(-1));
