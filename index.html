@@ -519,7 +519,7 @@ async function copyOrderDetails(){
 
   try{
     await navigator.clipboard.writeText(text);
-    alert("Copied! Paste it into an email/text to send your order.");
+    alert("Copied! Paste it into an email to send your order to flores@n2cfx.com.");
   }catch{
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -529,7 +529,7 @@ async function copyOrderDetails(){
     ta.select();
     document.execCommand("copy");
     document.body.removeChild(ta);
-    alert("Copied! Paste it into an email/text to send your order.");
+    alert("Copied! Paste it into an email to send your order to flores@n2cfx.com.");
   }
 }
 
