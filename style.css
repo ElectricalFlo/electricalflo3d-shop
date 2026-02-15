@@ -231,4 +231,362 @@ input, select, textarea{
   background: rgba(15,17,21,.35);
 }
 
-/* Glow-in-the-Dark badg*
+/* Glow-in-the-Dark badge */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(0,230,118,.22),
+      0 0 10px rgba(0,230,118,.45),
+      0 0 22px rgba(0,230,118,.22);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(0,230,118,.32),
+      0 0 14px rgba(0,230,118,.75),
+      0 0 30px rgba(0,230,118,.35);
+  }
+}
+
+.badge--glow{
+  border-color: rgba(0,230,118,.85);
+  background: rgba(0,230,118,.14);
+  color: #b6ffd5;
+  animation: glowPulse 2.2s ease-in-out infinite;
+}
+
+/* Respect accessibility preferences */
+@media (prefers-reduced-motion: reduce){
+  .badge--glow{ animation: none; }
+}
+
+.noteLine{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.35;
+}
+
+.metaRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.price{ font-weight:800 }
+
+/* variants */
+.variantWrap{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.variantField span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+@media (max-width:520px){
+  .variantWrap{ grid-template-columns:1fr; }
+}
+
+/* ================= BUTTONS ================= */
+
+.primary{
+  background:var(--accent);
+  color:#08110b;
+  border:none;
+  padding:10px 12px;
+  border-radius:14px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.primary:hover{ filter:brightness(.95) }
+
+.ghost{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:14px;
+  cursor:pointer;
+}
+
+.cartBtn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.pill{
+  background:var(--border);
+  padding:2px 8px;
+  border-radius:999px;
+}
+
+/* ================= CART DRAWER ================= */
+
+.drawer{
+  position:fixed;
+  top:0;
+  right:0;
+  height:100vh;
+  width:min(440px,92vw);
+  background:var(--card);
+  border-left:1px solid var(--border);
+  transform:translateX(102%);
+  transition:.2s ease;
+  display:flex;
+  flex-direction:column;
+  z-index:50;
+}
+
+.drawer.open{ transform:translateX(0) }
+
+.drawerHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px;
+  border-bottom:1px solid var(--border);
+}
+
+.drawerBody{
+  padding:12px 16px;
+  overflow:auto;
+  flex:1;
+}
+
+.drawerFooter{
+  padding:12px 16px;
+  border-top:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.cartRow{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+}
+
+.cartTop{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+}
+
+.muted{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:6px;
+}
+
+.qtyRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:10px;
+}
+
+.qty{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+
+.iconBtn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:6px 10px;
+  border-radius:12px;
+  cursor:pointer;
+}
+
+.link{
+  background:transparent;
+  border:none;
+  color:var(--accent);
+  cursor:pointer;
+  padding:0;
+}
+
+.totalRow{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.field span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:6px;
+}
+
+.fine{
+  color:var(--muted);
+  font-size:12px;
+  margin:0;
+}
+
+.empty{ color:var(--muted) }
+
+.backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:40;
+}
+
+/* ================= FULLSCREEN IMAGE MODAL ================= */
+
+.imgModal{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+}
+
+.imgModalBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.75);
+}
+
+.imgModalPanel{
+  position:relative;
+  margin:24px auto;
+  width:min(980px,94vw);
+  height:min(86vh,760px);
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  z-index:1001;
+}
+
+.imgModalHeader{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+}
+
+.imgModalTitle{ font-weight:800 }
+
+.imgModalMain{
+  flex:1;
+  min-height:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  padding:12px;
+  background:#0b0d11;
+  overflow:hidden;
+}
+
+/* New: wrapper inside modal for image OR TikTok */
+.modalMedia{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* TikTok embed container (keeps player centered + sized nicely) */
+.modalMedia .tiktokWrap{
+  width:min(520px,92vw);
+  max-height:100%;
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+  display:flex;
+  justify-content:center;
+}
+
+/* IMPORTANT: viewer should NEVER crop */
+.imgModalMain img{
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  border-radius:14px;
+  display:block;
+}
+
+.imgNavBtn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  width:44px;
+  height:44px;
+  border-radius:14px;
+  cursor:pointer;
+  font-size:22px;
+  line-height:1;
+}
+
+.imgNavBtn:hover{ border-color:var(--accent) }
+
+.imgModalThumbs{
+  display:flex;
+  gap:10px;
+  padding:12px;
+  border-top:1px solid var(--border);
+  overflow-x:auto;
+  background:rgba(15,17,21,.65);
+}
+
+.imgModalThumb{
+  border:1px solid var(--border);
+  background:transparent;
+  border-radius:12px;
+  padding:0;
+  width:90px;
+  height:66px;
+  flex:0 0 auto;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.imgModalThumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.imgModalThumb.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(0,230,118,0.18);
+}
+
+@media (max-width:600px){
+  .imgModalPanel{
+    margin:12px auto;
+    height:88vh;
+  }
+  .imgNavBtn{
+    width:40px;
+    height:40px;
+    border-radius:12px;
+  }
+}
