@@ -15,6 +15,17 @@
   <meta property="og:image" content="https://electricalflo.com/images/og-radio.jpg" />
 
   <link rel="stylesheet" href="style.css" />
+
+  <!-- FIX: make the cart drawer scroll as ONE panel so items never get squished/cut off -->
+  <style>
+    /* Keep header fixed, scroll everything else */
+    .drawer { display:flex; flex-direction:column; }
+    .drawerHeader { flex: 0 0 auto; }
+    .drawerBody { flex: 1 1 auto; overflow:auto; min-height:0; }
+    /* Ensure cart items + form can flow nicely in the one scroll area */
+    #cartItems { padding:12px 16px; }
+    .drawerFooter { padding:12px 16px; border-top:1px solid var(--border); }
+  </style>
 </head>
 <body>
 
@@ -61,66 +72,69 @@
     <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
   </div>
 
-  <div class="drawerBody" id="cartItems"></div>
+  <!-- FIX: one scroll area (cart items + checkout form) -->
+  <div class="drawerBody">
+    <div id="cartItems"></div>
 
-  <div class="drawerFooter">
-    <div class="totalRow">
-      <span>Subtotal</span>
-      <strong id="subtotal">$0.00</strong>
+    <div class="drawerFooter">
+      <div class="totalRow">
+        <span>Subtotal</span>
+        <strong id="subtotal">$0.00</strong>
+      </div>
+
+      <label class="field">
+        <span>Your name</span>
+        <input id="customerName" placeholder="Your name" />
+      </label>
+
+      <label class="field">
+        <span>Your email (required)</span>
+        <input id="customerEmail" placeholder="you@email.com" inputmode="email" autocomplete="email" />
+      </label>
+
+      <label class="field">
+        <span>Notes (customization, etc.)</span>
+        <textarea id="orderNotes" rows="3" placeholder="Example: callsign N2CFX, preferred color, etc."></textarea>
+      </label>
+
+      <label class="field">
+        <span>Preferred payment method</span>
+        <select id="paymentMethod">
+          <option value="PayPal">PayPal</option>
+          <option value="Venmo">Venmo</option>
+        </select>
+      </label>
+
+      <!-- REQUIRED SHIPPING INFO -->
+      <label class="field">
+        <span>Shipping country</span>
+        <select id="shippingCountry" required>
+          <option value="US">United States</option>
+          <option value="INTL">International</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Shipping address (required)</span>
+        <textarea id="shippingAddress" rows="3" placeholder="Street, City, State/Province, ZIP/Postal Code" required></textarea>
+      </label>
+
+      <button class="primary" id="placeOrderBtn" type="button">
+        Place Order
+      </button>
+
+      <button class="ghost" id="copyOrderBtn" type="button">
+        Copy order details
+      </button>
+
+      <button class="ghost" id="clearCartBtn" type="button">
+        Clear cart
+      </button>
+
+      <p class="fine">
+        No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).
+      </p>
     </div>
-
-    <label class="field">
-      <span>Your name</span>
-      <input id="customerName" placeholder="Your name" />
-    </label>
-
-    <label class="field">
-      <span>Your email (required)</span>
-      <input id="customerEmail" placeholder="you@email.com" inputmode="email" autocomplete="email" />
-    </label>
-
-    <label class="field">
-      <span>Notes (customization, etc.)</span>
-      <textarea id="orderNotes" rows="3" placeholder="Example: callsign N2CFX, preferred color, etc."></textarea>
-    </label>
-
-    <label class="field">
-      <span>Preferred payment method</span>
-      <select id="paymentMethod">
-        <option value="PayPal">PayPal</option>
-        <option value="Venmo">Venmo</option>
-      </select>
-    </label>
-
-    <!-- REQUIRED SHIPPING INFO -->
-    <label class="field">
-      <span>Shipping country</span>
-      <select id="shippingCountry" required>
-        <option value="US">United States</option>
-        <option value="INTL">International</option>
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Shipping address (required)</span>
-      <textarea id="shippingAddress" rows="3" placeholder="Street, City, State/Province, ZIP/Postal Code" required></textarea>
-    </label>
-
-    <button class="primary" id="placeOrderBtn" type="button">
-      Place Order
-    </button>
-
-    <button class="ghost" id="copyOrderBtn" type="button">
-      Copy order details
-    </button>
-
-    <button class="ghost" id="clearCartBtn" type="button">
-      Clear cart
-    </button>
-
-    <p class="fine">
-      No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).
-    </p>
   </div>
 </aside>
 
@@ -442,6 +456,23 @@ function renderCart(){
   document.getElementById("subtotal").textContent = money(subtotal);
 }
 
+/* ================= ORDER ID (client-side) =================
+   This avoids needing to read a JSON response (CORS).
+*/
+function makeOrderId(){
+  // EF-YYYYMMDD-HHMMSS-XXXX
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth()+1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mi = pad(d.getMinutes());
+  const ss = pad(d.getSeconds());
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `EF-${yyyy}${mm}${dd}-${hh}${mi}${ss}-${rand}`;
+}
+
 /* ================= ORDER SUMMARY (for copy) ================= */
 function buildOrderSummaryText(orderIdMaybe){
   const name = (document.getElementById("customerName")?.value || "").trim();
@@ -487,8 +518,13 @@ function buildOrderSummaryText(orderIdMaybe){
   return lines.join("\n");
 }
 
-/* ================= WEBHOOK ORDER SUBMIT ================= */
-function buildOrderPayload(){
+/* ================= WEBHOOK ORDER SUBMIT =================
+   IMPORTANT: Your Apps Script is on script.google.com (different origin).
+   Browsers will block reading the response unless CORS headers exist.
+   Fix: send the request "fire-and-forget" (no-cors / sendBeacon),
+        generate Order ID client-side, and tell customer to check email.
+*/
+function buildOrderPayload(orderId){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const email = (document.getElementById("customerEmail")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
@@ -511,6 +547,7 @@ function buildOrderPayload(){
 
   return {
     secret: SHARED_SECRET,
+    orderId,           // <-- NEW: client-generated order id
     name,
     email,
     paymentMethod,
@@ -521,16 +558,25 @@ function buildOrderPayload(){
   };
 }
 
-async function submitOrderToWebhook(payload){
-  const res = await fetch(WEBAPP_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+function sendOrderNoCors(payload){
+  const body = JSON.stringify(payload);
 
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.error || "Order failed");
-  return json;
+  // Best-effort: sendBeacon (does not require CORS read)
+  if (navigator.sendBeacon){
+    try{
+      const blob = new Blob([body], { type: "application/json" });
+      const ok = navigator.sendBeacon(WEBAPP_URL, blob);
+      if (ok) return Promise.resolve(true);
+    }catch(_){}
+  }
+
+  // Fallback: fetch no-cors (opaque response, but request is sent)
+  return fetch(WEBAPP_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body
+  }).then(() => true).catch(() => false);
 }
 
 async function placeOrder(){
@@ -576,11 +622,28 @@ async function placeOrder(){
   btn.disabled = true;
   btn.textContent = "Placing order…";
 
-  try{
-    const payload = buildOrderPayload();
-    const result = await submitOrderToWebhook(payload);
+  const orderId = makeOrderId();
 
-    alert(`Order placed! Order ID: ${result.orderId}\n\nCheck your email for payment info.`);
+  try{
+    const payload = buildOrderPayload(orderId);
+
+    // Save locally (helps you / customer if email doesn’t arrive)
+    localStorage.setItem("ef_last_order", JSON.stringify({
+      orderId,
+      at: new Date().toISOString(),
+      summary: buildOrderSummaryText(orderId)
+    }));
+
+    const sent = await sendOrderNoCors(payload);
+    if (!sent){
+      throw new Error("Could not submit order (network). Please try again.");
+    }
+
+    alert(
+      `Order placed! Order ID: ${orderId}\n\n` +
+      `You will receive an email with your total + payment link.\n` +
+      `If you don’t see it within a few minutes, check spam/junk.`
+    );
 
     clearCart();
     closeDrawer();
