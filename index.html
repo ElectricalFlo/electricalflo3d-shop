@@ -74,7 +74,6 @@
       <input id="customerName" placeholder="Your name" />
     </label>
 
-    <!-- NEW (required) -->
     <label class="field">
       <span>Your email (required)</span>
       <input id="customerEmail" placeholder="you@email.com" inputmode="email" autocomplete="email" />
@@ -93,26 +92,20 @@
       </select>
     </label>
 
+    <!-- REQUIRED SHIPPING INFO -->
     <label class="field">
-  <span>Shipping country</span>
-  <select id="shippingCountry" required>
-    <option value="US">United States</option>
-    <option value="INTL">International</option>
-  </select>
-</label>
-
-<label class="field">
-  <span>Shipping address (required)</span>
-  <textarea id="shippingAddress" rows="3" placeholder="Street, City, State/Province, ZIP/Postal Code" required></textarea>
-</label>
-
-
-    <label class="field" id="shippingWrap" style="display:none">
-      <span>Shipping address</span>
-      <textarea id="shippingAddress" rows="3" placeholder="Street, City, State, ZIP"></textarea>
+      <span>Shipping country</span>
+      <select id="shippingCountry" required>
+        <option value="US">United States</option>
+        <option value="INTL">International</option>
+      </select>
     </label>
 
-    <!-- CHANGED -->
+    <label class="field">
+      <span>Shipping address (required)</span>
+      <textarea id="shippingAddress" rows="3" placeholder="Street, City, State/Province, ZIP/Postal Code" required></textarea>
+    </label>
+
     <button class="primary" id="placeOrderBtn" type="button">
       Place Order
     </button>
@@ -125,7 +118,6 @@
       Clear cart
     </button>
 
-    <!-- CHANGED -->
     <p class="fine">
       No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).
     </p>
@@ -159,7 +151,6 @@
 
 <script>
 /* ================= CONFIG ================= */
-/* Paste your Apps Script Web App URL + shared secret here */
 const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw_UBI7PTar8GFCe7TkTXr6G8rTsM3N77CQEnzAlYCDIQnXe9t5aa7fXMGyW5Mm8VLT/exec";
 const SHARED_SECRET = "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB";
 
@@ -457,7 +448,8 @@ function buildOrderSummaryText(orderIdMaybe){
   const email = (document.getElementById("customerEmail")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
   const payment = document.getElementById("paymentMethod")?.value || "PayPal";
-  const includeShip = document.getElementById("includeShippingNow")?.checked;
+
+  const country = document.getElementById("shippingCountry")?.value || "US";
   const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
 
   const subtotal = cart.reduce((a,b) => a + (b.price*b.qty), 0);
@@ -467,6 +459,7 @@ function buildOrderSummaryText(orderIdMaybe){
   lines.push(`Name: ${name || "(not provided)"}`);
   lines.push(`Email: ${email || "(not provided)"}`);
   lines.push(`Preferred payment method: ${payment}`);
+  lines.push(`Shipping country: ${country === "US" ? "United States" : "International"}`);
   lines.push("");
 
   lines.push("Items:");
@@ -488,12 +481,8 @@ function buildOrderSummaryText(orderIdMaybe){
     lines.push("");
   }
 
-  if (includeShip && shipAddr){
-    lines.push("Shipping address:");
-    lines.push(shipAddr);
-  } else {
-    lines.push("Shipping address: (not provided)");
-  }
+  lines.push("Shipping address:");
+  lines.push(shipAddr || "(not provided)");
 
   return lines.join("\n");
 }
@@ -504,10 +493,10 @@ function buildOrderPayload(){
   const email = (document.getElementById("customerEmail")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
   const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
-  const includeShip = document.getElementById("includeShippingNow")?.checked;
-  const address = includeShip ? (document.getElementById("shippingAddress")?.value || "").trim() : "";
 
-  // Include variant text inside item name so the sheet/emails are clear
+  const country = document.getElementById("shippingCountry")?.value || "US";
+  const address = (document.getElementById("shippingAddress")?.value || "").trim();
+
   const items = cart.map(i => {
     const sel = [];
     if (i.selections?.model) sel.push(i.selections.model);
@@ -522,10 +511,11 @@ function buildOrderPayload(){
 
   return {
     secret: SHARED_SECRET,
-    name: name,
-    email: email,
+    name,
+    email,
     paymentMethod,
     notes,
+    country,
     address,
     items
   };
@@ -538,7 +528,6 @@ async function submitOrderToWebhook(payload){
     body: JSON.stringify(payload)
   });
 
-  // Apps Script returns JSON either way
   const json = await res.json();
   if (!json.ok) throw new Error(json.error || "Order failed");
   return json;
@@ -549,6 +538,8 @@ async function placeOrder(){
 
   const email = (document.getElementById("customerEmail")?.value || "").trim();
   const name = (document.getElementById("customerName")?.value || "").trim();
+  const country = document.getElementById("shippingCountry")?.value || "";
+  const address = (document.getElementById("shippingAddress")?.value || "").trim();
 
   if (!name){
     alert("Please enter your name.");
@@ -560,12 +551,22 @@ async function placeOrder(){
     return;
   }
 
-  if (!WEBAPP_URL || WEBAPP_URL.includes("PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE")){
+  if (!country){
+    alert("Please select a shipping country.");
+    return;
+  }
+
+  if (!address){
+    alert("Please enter your shipping address (required).");
+    return;
+  }
+
+  if (!WEBAPP_URL){
     alert("Shop is not configured yet (WEBAPP_URL missing). Please try again later.");
     return;
   }
 
-  if (!SHARED_SECRET || SHARED_SECRET.includes("PASTE_THE_SAME_SHARED_SECRET_HERE")){
+  if (!SHARED_SECRET){
     alert("Shop is not configured yet (SHARED_SECRET missing). Please try again later.");
     return;
   }
@@ -581,7 +582,6 @@ async function placeOrder(){
 
     alert(`Order placed! Order ID: ${result.orderId}\n\nCheck your email for payment info.`);
 
-    // Clear cart after success
     clearCart();
     closeDrawer();
 
@@ -613,16 +613,6 @@ async function copyOrderDetails(){
     document.body.removeChild(ta);
     alert("Copied order details.");
   }
-}
-
-/* ================= SHIPPING TOGGLE ================= */
-function wireShippingToggle(){
-  const cb = document.getElementById("includeShippingNow");
-  const wrap = document.getElementById("shippingWrap");
-  if (!cb || !wrap) return;
-  cb.addEventListener("change", () => {
-    wrap.style.display = cb.checked ? "block" : "none";
-  });
 }
 
 /* ================= DRAWER ================= */
@@ -825,13 +815,10 @@ async function init(){
   document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
   document.getElementById("backdrop").addEventListener("click", closeDrawer);
 
-  // CHANGED: place order instead of email
   document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
 
   document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
   document.getElementById("clearCartBtn").addEventListener("click", clearCart);
-
-  wireShippingToggle();
 
   document.getElementById("imgModalClose").addEventListener("click", closeLightbox);
   document.getElementById("imgModalBackdrop").addEventListener("click", closeLightbox);
