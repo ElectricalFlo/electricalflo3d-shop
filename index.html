@@ -12,8 +12,6 @@
   <meta property="og:description" content="3D Printed Gear" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://electricalflo.com/" />
-  <!-- You can set this to an image you uploaded (recommended):
-       images/og-radio.jpg or images/og-flashlight.jpg -->
   <meta property="og:image" content="https://electricalflo.com/images/og-radio.jpg" />
 
   <link rel="stylesheet" href="style.css" />
@@ -72,8 +70,14 @@
     </div>
 
     <label class="field">
-      <span>Your name (optional)</span>
+      <span>Your name</span>
       <input id="customerName" placeholder="Your name" />
+    </label>
+
+    <!-- NEW (required) -->
+    <label class="field">
+      <span>Your email (required)</span>
+      <input id="customerEmail" placeholder="you@email.com" inputmode="email" autocomplete="email" />
     </label>
 
     <label class="field">
@@ -86,7 +90,6 @@
       <select id="paymentMethod">
         <option value="PayPal">PayPal</option>
         <option value="Venmo">Venmo</option>
-      
       </select>
     </label>
 
@@ -100,8 +103,9 @@
       <textarea id="shippingAddress" rows="3" placeholder="Street, City, State, ZIP"></textarea>
     </label>
 
-    <button class="primary" id="emailCheckoutBtn" type="button">
-      Email Order for Payment Info
+    <!-- CHANGED -->
+    <button class="primary" id="placeOrderBtn" type="button">
+      Place Order
     </button>
 
     <button class="ghost" id="copyOrderBtn" type="button">
@@ -112,8 +116,9 @@
       Clear cart
     </button>
 
+    <!-- CHANGED -->
     <p class="fine">
-      No payment is taken on this site. You’ll email the order and I’ll reply with payment + shipping details.
+      No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).
     </p>
   </div>
 </aside>
@@ -145,14 +150,14 @@
 
 <script>
 /* ================= CONFIG ================= */
-const EMAIL_TO = "flores@n2cfx.com";
-const EMAIL_SUBJECT_PREFIX = "ElectricalFlo Order";
+/* Paste your Apps Script Web App URL + shared secret here */
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw_UBI7PTar8GFCe7TkTXr6G8rTsM3N77CQEnzAlYCDIQnXe9t5aa7fXMGyW5Mm8VLT/exec";
+const SHARED_SECRET = "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB";
 
 /* ================= STATE ================= */
 let PRODUCTS = [];
 let activeCategory = "all"; // all | radio | flashlight
 
-// cart stored as array of line items (supports variants)
 let cart = JSON.parse(localStorage.getItem("cart_v2") || "[]");
 /*
   cart item shape:
@@ -203,7 +208,6 @@ function setActiveTab(cat){
     btn.classList.toggle("active", btn.dataset.cat === cat);
   });
 
-  // update URL for shareable links without folders
   const url = new URL(window.location.href);
   if (cat === "all") url.searchParams.delete("cat");
   else url.searchParams.set("cat", cat);
@@ -438,22 +442,10 @@ function renderCart(){
   document.getElementById("subtotal").textContent = money(subtotal);
 }
 
-/* ================= ORDER NUMBER ================= */
-function generateOrderNumber(){
-  // EF-YYMMDD-HHMM-XXXX
-  const d = new Date();
-  const yy = String(d.getFullYear()).slice(-2);
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const dd = String(d.getDate()).padStart(2,"0");
-  const hh = String(d.getHours()).padStart(2,"0");
-  const mi = String(d.getMinutes()).padStart(2,"0");
-  const rnd = Math.random().toString(36).slice(2,6).toUpperCase();
-  return `EF-${yy}${mm}${dd}-${hh}${mi}-${rnd}`;
-}
-
-/* ================= EMAIL BODY ================= */
-function buildEmailBody(orderNo){
+/* ================= ORDER SUMMARY (for copy) ================= */
+function buildOrderSummaryText(orderIdMaybe){
   const name = (document.getElementById("customerName")?.value || "").trim();
+  const email = (document.getElementById("customerEmail")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
   const payment = document.getElementById("paymentMethod")?.value || "PayPal";
   const includeShip = document.getElementById("includeShippingNow")?.checked;
@@ -462,12 +454,9 @@ function buildEmailBody(orderNo){
   const subtotal = cart.reduce((a,b) => a + (b.price*b.qty), 0);
 
   const lines = [];
-  lines.push(`Order Number: ${orderNo}`);
-  lines.push("");
-  lines.push("Hi! I'd like to place an order:");
-  lines.push("");
-
-  if (name) lines.push(`Name: ${name}`);
+  if (orderIdMaybe) lines.push(`Order ID: ${orderIdMaybe}`);
+  lines.push(`Name: ${name || "(not provided)"}`);
+  lines.push(`Email: ${email || "(not provided)"}`);
   lines.push(`Preferred payment method: ${payment}`);
   lines.push("");
 
@@ -493,33 +482,117 @@ function buildEmailBody(orderNo){
   if (includeShip && shipAddr){
     lines.push("Shipping address:");
     lines.push(shipAddr);
-    lines.push("");
   } else {
-    lines.push("Shipping address: I can provide after you reply.");
-    lines.push("");
+    lines.push("Shipping address: (not provided)");
   }
 
-  lines.push("Please reply with the total (including shipping) and your payment details for the method I selected. Thanks!");
   return lines.join("\n");
 }
 
-function emailCheckout(){
-  if (!cart.length) return;
+/* ================= WEBHOOK ORDER SUBMIT ================= */
+function buildOrderPayload(){
+  const name = (document.getElementById("customerName")?.value || "").trim();
+  const email = (document.getElementById("customerEmail")?.value || "").trim();
+  const notes = (document.getElementById("orderNotes")?.value || "").trim();
+  const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
+  const includeShip = document.getElementById("includeShippingNow")?.checked;
+  const address = includeShip ? (document.getElementById("shippingAddress")?.value || "").trim() : "";
 
-  const orderNo = generateOrderNumber();
-  const subject = encodeURIComponent(`${EMAIL_SUBJECT_PREFIX} — ${orderNo}`);
-  const body = encodeURIComponent(buildEmailBody(orderNo));
-  window.location.href = `mailto:${encodeURIComponent(EMAIL_TO)}?subject=${subject}&body=${body}`;
+  // Include variant text inside item name so the sheet/emails are clear
+  const items = cart.map(i => {
+    const sel = [];
+    if (i.selections?.model) sel.push(i.selections.model);
+    if (i.selections?.color) sel.push(i.selections.color);
+    const selTxt = sel.length ? ` [${sel.join(" / ")}]` : "";
+    return {
+      name: `${i.name}${selTxt}`,
+      qty: i.qty,
+      price: Number(i.price || 0)
+    };
+  });
+
+  return {
+    secret: SHARED_SECRET,
+    name: name,
+    email: email,
+    paymentMethod,
+    notes,
+    address,
+    items
+  };
 }
 
+async function submitOrderToWebhook(payload){
+  const res = await fetch(WEBAPP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+
+  // Apps Script returns JSON either way
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || "Order failed");
+  return json;
+}
+
+async function placeOrder(){
+  if (!cart.length) return;
+
+  const email = (document.getElementById("customerEmail")?.value || "").trim();
+  const name = (document.getElementById("customerName")?.value || "").trim();
+
+  if (!name){
+    alert("Please enter your name.");
+    return;
+  }
+
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)){
+    alert("Please enter a valid email address (required).");
+    return;
+  }
+
+  if (!WEBAPP_URL || WEBAPP_URL.includes("PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE")){
+    alert("Shop is not configured yet (WEBAPP_URL missing). Please try again later.");
+    return;
+  }
+
+  if (!SHARED_SECRET || SHARED_SECRET.includes("PASTE_THE_SAME_SHARED_SECRET_HERE")){
+    alert("Shop is not configured yet (SHARED_SECRET missing). Please try again later.");
+    return;
+  }
+
+  const btn = document.getElementById("placeOrderBtn");
+  const oldText = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "Placing order…";
+
+  try{
+    const payload = buildOrderPayload();
+    const result = await submitOrderToWebhook(payload);
+
+    alert(`Order placed! Order ID: ${result.orderId}\n\nCheck your email for payment info.`);
+
+    // Clear cart after success
+    clearCart();
+    closeDrawer();
+
+  }catch(err){
+    alert(`Error placing order: ${err.message}`);
+  }finally{
+    btn.disabled = false;
+    btn.textContent = oldText;
+  }
+}
+
+/* ================= COPY ORDER DETAILS ================= */
 async function copyOrderDetails(){
   if (!cart.length) return;
-  const orderNo = generateOrderNumber();
-  const text = buildEmailBody(orderNo);
+
+  const text = buildOrderSummaryText("");
 
   try{
     await navigator.clipboard.writeText(text);
-    alert("Copied! Paste it into an email to send your order to flores@n2cfx.com.");
+    alert("Copied order details.");
   }catch{
     const ta = document.createElement("textarea");
     ta.value = text;
@@ -529,7 +602,7 @@ async function copyOrderDetails(){
     ta.select();
     document.execCommand("copy");
     document.body.removeChild(ta);
-    alert("Copied! Paste it into an email to send your order to flores@n2cfx.com.");
+    alert("Copied order details.");
   }
 }
 
@@ -743,7 +816,9 @@ async function init(){
   document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
   document.getElementById("backdrop").addEventListener("click", closeDrawer);
 
-  document.getElementById("emailCheckoutBtn").addEventListener("click", emailCheckout);
+  // CHANGED: place order instead of email
+  document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
+
   document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
   document.getElementById("clearCartBtn").addEventListener("click", clearCart);
 
