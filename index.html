@@ -93,10 +93,19 @@
       </select>
     </label>
 
-    <label class="field checkbox">
-      <input type="checkbox" id="includeShippingNow" />
-      <span>Include shipping address now (optional)</span>
-    </label>
+    <label class="field">
+  <span>Shipping country</span>
+  <select id="shippingCountry" required>
+    <option value="US">United States</option>
+    <option value="INTL">International</option>
+  </select>
+</label>
+
+<label class="field">
+  <span>Shipping address (required)</span>
+  <textarea id="shippingAddress" rows="3" placeholder="Street, City, State/Province, ZIP/Postal Code" required></textarea>
+</label>
+
 
     <label class="field" id="shippingWrap" style="display:none">
       <span>Shipping address</span>
