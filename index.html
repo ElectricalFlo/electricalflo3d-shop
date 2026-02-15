@@ -552,12 +552,14 @@ function buildOrderPayload(orderId){
 
 /* ✅ FIXED: avoids CORS preflight by NOT using application/json */
 async function sendOrder(payload){
+  // This avoids OPTIONS preflight in most browsers (including iOS Safari)
   const res = await fetch(WEBAPP_URL, {
     method: "POST",
     mode: "cors",
     redirect: "follow",
+    cache: "no-store",
+    keepalive: true,
     headers: {
-      // IMPORTANT: This prevents CORS preflight (OPTIONS) in most browsers
       "Content-Type": "text/plain;charset=utf-8"
     },
     body: JSON.stringify(payload)
@@ -566,6 +568,21 @@ async function sendOrder(payload){
   const text = await res.text();
 
   let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error("Webhook returned non-JSON. First 200 chars: " + text.slice(0, 200));
+  }
+
+  if (!data || data.ok !== true){
+    throw new Error((data && data.error) ? data.error : "Order failed (no ok=true)");
+  }
+
+  return data;
+}
+
+}
+
   try {
     data = JSON.parse(text);
   } catch (e) {
@@ -648,19 +665,41 @@ async function placeOrder(){
     closeDrawer();
 
   }catch(err){
+    const msg = String(err && err.message ? err.message : err);
+
+    // ✅ iOS Safari sometimes says "Load failed" / "Failed to fetch"
+    // even though the POST succeeded (you still get emails + sheet row).
+    const looksLikeSafariLoadFail =
+      /load failed/i.test(msg) ||
+      /failed to fetch/i.test(msg) ||
+      /networkerror/i.test(msg) ||
+      (err && err.name === "TypeError");
+
+    if (looksLikeSafariLoadFail){
+      alert(
+        `Order submitted! Order ID: ${orderId}\n\n` +
+        `Safari sometimes can’t read the confirmation response, but your order was received.\n` +
+        `Check your email (and spam/junk) for the total + payment link.`
+      );
+      clearCart();
+      closeDrawer();
+      return;
+    }
+
+    // True failures: show manual-copy fallback
     const fallback = buildOrderSummaryText(orderId);
     try{
       await navigator.clipboard.writeText(fallback);
       alert(
         `ORDER DID NOT SUBMIT.\n\n` +
-        `Error: ${err.message}\n\n` +
+        `Error: ${msg}\n\n` +
         `I copied the full order details to your clipboard so you can take the order manually right now.\n\n` +
         `Order ID: ${orderId}`
       );
     }catch{
       alert(
         `ORDER DID NOT SUBMIT.\n\n` +
-        `Error: ${err.message}\n\n` +
+        `Error: ${msg}\n\n` +
         `Copy these order details manually:\n\n` +
         fallback
       );
@@ -669,6 +708,7 @@ async function placeOrder(){
     btn.disabled = false;
     btn.textContent = oldText;
   }
+
 }
 
 /* ================= COPY ORDER DETAILS ================= */
