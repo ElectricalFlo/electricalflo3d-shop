@@ -72,7 +72,7 @@
     <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
   </div>
 
-  <!-- FIX: one scroll area (cart items + checkout form) -->
+  <!-- one scroll area (cart items + checkout form) -->
   <div class="drawerBody">
     <div id="cartItems"></div>
 
@@ -550,16 +550,27 @@ function buildOrderPayload(orderId){
   };
 }
 
-/* ✅ FIXED: real POST + read JSON (no more silent failures) */
+/* ✅ FIXED: avoids CORS preflight by NOT using application/json */
 async function sendOrder(payload){
   const res = await fetch(WEBAPP_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    mode: "cors",
+    redirect: "follow",
+    headers: {
+      // IMPORTANT: This prevents CORS preflight (OPTIONS) in most browsers
+      "Content-Type": "text/plain;charset=utf-8"
+    },
     body: JSON.stringify(payload)
   });
 
-  // If Apps Script is missing CORS headers, this will throw — which is GOOD (we see it)
-  const data = await res.json();
+  const text = await res.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    throw new Error("Webhook returned non-JSON. First 200 chars: " + text.slice(0, 200));
+  }
 
   if (!data || data.ok !== true){
     throw new Error((data && data.error) ? data.error : "Order failed (no ok=true)");
@@ -624,11 +635,11 @@ async function placeOrder(){
       summary
     }));
 
-    // ✅ REAL submit (will throw if it fails)
-    await sendOrder(payload);
+    // ✅ REAL submit (returns JSON)
+    const result = await sendOrder(payload);
 
     alert(
-      `Order placed! Order ID: ${orderId}\n\n` +
+      `Order placed! Order ID: ${result.orderId}\n\n` +
       `You will receive an email with your total + payment link.\n` +
       `If you don’t see it within a few minutes, check spam/junk.`
     );
@@ -637,7 +648,6 @@ async function placeOrder(){
     closeDrawer();
 
   }catch(err){
-    // Failsafe: show copyable summary so you can still take the order manually
     const fallback = buildOrderSummaryText(orderId);
     try{
       await navigator.clipboard.writeText(fallback);
