@@ -456,11 +456,8 @@ function renderCart(){
   document.getElementById("subtotal").textContent = money(subtotal);
 }
 
-/* ================= ORDER ID (client-side) =================
-   This avoids needing to read a JSON response (CORS).
-*/
+/* ================= ORDER ID (client-side) ================= */
 function makeOrderId(){
-  // EF-YYYYMMDD-HHMMSS-XXXX
   const d = new Date();
   const pad = (n) => String(n).padStart(2,"0");
   const yyyy = d.getFullYear();
@@ -518,12 +515,7 @@ function buildOrderSummaryText(orderIdMaybe){
   return lines.join("\n");
 }
 
-/* ================= WEBHOOK ORDER SUBMIT =================
-   IMPORTANT: Your Apps Script is on script.google.com (different origin).
-   Browsers will block reading the response unless CORS headers exist.
-   Fix: send the request "fire-and-forget" (no-cors / sendBeacon),
-        generate Order ID client-side, and tell customer to check email.
-*/
+/* ================= WEBHOOK ORDER SUBMIT ================= */
 function buildOrderPayload(orderId){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const email = (document.getElementById("customerEmail")?.value || "").trim();
@@ -547,7 +539,7 @@ function buildOrderPayload(orderId){
 
   return {
     secret: SHARED_SECRET,
-    orderId,           // <-- NEW: client-generated order id
+    orderId,
     name,
     email,
     paymentMethod,
@@ -558,25 +550,22 @@ function buildOrderPayload(orderId){
   };
 }
 
-function sendOrderNoCors(payload){
-  const body = JSON.stringify(payload);
+/* ✅ FIXED: real POST + read JSON (no more silent failures) */
+async function sendOrder(payload){
+  const res = await fetch(WEBAPP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
 
-  // Best-effort: sendBeacon (does not require CORS read)
-  if (navigator.sendBeacon){
-    try{
-      const blob = new Blob([body], { type: "application/json" });
-      const ok = navigator.sendBeacon(WEBAPP_URL, blob);
-      if (ok) return Promise.resolve(true);
-    }catch(_){}
+  // If Apps Script is missing CORS headers, this will throw — which is GOOD (we see it)
+  const data = await res.json();
+
+  if (!data || data.ok !== true){
+    throw new Error((data && data.error) ? data.error : "Order failed (no ok=true)");
   }
 
-  // Fallback: fetch no-cors (opaque response, but request is sent)
-  return fetch(WEBAPP_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/json" },
-    body
-  }).then(() => true).catch(() => false);
+  return data;
 }
 
 async function placeOrder(){
@@ -627,17 +616,16 @@ async function placeOrder(){
   try{
     const payload = buildOrderPayload(orderId);
 
-    // Save locally (helps you / customer if email doesn’t arrive)
+    // Save locally (failsafe)
+    const summary = buildOrderSummaryText(orderId);
     localStorage.setItem("ef_last_order", JSON.stringify({
       orderId,
       at: new Date().toISOString(),
-      summary: buildOrderSummaryText(orderId)
+      summary
     }));
 
-    const sent = await sendOrderNoCors(payload);
-    if (!sent){
-      throw new Error("Could not submit order (network). Please try again.");
-    }
+    // ✅ REAL submit (will throw if it fails)
+    await sendOrder(payload);
 
     alert(
       `Order placed! Order ID: ${orderId}\n\n` +
@@ -649,7 +637,24 @@ async function placeOrder(){
     closeDrawer();
 
   }catch(err){
-    alert(`Error placing order: ${err.message}`);
+    // Failsafe: show copyable summary so you can still take the order manually
+    const fallback = buildOrderSummaryText(orderId);
+    try{
+      await navigator.clipboard.writeText(fallback);
+      alert(
+        `ORDER DID NOT SUBMIT.\n\n` +
+        `Error: ${err.message}\n\n` +
+        `I copied the full order details to your clipboard so you can take the order manually right now.\n\n` +
+        `Order ID: ${orderId}`
+      );
+    }catch{
+      alert(
+        `ORDER DID NOT SUBMIT.\n\n` +
+        `Error: ${err.message}\n\n` +
+        `Copy these order details manually:\n\n` +
+        fallback
+      );
+    }
   }finally{
     btn.disabled = false;
     btn.textContent = oldText;
