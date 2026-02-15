@@ -590,3 +590,25 @@ input, select, textarea{
     border-radius:12px;
   }
 }
+/* ================= CART DRAWER LAYOUT FIX ================= */
+/* Keep cart items visible + scroll the form instead of crushing the items */
+
+.drawerBody{
+  /* give cart items a guaranteed visible area */
+  flex: 0 0 260px;          /* height reserved for cart items */
+  overflow: auto;
+  border-bottom: 1px solid var(--border);
+}
+
+.drawerFooter{
+  /* the form becomes the scroll area */
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+/* On smaller screens, reserve a bit less for cart items */
+@media (max-width: 600px){
+  .drawerBody{
+    flex-basis: 200px;
+  }
+}
