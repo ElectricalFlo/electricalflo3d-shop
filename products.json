@@ -9,7 +9,11 @@
     "images": [
       "images/IMG_1085.jpeg",
       "images/IMG_1086.jpeg",
-      "images/IMG_1090.jpeg"
+      "images/IMG_1090.jpeg",
+      "images/APXLAHN.PNG",
+      "images/APXCharlieKing.PNG",
+      "images/APXDonaldRoyce.JPEG",
+      "images/APXMarshal56.JPG"
     ]
   },
   {
@@ -68,6 +72,7 @@
     "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4406BR, PMNN4491C, PMNN4491B",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
+     "images/XPR3300.JPG",
       "images/95E8BB77-39EA-4123-BE25-4BDED7FCBB22.jpeg"
     ]
   },
@@ -79,7 +84,19 @@
     "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4406BR, PMNN4491C, PMNN4491B",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
+      "images/XPR3500.JPG",
       "images/8E15CA01-13BA-4A32-B76E-DE313B15E52D.jpeg"
+    ]
+  },
+    {
+    "id": "xts5000-cupholder",
+    "category": "radio",
+    "name": "Cup Holder for Motorola XTS5000",
+    "price": 35,
+    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: H8610-LiP ",
+    "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
+    "images": [
+      "images/XTS5000.JPG"
     ]
   },
   {
