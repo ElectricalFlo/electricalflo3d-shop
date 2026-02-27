@@ -62,8 +62,17 @@
       try {
         const data = JSON.parse(text);
         if (data.ok) {
+          // ✅ Clear cart after successful Stripe payment confirmation
+          localStorage.removeItem("cart_v2");
+
           document.getElementById("status").innerText =
             "Order confirmed! You will receive a confirmation email shortly.";
+
+          // ✅ Send them back to the shop automatically
+          setTimeout(() => {
+            window.location.href = "https://electricalflo.com";
+          }, 1200);
+
         } else {
           document.getElementById("status").innerText =
             "Payment received, but confirmation failed. Contact support.";
