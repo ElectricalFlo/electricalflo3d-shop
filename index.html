@@ -100,10 +100,10 @@
       <label class="field">
         <span>Preferred payment method</span>
         <select id="paymentMethod">
-          <option value="PayPal">PayPal</option>
-          <option value="Venmo">Venmo</option>
-          <!-- ✅ ADDED: Stripe -->
-          <option value="Stripe">Card (Stripe Checkout)</option>
+          <!-- ✅ CHANGE: Stripe first + default selected + clearer text -->
+          <option value="Stripe" selected>Card (Stripe Checkout) — Recommended</option>
+          <option value="PayPal">PayPal (Manual Payment)</option>
+          <option value="Venmo">Venmo (Manual Payment)</option>
         </select>
       </label>
 
@@ -135,7 +135,7 @@
 
       <!-- ✅ CHANGED: give this an id so we can swap the text when Stripe is selected -->
       <p class="fine" id="paymentNotice">
-        No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).
+        Card payments are processed securely via Stripe Checkout. You’ll be redirected to Stripe to complete payment.
       </p>
     </div>
   </div>
