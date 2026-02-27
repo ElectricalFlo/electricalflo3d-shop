@@ -102,6 +102,8 @@
         <select id="paymentMethod">
           <option value="PayPal">PayPal</option>
           <option value="Venmo">Venmo</option>
+          <!-- ✅ ADDED: Stripe -->
+          <option value="Stripe">Card (Stripe Checkout)</option>
         </select>
       </label>
 
@@ -131,7 +133,8 @@
         Clear cart
       </button>
 
-      <p class="fine">
+      <!-- ✅ CHANGED: give this an id so we can swap the text when Stripe is selected -->
+      <p class="fine" id="paymentNotice">
         No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).
       </p>
     </div>
@@ -581,6 +584,19 @@ async function sendOrder(payload){
   return data;
 }
 
+/* ✅ NEW: update the notice text based on payment method */
+function updatePaymentNotice(){
+  const pm = (document.getElementById("paymentMethod")?.value || "PayPal");
+  const el = document.getElementById("paymentNotice");
+  if (!el) return;
+
+  if (pm === "Stripe"){
+    el.textContent = "Card payments are processed securely via Stripe Checkout. You’ll be redirected to Stripe to complete payment.";
+  } else {
+    el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).";
+  }
+}
+
 async function placeOrder(){
   if (!cart.length) return;
 
@@ -588,6 +604,7 @@ async function placeOrder(){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const country = document.getElementById("shippingCountry")?.value || "";
   const address = (document.getElementById("shippingAddress")?.value || "").trim();
+  const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
 
   if (!name){
     alert("Please enter your name.");
@@ -619,10 +636,16 @@ async function placeOrder(){
     return;
   }
 
+  // Stripe: block INTL (your backend currently requires manual shipping for intl)
+  if (paymentMethod === "Stripe" && country !== "US"){
+    alert("International shipping is currently handled manually. Please select PayPal or Venmo for international orders.");
+    return;
+  }
+
   const btn = document.getElementById("placeOrderBtn");
   const oldText = btn.textContent;
   btn.disabled = true;
-  btn.textContent = "Placing order…";
+  btn.textContent = (paymentMethod === "Stripe") ? "Redirecting to Stripe…" : "Placing order…";
 
   const orderId = makeOrderId();
 
@@ -637,7 +660,21 @@ async function placeOrder(){
       summary
     }));
 
-    // ✅ REAL submit (returns JSON)
+    // ✅ STRIPE PATH
+    if (paymentMethod === "Stripe"){
+      payload.action = "createCheckout"; // IMPORTANT
+      const result = await sendOrder(payload);
+
+      if (!result.checkoutUrl){
+        throw new Error("Stripe checkout URL missing.");
+      }
+
+      // Redirect to Stripe Checkout
+      window.location.href = result.checkoutUrl;
+      return;
+    }
+
+    // ✅ LEGACY PATH (PayPal/Venmo) — unchanged
     const result = await sendOrder(payload);
 
     alert(
@@ -660,7 +697,8 @@ async function placeOrder(){
       /networkerror/i.test(msg) ||
       (err && err.name === "TypeError");
 
-    if (looksLikeSafariLoadFail){
+    // NOTE: For Stripe, we should NOT assume success on "Load failed" because checkout URL matters.
+    if (looksLikeSafariLoadFail && paymentMethod !== "Stripe"){
       alert(
         `Order submitted! Order ID: ${orderId}\n\n` +
         `Safari sometimes can’t read the confirmation response, but your order was received.\n` +
@@ -922,6 +960,10 @@ async function init(){
 
   document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
   document.getElementById("clearCartBtn").addEventListener("click", clearCart);
+
+  // ✅ NEW: update the notice when payment method changes
+  document.getElementById("paymentMethod").addEventListener("change", updatePaymentNotice);
+  updatePaymentNotice();
 
   document.getElementById("imgModalClose").addEventListener("click", closeLightbox);
   document.getElementById("imgModalBackdrop").addEventListener("click", closeLightbox);
