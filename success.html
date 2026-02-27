@@ -1,1 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Payment Successful – ElectricalFlo</title>
+  <style>
+    body {
+      background: #0b1220;
+      color: #e2e8f0;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .card {
+      max-width: 600px;
+      margin: auto;
+      background: #0f172a;
+      padding: 40px;
+      border-radius: 14px;
+      border: 1px solid #1f2937;
+    }
+    h1 {
+      color: #22c55e;
+    }
+    a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
 
+<div class="card">
+  <h1>✅ Payment Successful</h1>
+  <p>Finalizing your order...</p>
+  <p id="status"></p>
+  <br>
+  <a href="https://electricalflo.com">Return to Home</a>
+</div>
+
+<script>
+  const WEBAPP_URL = "PASTE_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE";
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionId = urlParams.get("session_id");
+
+  if (!sessionId) {
+    document.getElementById("status").innerText = "Missing session ID.";
+  } else {
+    fetch(WEBAPP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "confirmCheckout",
+        sessionId: sessionId,
+        secret: "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB"
+      })
+    })
+    .then(res => res.text())
+    .then(text => {
+      try {
+        const data = JSON.parse(text);
+        if (data.ok) {
+          document.getElementById("status").innerText =
+            "Order confirmed! You will receive a confirmation email shortly.";
+        } else {
+          document.getElementById("status").innerText =
+            "Payment received, but confirmation failed. Contact support.";
+        }
+      } catch {
+        document.getElementById("status").innerText =
+          "Payment received. Confirmation in progress.";
+      }
+    })
+    .catch(() => {
+      document.getElementById("status").innerText =
+        "Payment received. Confirmation in progress.";
+    });
+  }
+</script>
+
+</body>
+</html>
