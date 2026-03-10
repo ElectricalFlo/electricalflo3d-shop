@@ -17,6 +17,20 @@
     ]
   },
   {
+    "id": "apx-cupholder-wclip",
+    "category": "radio",
+    "name": "Cup Holder for Motorola APX 6000XE & 8000XE W/Belt Clip Holster",
+    "price": 45,
+    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4486A, PMNN4485A, NNTN7033A",
+    "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
+    "images": [
+      "images/APX_CLIP.JPG",
+      "images/APX_CLIP.JPG",
+      "images/APX_CLIP.JPG",
+      "images/APX_CLIP.JPG"
+    ]
+  },
+  {
     "id": "vp8000",
     "category": "radio",
     "name": "Cup Holder for Kenwood/ EJ Johnson/ Viking VP8000",
