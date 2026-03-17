@@ -210,6 +210,10 @@ function getProductImages(p){
   if (p.image) return [p.image];
   return [];
 }
+  function showHiddenTestItems() {
+  const url = new URL(window.location.href);
+  return url.searchParams.get("test") === "1";
+}
 
 function makeLineKey(id, model, color){
   return [id || "", model || "", color || ""].join("|");
