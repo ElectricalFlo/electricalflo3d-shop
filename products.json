@@ -239,9 +239,9 @@
   "badges": ["Internal Test"],
   "hidden": true,
   "images": [
-    "images/Kenwood&APX_CupholderLOGO.png",
+    "images/Kenwood&APX_CupholderLOGO.png"
   ]
-} 
+},
   {
     "id": "okluma-gitd-tailrings",
     "category": "flashlight",
