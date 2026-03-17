@@ -241,7 +241,13 @@ function getDisplayBadges(product){
 function getShippingAmount(){
   const country = document.getElementById("shippingCountry")?.value || "US";
   if (!cart.length) return 0;
+
+  // Internal system test item should not charge shipping
+  const hasTestItem = cart.some(i => i.id === "internal-test-checkout");
+  if (hasTestItem) return 0;
+
   if (country === "US") return US_FLAT_SHIPPING;
+
   return 0; // international handled manually
 }
 
