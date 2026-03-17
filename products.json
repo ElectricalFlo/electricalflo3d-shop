@@ -230,18 +230,6 @@
       "images/Kenwood&APX_CupholderLOGO.png"
     ]
   },
-{
-  "id": "internal-test-checkout",
-  "category": "radio",
-  "name": "Internal Test Checkout Item",
-  "price": 1,
-  "note": "Internal test item for checkout and webhook verification. Do not purchase unless instructed.",
-  "badges": ["Internal Test"],
-  "hidden": true,
-  "images": [
-    "images/Kenwood&APX_CupholderLOGO.png"
-  ]
-},
   {
     "id": "okluma-gitd-tailrings",
     "category": "flashlight",
