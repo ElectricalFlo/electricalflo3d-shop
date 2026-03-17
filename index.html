@@ -293,6 +293,10 @@ function getFilteredSortedProducts(){
 
   let list = PRODUCTS.slice();
 
+if (!showHiddenTestItems()) {
+  list = list.filter(p => !p.hidden);
+}
+
   if (activeCategory !== "all"){
     list = list.filter(p => (p.category || "radio") === activeCategory);
   }
