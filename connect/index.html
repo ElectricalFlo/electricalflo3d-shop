@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ElectricalFlo</title>
+  <meta name="description" content="ElectricalFlo custom radio accessories." />
+
+  <style>
+    :root{
+      --bg:#0b1118;
+      --bg2:#0f1722;
+      --panel:#111a24;
+      --panel2:#0d141c;
+      --text:#eef7ff;
+      --muted:#9fb6c9;
+      --blue:#00c8ff;
+      --blue2:#89ecff;
+      --green:#c8ff14;
+      --green2:#e4ff7c;
+    }
+
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+
+    body{
+      font-family:Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top center, rgba(0,200,255,.08), transparent 28%),
+        linear-gradient(180deg, #121a24 0%, #090d12 100%);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      padding:28px 14px 40px;
+      min-height:100vh;
+    }
+
+    .container{
+      width:100%;
+      max-width:560px;
+    }
+
+    .hero{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        linear-gradient(180deg, #131c26 0%, #0b1118 100%);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:26px;
+      padding:22px 18px 20px;
+      text-align:center;
+      box-shadow:0 22px 60px rgba(0,0,0,.45);
+    }
+
+    .logo{
+      width:220px;
+      margin:0 auto 12px;
+    }
+
+    .logo img{
+      width:100%;
+      display:block;
+      filter:drop-shadow(0 10px 18px rgba(0,0,0,.28));
+    }
+
+    .divider{
+      width:100%;
+      height:2px;
+      margin:8px 0 16px;
+      background:linear-gradient(90deg, transparent, var(--blue), transparent);
+      box-shadow:
+        0 0 10px rgba(0,200,255,.75),
+        0 0 22px rgba(0,200,255,.18);
+      border-radius:999px;
+    }
+
+    .brand{
+      font-size:46px;
+      line-height:.98;
+      font-weight:800;
+      color:#93ecff;
+      margin:0 0 6px;
+      letter-spacing:-.04em;
+      text-shadow:
+        0 0 10px rgba(0,200,255,.18),
+        0 0 22px rgba(0,200,255,.08);
+    }
+
+    .tagline{
+      font-size:16px;
+      color:var(--muted);
+      margin:0 0 18px;
+    }
+
+    .buttons{
+      display:grid;
+      gap:12px;
+      margin-top:4px;
+    }
+
+    .button{
+      text-decoration:none;
+      color:var(--text);
+      padding:16px 16px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)),
+        linear-gradient(180deg, #121b25 0%, #0b1118 100%);
+      font-size:16px;
+      font-weight:700;
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      box-shadow:0 8px 22px rgba(0,0,0,.16);
+    }
+
+    .button:hover,
+    .button:active{
+      transform:translateY(-1px);
+    }
+
+    .button.shop{
+      border-color:rgba(0,200,255,.30);
+      box-shadow:
+        0 0 16px rgba(0,200,255,.10),
+        0 8px 22px rgba(0,0,0,.16);
+    }
+
+    .button.shop:hover,
+    .button.shop:active{
+      border-color:rgba(0,200,255,.52);
+      box-shadow:
+        0 0 22px rgba(0,200,255,.16),
+        0 8px 22px rgba(0,0,0,.16);
+    }
+
+    .button.tiktok{
+      border-color:rgba(255,255,255,.10);
+    }
+
+    .button.tiktok:hover,
+    .button.tiktok:active{
+      border-color:rgba(0,200,255,.34);
+      box-shadow:0 0 18px rgba(0,200,255,.10);
+    }
+
+    .button.contact{
+      border-color:rgba(200,255,20,.34);
+      box-shadow:
+        0 0 16px rgba(200,255,20,.10),
+        0 8px 22px rgba(0,0,0,.16);
+    }
+
+    .button.contact:hover,
+    .button.contact:active{
+      border-color:rgba(200,255,20,.56);
+      box-shadow:
+        0 0 22px rgba(200,255,20,.16),
+        0 8px 22px rgba(0,0,0,.16);
+    }
+
+    .product-card{
+      margin-top:16px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01)),
+        linear-gradient(180deg, #111924 0%, #0b1016 100%);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 18px 45px rgba(0,0,0,.28);
+      text-align:left;
+    }
+
+    .product-card img{
+      width:100%;
+      display:block;
+      aspect-ratio: 16 / 11;
+      object-fit:cover;
+      background:#0d1218;
+    }
+
+    .product-copy{
+      padding:14px 14px 16px;
+    }
+
+    .product-label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.14em;
+      color:var(--blue2);
+      font-weight:800;
+      margin:0 0 8px;
+    }
+
+    .product-title{
+      font-size:20px;
+      font-weight:800;
+      margin:0 0 6px;
+      color:var(--text);
+    }
+
+    .product-desc{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    .perk{
+      margin-top:16px;
+      padding:14px 16px;
+      border-radius:16px;
+      background:
+        linear-gradient(180deg, rgba(200,255,20,.12), rgba(200,255,20,.04)),
+        linear-gradient(180deg, #101821 0%, #0b1016 100%);
+      border:1px solid rgba(200,255,20,.26);
+      color:var(--text);
+      font-size:14px;
+      line-height:1.45;
+      box-shadow:0 0 18px rgba(200,255,20,.08);
+    }
+
+    .perk strong{
+      color:var(--green2);
+      text-shadow:0 0 10px rgba(200,255,20,.14);
+    }
+
+    .footer{
+      margin-top:18px;
+      text-align:center;
+      color:#8198ab;
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    @media (min-width: 640px){
+      .hero{
+        padding:26px 24px 24px;
+      }
+
+      .buttons{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero">
+      <div class="logo">
+        <img src="/images/Kenwood&APX_CupholderLOGO.png" alt="ElectricalFlo logo">
+      </div>
+
+      <div class="divider"></div>
+
+      <h1 class="brand">ElectricalFlo</h1>
+      <p class="tagline">Custom Radio Accessories</p>
+
+      <div class="buttons">
+        <a class="button shop" href="https://electricalflo.com" target="_blank" rel="noopener noreferrer">
+          Shop Custom Radio Gear
+        </a>
+
+        <a class="button tiktok" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">
+          TikTok: N2CFX
+        </a>
+
+        <a class="button contact" href="mailto:orders@electricalflo.com">
+          Contact Me
+        </a>
+      </div>
+
+      <div class="product-card">
+        <img src="/images/IMG_1086.jpeg" alt="Featured ElectricalFlo product">
+
+        <div class="product-copy">
+          <p class="product-label">Featured Product</p>
+          <h2 class="product-title">Custom Radio Cup Holders</h2>
+          <p class="product-desc">
+            Built for radio users who want clean vehicle organization and gear that looks as good as it works.
+          </p>
+        </div>
+      </div>
+
+      <div class="perk">
+        Business card holders get <strong>10% off</strong> with code <strong>N2CFX10</strong> at checkout.
+      </div>
+    </section>
+
+    <p class="footer">
+      ElectricalFlo • Custom Radio Accessories
+    </p>
+  </main>
+</body>
+</html>
