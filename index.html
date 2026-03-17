@@ -185,7 +185,6 @@
 /* ================= CONFIG ================= */
 const WEBAPP_URL = "https://electricalflo.com/api/order";
 const SHARED_SECRET = "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB";
-const US_FLAT_SHIPPING = 7.00;
 
 /* ================= STATE ================= */
 let PRODUCTS = [];
@@ -237,8 +236,16 @@ function getDisplayBadges(product){
 function getShippingAmount(){
   const country = document.getElementById("shippingCountry")?.value || "US";
   if (!cart.length) return 0;
-  if (country === "US") return US_FLAT_SHIPPING;
-  return 0; // international handled manually
+
+  const itemCount = cart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+
+  if (country === "US") {
+    if (itemCount <= 2) return 7.00;
+    if (itemCount <= 4) return 10.00;
+    return 15.00;
+  }
+
+  return 40.00; // International flat UPS rate
 }
 
 function getCartSubtotal(){
@@ -566,8 +573,8 @@ function buildOrderSummaryText(orderIdMaybe){
 
   lines.push("");
   lines.push(`Subtotal: $${subtotal.toFixed(2)}`);
-  lines.push(`Shipping: ${country === "US" ? `$${shipping.toFixed(2)}` : "Manual / To be invoiced"}`);
-  lines.push(`Total: ${country === "US" ? `$${total.toFixed(2)}` : "To be invoiced"}`);
+  lines.push(`Shipping: $${shipping.toFixed(2)}`);
+  lines.push(`Total: $${total.toFixed(2)}`);
   lines.push("");
 
   if (notes){
@@ -663,15 +670,15 @@ function updatePaymentNotice(){
 
   if (pm === "Stripe"){
     if (country === "US") {
-      el.textContent = `Card payments are processed securely via Stripe Checkout. U.S. shipping is a flat ${money(US_FLAT_SHIPPING)}. You’ll be redirected to Stripe to complete payment.`;
+      el.textContent = "Card payments are processed securely via Stripe Checkout. U.S. shipping is $7 for 1–2 items, $10 for 3–4 items, and $15 for 5+ items. You’ll be redirected to Stripe to complete payment.";
     } else {
-      el.textContent = "International shipping is currently handled manually. Please select PayPal or Venmo for international orders.";
+      el.textContent = "Card payments are processed securely via Stripe Checkout. International shipping is a flat $40 via UPS. You’ll be redirected to Stripe to complete payment.";
     }
   } else {
     if (country === "US") {
-      el.textContent = `No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. U.S. shipping is a flat ${money(US_FLAT_SHIPPING)}.`;
+      el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. U.S. shipping is $7 for 1–2 items, $10 for 3–4 items, and $15 for 5+ items.";
     } else {
-      el.textContent = "No payment is taken on this site. International orders are handled manually and you’ll receive an email with total + payment instructions.";
+      el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. International shipping is a flat $40 via UPS.";
     }
   }
 }
@@ -681,7 +688,7 @@ async function placeOrder(){
 
   const email = (document.getElementById("customerEmail")?.value || "").trim();
   const name = (document.getElementById("customerName")?.value || "").trim();
-  const country = document.getElementById("shippingCountry")?.value || "";
+  const country = (document.getElementById("shippingCountry")?.value || "").trim();
   const address = (document.getElementById("shippingAddress")?.value || "").trim();
   const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
 
@@ -712,11 +719,6 @@ async function placeOrder(){
 
   if (!SHARED_SECRET){
     alert("Shop is not configured yet (SHARED_SECRET missing). Please try again later.");
-    return;
-  }
-
-  if (paymentMethod === "Stripe" && country !== "US"){
-    alert("International shipping is currently handled manually. Please select PayPal or Venmo for international orders.");
     return;
   }
 
