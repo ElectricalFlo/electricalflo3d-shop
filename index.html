@@ -210,10 +210,6 @@ function getProductImages(p){
   if (p.image) return [p.image];
   return [];
 }
-  function showHiddenTestItems() {
-  const url = new URL(window.location.href);
-  return url.searchParams.get("test") === "1";
-}
 
 function makeLineKey(id, model, color){
   return [id || "", model || "", color || ""].join("|");
@@ -241,13 +237,7 @@ function getDisplayBadges(product){
 function getShippingAmount(){
   const country = document.getElementById("shippingCountry")?.value || "US";
   if (!cart.length) return 0;
-
-  // Internal system test item should not charge shipping
-  const hasTestItem = cart.some(i => i.id === "internal-test-checkout");
-  if (hasTestItem) return 0;
-
   if (country === "US") return US_FLAT_SHIPPING;
-
   return 0; // international handled manually
 }
 
@@ -298,10 +288,6 @@ function getFilteredSortedProducts(){
   const sort = document.getElementById("sort").value;
 
   let list = PRODUCTS.slice();
-
-if (!showHiddenTestItems()) {
-  list = list.filter(p => !p.hidden);
-}
 
   if (activeCategory !== "all"){
     list = list.filter(p => (p.category || "radio") === activeCategory);
