@@ -16,15 +16,24 @@
 
   <link rel="stylesheet" href="style.css" />
 
-  <!-- FIX: make the cart drawer scroll as ONE panel so items never get squished/cut off -->
   <style>
     /* Keep header fixed, scroll everything else */
     .drawer { display:flex; flex-direction:column; }
     .drawerHeader { flex: 0 0 auto; }
     .drawerBody { flex: 1 1 auto; overflow:auto; min-height:0; }
-    /* Ensure cart items + form can flow nicely in the one scroll area */
     #cartItems { padding:12px 16px; }
     .drawerFooter { padding:12px 16px; border-top:1px solid var(--border); }
+
+    /* Small helper styles for new product info */
+    .compatLine{
+      margin: 8px 0 0;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+    .compatLine strong{
+      color: var(--text);
+    }
   </style>
 </head>
 <body>
@@ -72,7 +81,6 @@
     <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
   </div>
 
-  <!-- one scroll area (cart items + checkout form) -->
   <div class="drawerBody">
     <div id="cartItems"></div>
 
@@ -80,6 +88,16 @@
       <div class="totalRow">
         <span>Subtotal</span>
         <strong id="subtotal">$0.00</strong>
+      </div>
+
+      <div class="totalRow">
+        <span>Shipping</span>
+        <strong id="shippingAmount">$0.00</strong>
+      </div>
+
+      <div class="totalRow">
+        <span>Total</span>
+        <strong id="grandTotal">$0.00</strong>
       </div>
 
       <label class="field">
@@ -100,14 +118,12 @@
       <label class="field">
         <span>Preferred payment method</span>
         <select id="paymentMethod">
-          <!-- ✅ CHANGE: Stripe first + default selected + clearer text -->
           <option value="Stripe" selected>Card (Stripe Checkout) — Recommended</option>
           <option value="PayPal">PayPal (Manual Payment)</option>
           <option value="Venmo">Venmo (Manual Payment)</option>
         </select>
       </label>
 
-      <!-- REQUIRED SHIPPING INFO -->
       <label class="field">
         <span>Shipping country</span>
         <select id="shippingCountry" required>
@@ -133,7 +149,6 @@
         Clear cart
       </button>
 
-      <!-- ✅ CHANGED: give this an id so we can swap the text when Stripe is selected -->
       <p class="fine" id="paymentNotice">
         Card payments are processed securely via Stripe Checkout. You’ll be redirected to Stripe to complete payment.
       </p>
@@ -170,6 +185,7 @@
 /* ================= CONFIG ================= */
 const WEBAPP_URL = "https://electricalflo.com/api/order";
 const SHARED_SECRET = "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB";
+const US_FLAT_SHIPPING = 7.00;
 
 /* ================= STATE ================= */
 let PRODUCTS = [];
@@ -206,6 +222,31 @@ function getCurrentSelection(product){
     model: modelSel ? modelSel.value : "",
     color: colorSel ? colorSel.value : ""
   };
+}
+
+function getDisplayBadges(product){
+  const badges = Array.isArray(product.badges) ? [...product.badges] : [];
+
+  if (product.tiktok && !badges.includes("Seen on TikTok")) {
+    badges.push("Seen on TikTok");
+  }
+
+  return badges;
+}
+
+function getShippingAmount(){
+  const country = document.getElementById("shippingCountry")?.value || "US";
+  if (!cart.length) return 0;
+  if (country === "US") return US_FLAT_SHIPPING;
+  return 0; // international handled manually
+}
+
+function getCartSubtotal(){
+  return cart.reduce((a,b) => a + (b.price * b.qty), 0);
+}
+
+function getCartTotal(){
+  return getCartSubtotal() + getShippingAmount();
 }
 
 function saveCart(){
@@ -254,7 +295,14 @@ function getFilteredSortedProducts(){
 
   if (q){
     list = list.filter(p => {
-      const hay = (p.name + " " + (p.note || "") + " " + (p.badges || []).join(" ")).toLowerCase();
+      const hay = [
+        p.name || "",
+        p.note || "",
+        (p.badges || []).join(" "),
+        (p.compatible_batteries || []).join(" "),
+        p.tiktok ? "Seen on TikTok" : ""
+      ].join(" ").toLowerCase();
+
       return hay.includes(q);
     });
   }
@@ -279,11 +327,15 @@ function renderProducts(){
   grid.innerHTML = list.map(p => {
     const imgs = getProductImages(p);
     const firstImg = imgs[0] || "";
-    const badges = Array.isArray(p.badges) ? p.badges : [];
+    const badges = getDisplayBadges(p);
 
     const hasVariants = p.variants && (p.variants.models || p.variants.colors);
     const models = (p.variants && Array.isArray(p.variants.models)) ? p.variants.models : [];
     const colors = (p.variants && Array.isArray(p.variants.colors)) ? p.variants.colors : [];
+
+    const compatLine = Array.isArray(p.compatible_batteries) && p.compatible_batteries.length
+      ? `<div class="compatLine"><strong>Compatible Batteries:</strong> ${p.compatible_batteries.join(", ")}</div>`
+      : "";
 
     return `
       <article class="card">
@@ -321,6 +373,7 @@ function renderProducts(){
           </div>
 
           ${p.note ? `<div class="noteLine">${p.note}</div>` : ""}
+          ${compatLine}
 
           <div class="metaRow">
             <span class="price">${money(p.price || 0)}</span>
@@ -425,6 +478,8 @@ function renderCart(){
   if (!cart.length){
     box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
     document.getElementById("subtotal").textContent = money(0);
+    document.getElementById("shippingAmount").textContent = money(0);
+    document.getElementById("grandTotal").textContent = money(0);
     return;
   }
 
@@ -455,8 +510,13 @@ function renderCart(){
     `;
   }).join("");
 
-  const subtotal = cart.reduce((a,b) => a + (b.price*b.qty), 0);
+  const subtotal = getCartSubtotal();
+  const shipping = getShippingAmount();
+  const total = subtotal + shipping;
+
   document.getElementById("subtotal").textContent = money(subtotal);
+  document.getElementById("shippingAmount").textContent = money(shipping);
+  document.getElementById("grandTotal").textContent = money(total);
 }
 
 /* ================= ORDER ID (client-side) ================= */
@@ -483,7 +543,9 @@ function buildOrderSummaryText(orderIdMaybe){
   const country = document.getElementById("shippingCountry")?.value || "US";
   const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
 
-  const subtotal = cart.reduce((a,b) => a + (b.price*b.qty), 0);
+  const subtotal = getCartSubtotal();
+  const shipping = getShippingAmount();
+  const total = subtotal + shipping;
 
   const lines = [];
   if (orderIdMaybe) lines.push(`Order ID: ${orderIdMaybe}`);
@@ -503,7 +565,9 @@ function buildOrderSummaryText(orderIdMaybe){
   });
 
   lines.push("");
-  lines.push(`Subtotal (before shipping): $${subtotal.toFixed(2)}`);
+  lines.push(`Subtotal: $${subtotal.toFixed(2)}`);
+  lines.push(`Shipping: ${country === "US" ? `$${shipping.toFixed(2)}` : "Manual / To be invoiced"}`);
+  lines.push(`Total: ${country === "US" ? `$${total.toFixed(2)}` : "To be invoiced"}`);
   lines.push("");
 
   if (notes){
@@ -528,6 +592,10 @@ function buildOrderPayload(orderId){
   const country = document.getElementById("shippingCountry")?.value || "US";
   const address = (document.getElementById("shippingAddress")?.value || "").trim();
 
+  const subtotal = getCartSubtotal();
+  const shipping = getShippingAmount();
+  const total = subtotal + shipping;
+
   const items = cart.map(i => {
     const sel = [];
     if (i.selections?.model) sel.push(i.selections.model);
@@ -549,13 +617,15 @@ function buildOrderPayload(orderId){
     notes,
     country,
     address,
-    items
+    items,
+    subtotal,
+    shipping,
+    total
   };
 }
 
-/* ✅ FIXED: avoids CORS preflight by NOT using application/json */
+/* avoids CORS preflight by NOT using application/json */
 async function sendOrder(payload){
-  // This avoids OPTIONS preflight in most browsers (including iOS Safari)
   const res = await fetch(WEBAPP_URL, {
     method: "POST",
     mode: "cors",
@@ -584,16 +654,25 @@ async function sendOrder(payload){
   return data;
 }
 
-/* ✅ NEW: update the notice text based on payment method */
+/* ================= PAYMENT NOTICE ================= */
 function updatePaymentNotice(){
   const pm = (document.getElementById("paymentMethod")?.value || "PayPal");
+  const country = document.getElementById("shippingCountry")?.value || "US";
   const el = document.getElementById("paymentNotice");
   if (!el) return;
 
   if (pm === "Stripe"){
-    el.textContent = "Card payments are processed securely via Stripe Checkout. You’ll be redirected to Stripe to complete payment.";
+    if (country === "US") {
+      el.textContent = `Card payments are processed securely via Stripe Checkout. U.S. shipping is a flat ${money(US_FLAT_SHIPPING)}. You’ll be redirected to Stripe to complete payment.`;
+    } else {
+      el.textContent = "International shipping is currently handled manually. Please select PayPal or Venmo for international orders.";
+    }
   } else {
-    el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link (PayPal or Venmo).";
+    if (country === "US") {
+      el.textContent = `No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. U.S. shipping is a flat ${money(US_FLAT_SHIPPING)}.`;
+    } else {
+      el.textContent = "No payment is taken on this site. International orders are handled manually and you’ll receive an email with total + payment instructions.";
+    }
   }
 }
 
@@ -636,7 +715,6 @@ async function placeOrder(){
     return;
   }
 
-  // Stripe: block INTL (your backend currently requires manual shipping for intl)
   if (paymentMethod === "Stripe" && country !== "US"){
     alert("International shipping is currently handled manually. Please select PayPal or Venmo for international orders.");
     return;
@@ -652,7 +730,6 @@ async function placeOrder(){
   try{
     const payload = buildOrderPayload(orderId);
 
-    // Save locally (failsafe)
     const summary = buildOrderSummaryText(orderId);
     localStorage.setItem("ef_last_order", JSON.stringify({
       orderId,
@@ -660,21 +737,18 @@ async function placeOrder(){
       summary
     }));
 
-    // ✅ STRIPE PATH
     if (paymentMethod === "Stripe"){
-      payload.action = "createCheckout"; // IMPORTANT
+      payload.action = "createCheckout";
       const result = await sendOrder(payload);
 
       if (!result.checkoutUrl){
         throw new Error("Stripe checkout URL missing.");
       }
 
-      // Redirect to Stripe Checkout
       window.location.href = result.checkoutUrl;
       return;
     }
 
-    // ✅ LEGACY PATH (PayPal/Venmo) — unchanged
     const result = await sendOrder(payload);
 
     alert(
@@ -689,15 +763,12 @@ async function placeOrder(){
   }catch(err){
     const msg = String(err && err.message ? err.message : err);
 
-    // ✅ iOS Safari sometimes says "Load failed" / "Failed to fetch"
-    // even though the POST succeeded (you still get emails + sheet row).
     const looksLikeSafariLoadFail =
       /load failed/i.test(msg) ||
       /failed to fetch/i.test(msg) ||
       /networkerror/i.test(msg) ||
       (err && err.name === "TypeError");
 
-    // NOTE: For Stripe, we should NOT assume success on "Load failed" because checkout URL matters.
     if (looksLikeSafariLoadFail && paymentMethod !== "Stripe"){
       alert(
         `Order submitted! Order ID: ${orderId}\n\n` +
@@ -709,7 +780,6 @@ async function placeOrder(){
       return;
     }
 
-    // True failures: show manual-copy fallback
     const fallback = buildOrderSummaryText(orderId);
     try{
       await navigator.clipboard.writeText(fallback);
@@ -731,7 +801,6 @@ async function placeOrder(){
     btn.disabled = false;
     btn.textContent = oldText;
   }
-
 }
 
 /* ================= COPY ORDER DETAILS ================= */
@@ -961,8 +1030,12 @@ async function init(){
   document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
   document.getElementById("clearCartBtn").addEventListener("click", clearCart);
 
-  // ✅ NEW: update the notice when payment method changes
   document.getElementById("paymentMethod").addEventListener("change", updatePaymentNotice);
+  document.getElementById("shippingCountry").addEventListener("change", () => {
+    renderCart();
+    updatePaymentNotice();
+  });
+
   updatePaymentNotice();
 
   document.getElementById("imgModalClose").addEventListener("click", closeLightbox);
