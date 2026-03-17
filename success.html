@@ -27,6 +27,21 @@
       text-decoration: none;
       font-weight: bold;
     }
+    .small {
+      color: #94a3b8;
+      font-size: 14px;
+      margin-top: 12px;
+      line-height: 1.5;
+    }
+    code {
+      display: inline-block;
+      margin-top: 8px;
+      background: #111827;
+      color: #cbd5e1;
+      padding: 6px 10px;
+      border-radius: 8px;
+      word-break: break-all;
+    }
   </style>
 </head>
 <body>
@@ -35,58 +50,81 @@
   <h1>✅ Payment Successful</h1>
   <p>Finalizing your order...</p>
   <p id="status"></p>
+  <div id="details" class="small"></div>
   <br>
   <a href="https://electricalflo.com">Return to Home</a>
 </div>
 
 <script>
   const WEBAPP_URL = "https://electricalflo.com/api/order";
+  const SHARED_SECRET = "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB";
+
+  const statusEl = document.getElementById("status");
+  const detailsEl = document.getElementById("details");
 
   const urlParams = new URLSearchParams(window.location.search);
   const sessionId = urlParams.get("session_id");
 
-  if (!sessionId) {
-    document.getElementById("status").innerText = "Missing session ID.";
-  } else {
-    fetch(WEBAPP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "confirmCheckout",
-        sessionId: sessionId,
-        secret: "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB"
-      })
-    })
-    .then(res => res.text())
-    .then(text => {
+  async function confirmCheckout() {
+    if (!sessionId) {
+      statusEl.innerText = "Missing session ID.";
+      return;
+    }
+
+    try {
+      const res = await fetch(WEBAPP_URL, {
+        method: "POST",
+        mode: "cors",
+        redirect: "follow",
+        cache: "no-store",
+        keepalive: true,
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          action: "confirmCheckout",
+          sessionId: sessionId,
+          secret: SHARED_SECRET
+        })
+      });
+
+      const text = await res.text();
+
+      let data;
       try {
-        const data = JSON.parse(text);
-        if (data.ok) {
-          // ✅ Clear cart after successful Stripe payment confirmation
-          localStorage.removeItem("cart_v2");
-
-          document.getElementById("status").innerText =
-            "Order confirmed! You will receive a confirmation email shortly.";
-
-          // ✅ Send them back to the shop automatically
-          setTimeout(() => {
-            window.location.href = "https://electricalflo.com";
-          }, 1200);
-
-        } else {
-          document.getElementById("status").innerText =
-            "Payment received, but confirmation failed. Contact support.";
-        }
-      } catch {
-        document.getElementById("status").innerText =
-          "Payment received. Confirmation in progress.";
+        data = JSON.parse(text);
+      } catch (err) {
+        throw new Error("Non-JSON response from server: " + text.slice(0, 200));
       }
-    })
-    .catch(() => {
-      document.getElementById("status").innerText =
-        "Payment received. Confirmation in progress.";
-    });
+
+      if (data.ok) {
+        localStorage.removeItem("cart_v2");
+
+        statusEl.innerText = "Order confirmed! Your payment has been recorded.";
+        detailsEl.innerHTML = data.orderId
+          ? `Order ID: <code>${data.orderId}</code>`
+          : "Payment confirmed.";
+
+        setTimeout(() => {
+          window.location.href = "https://electricalflo.com";
+        }, 1800);
+
+      } else {
+        statusEl.innerText = "Payment received, but confirmation failed.";
+        detailsEl.innerHTML =
+          `Stripe Session: <code>${sessionId}</code><br>` +
+          `Error: ${data.error || "Unknown error"}`;
+      }
+
+    } catch (err) {
+      statusEl.innerText = "Payment received, but confirmation failed.";
+      detailsEl.innerHTML =
+        `Stripe Session: <code>${sessionId}</code><br>` +
+        `Error: ${err.message || err}`;
+    }
   }
+
+  confirmCheckout();
 </script>
 
 </body>
