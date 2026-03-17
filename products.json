@@ -4,7 +4,13 @@
     "category": "radio",
     "name": "Cup Holder for Motorola APX 6000, 7000 & 8000",
     "price": 39,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4486A, PMNN4485A, NNTN7033A, PMNN4487A",
+    "compatible_batteries": [
+      "PMNN4486A",
+      "PMNN4485A",
+      "NNTN7033A",
+      "PMNN4487A"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
       "images/IMG_1085.jpeg",
@@ -21,7 +27,12 @@
     "category": "radio",
     "name": "Cup Holder for Motorola APX 6000XE & 8000XE W/Belt Clip Holster",
     "price": 45,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4486A, PMNN4485A, NNTN7033A",
+    "compatible_batteries": [
+      "PMNN4486A",
+      "PMNN4485A",
+      "NNTN7033A"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "tiktok": "https://www.tiktok.com/@n2cfx/video/7615730673558588703",
     "images": [
@@ -37,7 +48,7 @@
     "category": "radio",
     "name": "Cup Holder for Motorola APX NEXT W or WO/Belt Clip Holster",
     "price": 45,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Designed for APX NEXT WO Belt Clip but customers have confirmed that it sits Lower WO Belt Clip. Sits Higher W Belt Clip",
+    "note": "Made to order. Custom callsign in glow-in-the-dark. Designed for APX NEXT WO Belt Clip but customers have confirmed that it sits lower without belt clip and sits higher with belt clip.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
       "images/APXNEXT_CLIP2.jpg",
@@ -50,9 +61,12 @@
   {
     "id": "vp8000",
     "category": "radio",
-    "name": "Cup Holder for Kenwood/ EJ Johnson/ Viking VP8000",
+    "name": "Cup Holder for Kenwood/EJ Johnson/Viking VP8000",
     "price": 39,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: KNB-L3. If you have another type of battery add model to notes",
+    "compatible_batteries": [
+      "KNB-L3"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark. If you have another type of battery add model to notes.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
       "images/A8162483-AC72-40F2-B5EC-8F674F6A2E56_1_201_a.jpeg",
@@ -64,7 +78,16 @@
     "category": "radio",
     "name": "Cup Holder for Motorola APX900/APX4000/APX1000",
     "price": 39,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4406BR, PMNN4491C, PMNN4491B, PMNN4493A, NNTN8560A, PMNN4448, PMNN4448AR. Please include your battery model in the notes at checkout.",
+    "compatible_batteries": [
+      "PMNN4406BR",
+      "PMNN4491C",
+      "PMNN4491B",
+      "PMNN4493A",
+      "NNTN8560A",
+      "PMNN4448",
+      "PMNN4448AR"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark. Please include your battery model in the notes at checkout.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "tiktok": "https://www.tiktok.com/@n2cfx/video/7604665291943054622",
     "images": [
@@ -76,7 +99,10 @@
     "category": "radio",
     "name": "Cup Holder for Motorola R7",
     "price": 39,
-    "note": "Compatible with Standard battery PMNN4807A. Made to order. Custom callsign in glow-in-the-dark.",
+    "compatible_batteries": [
+      "PMNN4807A"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "tiktok": "https://www.tiktok.com/@n2cfx/video/7603434974557015326",
     "images": [
@@ -88,7 +114,12 @@
     "category": "radio",
     "name": "Cup Holder for Motorola XPR7550/E & XPR7580/E",
     "price": 39,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4406BR, PMNN4491C, PMNN4491B.",
+    "compatible_batteries": [
+      "PMNN4406BR",
+      "PMNN4491C",
+      "PMNN4491B"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "tiktok": "https://www.tiktok.com/@n2cfx/video/7604665291943054622",
     "images": [
@@ -100,7 +131,12 @@
     "category": "radio",
     "name": "Cup Holder for Motorola XPR3300/E",
     "price": 39,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4406BR, PMNN4491C, PMNN4491B",
+    "compatible_batteries": [
+      "PMNN4406BR",
+      "PMNN4491C",
+      "PMNN4491B"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
       "images/XPR3300.JPG",
@@ -112,7 +148,12 @@
     "category": "radio",
     "name": "Cup Holder for Motorola XPR3500/E",
     "price": 39,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: PMNN4406BR, PMNN4491C, PMNN4491B",
+    "compatible_batteries": [
+      "PMNN4406BR",
+      "PMNN4491C",
+      "PMNN4491B"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
       "images/XPR3500.JPG",
@@ -124,7 +165,10 @@
     "category": "radio",
     "name": "Cup Holder for Motorola XTS5000",
     "price": 39,
-    "note": "Made to order. Custom callsign in glow-in-the-dark. Compatible batteries: H8610-LiP ",
+    "compatible_batteries": [
+      "H8610-LiP"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
       "images/XTS5000.JPG"
@@ -135,7 +179,7 @@
     "category": "radio",
     "name": "Custom Radio Cup Holder (Made to Order)",
     "price": 60,
-    "note": "Made to order. If you don’t see your radio listed, add this item and include details in the Notes at checkout (radio model + what you want). Cup holders will be designed to your exact needs. Lead times will vary depending on radio model",
+    "note": "Made to order. If you don’t see your radio listed, add this item and include details in the Notes at checkout (radio model + what you want). Cup holders will be designed to your exact needs. Lead times will vary depending on radio model.",
     "badges": ["Made to Order", "Custom Callsign", "Glow-in-the-Dark Callsign"],
     "images": [
       "images/Kenwood&APX_CupholderLOGO.png"
