@@ -4,897 +4,240 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>ElectricalFlo — Shop</title>
-  <meta name="description" content="ElectricalFlo — Custom Radio Gear" />
+  <title>ElectricalFlo — Video Gallery</title>
+  <meta name="description" content="ElectricalFlo product demo videos" />
 
-  <!-- OpenGraph (preview when sharing links) -->
-  <meta property="og:title" content="ElectricalFlo — Shop" />
-  <meta property="og:description" content="3D Printed Gear" />
+  <meta property="og:title" content="ElectricalFlo — Video Gallery" />
+  <meta property="og:description" content="Watch product demos without leaving the site." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://electricalflo.com/" />
+  <meta property="og:url" content="https://electricalflo.com/videos/" />
   <meta property="og:image" content="https://electricalflo.com/images/og-radio.jpg" />
 
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../style.css" />
 
   <style>
-    /* Keep header fixed, scroll everything else */
-    .drawer { display:flex; flex-direction:column; }
-    .drawerHeader { flex: 0 0 auto; }
-    .drawerBody { flex: 1 1 auto; overflow:auto; min-height:0; }
-    #cartItems { padding:12px 16px; }
-    .drawerFooter { padding:12px 16px; border-top:1px solid var(--border); }
+    .galleryWrap{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
 
-    /* Small helper styles for new product info */
-    .compatLine{
-      margin: 8px 0 0;
+    .galleryHero{
+      margin: 8px 0 24px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .galleryHero h2{
+      margin: 0 0 8px;
+      font-size: 1.8rem;
+      line-height: 1.15;
+    }
+
+    .galleryHero p{
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 760px;
+    }
+
+    .galleryActions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+
+    .galleryGrid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px;
+    }
+
+    .videoCard{
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.02);
+      display:flex;
+      flex-direction:column;
+    }
+
+    .videoThumb{
+      aspect-ratio: 4 / 5;
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .videoThumb img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .videoBody{
+      padding: 14px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+    }
+
+    .videoTitle{
+      margin:0;
+      font-size:1rem;
+      line-height:1.35;
+    }
+
+    .videoMeta{
+      color: var(--muted);
       font-size: 0.92rem;
       line-height: 1.45;
-      color: var(--muted);
-    }
-    .compatLine strong{
-      color: var(--text);
     }
 
-    .headerLinks{
+    .videoActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top: 4px;
+    }
+
+    .topNav{
       display:flex;
       align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom: 16px;
+    }
+
+    .topNav .brandMini{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      text-decoration:none;
+      color:inherit;
+    }
+
+    .topNav .brandMini img{
+      width:44px;
+      height:44px;
+      object-fit:contain;
+    }
+
+    .topNav .brandMiniText{
+      display:flex;
+      flex-direction:column;
+      line-height:1.1;
+    }
+
+    .topNav .brandMiniText strong{
+      font-size:1rem;
+    }
+
+    .topNav .brandMiniText span{
+      color:var(--muted);
+      font-size:0.9rem;
+    }
+
+    .topNavActions{
+      display:flex;
       gap:10px;
       flex-wrap:wrap;
     }
 
-    .miniNavLink{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-height:38px;
-      padding:0 14px;
-      border:1px solid var(--border);
-      border-radius:999px;
-      color:var(--text);
-      text-decoration:none;
-      background:rgba(255,255,255,0.03);
-      transition:transform .15s ease, background .15s ease, border-color .15s ease;
-      font-size:0.95rem;
-      white-space:nowrap;
+    .imgModal[hidden]{
+      display:none !important;
     }
 
-    .miniNavLink:hover{
-      transform:translateY(-1px);
-      background:rgba(255,255,255,0.06);
+    .tiktokWrap{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      min-height: 300px;
     }
   </style>
 </head>
 <body>
 
-<header class="header">
-  <div class="brandWrap">
-    <img src="images/Logo.png" alt="ElectricalFlo Logo" class="logo" />
-    <div class="brand">
-      <h1>ElectricalFlo</h1>
-      <p>3D Printed Gear</p>
+  <main class="galleryWrap">
+    <div class="topNav">
+      <a class="brandMini" href="../index.html" aria-label="Back to shop">
+        <img src="../images/Logo.png" alt="ElectricalFlo Logo" />
+        <div class="brandMiniText">
+          <strong>ElectricalFlo</strong>
+          <span>Back to Shop</span>
+        </div>
+      </a>
+
+      <div class="topNavActions">
+        <a class="ghost" href="../index.html">Shop</a>
+        <a class="ghost" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Follow @N2CFX</a>
+      </div>
     </div>
-  </div>
 
-  <div class="headerRight">
-    <div class="headerLinks">
-      <nav class="catTabs" aria-label="Categories">
-        <button class="tabBtn" id="tabAll" type="button" data-cat="all">All</button>
-        <button class="tabBtn" id="tabRadio" type="button" data-cat="radio">Radio</button>
-        <button class="tabBtn" id="tabFlashlight" type="button" data-cat="flashlight">Flashlight</button>
-      </nav>
-
-      <a class="miniNavLink" href="videos/">Video Gallery</a>
-
-      <button class="cartBtn" id="openCartBtn" type="button">
-        Cart <span class="pill" id="cartCount">0</span>
-      </button>
-    </div>
-  </div>
-</header>
-
-<main class="wrap">
-  <section class="toolbar">
-    <input id="search" placeholder="Search items…" />
-    <select id="sort">
-      <option value="featured">Sort: Featured</option>
-      <option value="price_asc">Price: Low → High</option>
-      <option value="price_desc">Price: High → Low</option>
-      <option value="name_asc">Name: A → Z</option>
-    </select>
-  </section>
-
-  <section class="grid" id="grid"></section>
-</main>
-
-<!-- CART DRAWER -->
-<aside class="drawer" id="drawer" aria-hidden="true">
-  <div class="drawerHeader">
-    <h2>Your Cart</h2>
-    <button class="iconBtn" id="closeCartBtn" type="button">✕</button>
-  </div>
-
-  <div class="drawerBody">
-    <div id="cartItems"></div>
-
-    <div class="drawerFooter">
-      <div class="totalRow">
-        <span>Subtotal</span>
-        <strong id="subtotal">$0.00</strong>
-      </div>
-
-      <div class="totalRow">
-        <span>Shipping</span>
-        <strong id="shippingAmount">$0.00</strong>
-      </div>
-
-      <div class="totalRow">
-        <span>Total</span>
-        <strong id="grandTotal">$0.00</strong>
-      </div>
-
-      <label class="field">
-        <span>Your name</span>
-        <input id="customerName" placeholder="Your name" />
-      </label>
-
-      <label class="field">
-        <span>Your email (required)</span>
-        <input id="customerEmail" placeholder="you@email.com" inputmode="email" autocomplete="email" />
-      </label>
-
-      <label class="field">
-        <span>Notes (customization, etc.)</span>
-        <textarea id="orderNotes" rows="3" placeholder="Example: callsign N2CFX, preferred color, etc."></textarea>
-      </label>
-
-      <label class="field">
-        <span>Preferred payment method</span>
-        <select id="paymentMethod">
-          <option value="Stripe" selected>Card (Stripe Checkout) — Recommended</option>
-          <option value="PayPal">PayPal (Manual Payment)</option>
-          <option value="Venmo">Venmo (Manual Payment)</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Shipping country</span>
-        <select id="shippingCountry" required>
-          <option value="US">United States</option>
-          <option value="INTL">International</option>
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Shipping address (required)</span>
-        <textarea id="shippingAddress" rows="3" placeholder="Street, City, State/Province, ZIP/Postal Code" required></textarea>
-      </label>
-
-      <button class="primary" id="placeOrderBtn" type="button">
-        Place Order
-      </button>
-
-      <button class="ghost" id="copyOrderBtn" type="button">
-        Copy order details
-      </button>
-
-      <button class="ghost" id="clearCartBtn" type="button">
-        Clear cart
-      </button>
-
-      <p class="fine" id="paymentNotice">
-        Card payments are processed securely via Stripe Checkout. You’ll be redirected to Stripe to complete payment.
+    <section class="galleryHero">
+      <h2>Video Gallery</h2>
+      <p>
+        Watch featured product demos without leaving the site. These are some of the best ElectricalFlo TikTok videos, embedded here for a cleaner shopping experience.
       </p>
-    </div>
-  </div>
-</aside>
 
-<div class="backdrop" id="backdrop" hidden></div>
+      <div class="galleryActions">
+        <a class="primary" href="../index.html">Shop Products</a>
+        <a class="ghost" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Open TikTok Profile</a>
+      </div>
+    </section>
 
-<!-- FULLSCREEN IMAGE MODAL -->
-<div class="imgModal" id="imgModal" hidden>
-  <div class="imgModalBackdrop" id="imgModalBackdrop"></div>
-  <div class="imgModalPanel" role="dialog" aria-modal="true" aria-label="Image viewer">
-    <div class="imgModalHeader">
-      <div class="imgModalTitle" id="imgModalTitle">Image</div>
-      <button class="iconBtn" id="imgModalClose" type="button">✕</button>
-    </div>
+    <section class="galleryGrid" id="galleryGrid"></section>
+  </main>
 
-    <div class="imgModalMain">
-      <button class="imgNavBtn" id="imgPrev" type="button" aria-label="Previous image">‹</button>
-
-      <div id="modalMedia" class="modalMedia">
-        <img id="imgModalImg" alt="" />
+  <!-- VIDEO MODAL -->
+  <div class="imgModal" id="imgModal" hidden>
+    <div class="imgModalBackdrop" id="imgModalBackdrop"></div>
+    <div class="imgModalPanel" role="dialog" aria-modal="true" aria-label="Video viewer">
+      <div class="imgModalHeader">
+        <div class="imgModalTitle" id="imgModalTitle">Video</div>
+        <button class="iconBtn" id="imgModalClose" type="button">✕</button>
       </div>
 
-      <button class="imgNavBtn" id="imgNext" type="button" aria-label="Next image">›</button>
+      <div class="imgModalMain">
+        <div id="modalMedia" class="modalMedia"></div>
+      </div>
     </div>
-
-    <div class="imgModalThumbs" id="imgModalThumbs"></div>
   </div>
-</div>
 
 <script>
-/* ================= CONFIG ================= */
-const WEBAPP_URL = "https://electricalflo.com/api/order";
-const SHARED_SECRET = "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB";
-
-/* ================= STATE ================= */
-let PRODUCTS = [];
-let activeCategory = "all"; // all | radio | flashlight
-
-let cart = JSON.parse(localStorage.getItem("cart_v2") || "[]");
-/*
-  cart item shape:
+const FEATURED_VIDEOS = [
   {
-    key: "id|model|color",
-    id, name, price,
-    qty,
-    selections: { model, color }
+    title: "Motorola APX 6000 / 7000 / 8000 Cup Holder",
+    tiktok: "https://www.tiktok.com/@n2cfx/video/7608698894289079582",
+    image: "../images/IMG_1085.jpeg",
+    productId: "apx-cupholder"
+  },
+  {
+    title: "Motorola APX 6000XE / 8000XE Belt Clip Holster Cup Holder",
+    tiktok: "https://www.tiktok.com/@n2cfx/video/7615730673558588703",
+    image: "../images/APX_CLIP.jpg",
+    productId: "apx-cupholder-wclip"
+  },
+  {
+    title: "Featured ElectricalFlo Product Demo",
+    tiktok: "https://www.tiktok.com/@n2cfx/video/7610552793476189471",
+    image: "../images/Kenwood&APX_CupholderLOGO.png",
+    productId: ""
+  },
+  {
+    title: "Motorola APX900 / APX4000 / APX1000 Cup Holder",
+    tiktok: "https://www.tiktok.com/@n2cfx/video/7604665291943054622",
+    image: "../images/24F56103-BD9E-4191-854A-67614690D28E_1_201_a.jpeg",
+    productId: "APX900-cupholder"
   }
-*/
+];
 
-const money = n => `$${Number(n).toFixed(2)}`;
-
-/* ================= HELPERS ================= */
-function getProductImages(p){
-  if (Array.isArray(p.images) && p.images.length) return p.images;
-  if (p.image) return [p.image];
-  return [];
-}
-
-function makeLineKey(id, model, color){
-  return [id || "", model || "", color || ""].join("|");
-}
-
-function getCurrentSelection(product){
-  const modelSel = document.getElementById(`model-${product.id}`);
-  const colorSel = document.getElementById(`color-${product.id}`);
-  return {
-    model: modelSel ? modelSel.value : "",
-    color: colorSel ? colorSel.value : ""
-  };
-}
-
-function getDisplayBadges(product){
-  const badges = Array.isArray(product.badges) ? [...product.badges] : [];
-
-  if (product.tiktok && !badges.includes("Seen on TikTok")) {
-    badges.push("Seen on TikTok");
-  }
-
-  return badges;
-}
-
-function getShippingAmount(){
-  const country = document.getElementById("shippingCountry")?.value || "US";
-  if (!cart.length) return 0;
-
-  const itemCount = cart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
-
-  if (country === "US") {
-    if (itemCount <= 2) return 7.00;
-    if (itemCount <= 4) return 10.00;
-    return 15.00;
-  }
-
-  return 40.00; // International flat UPS rate
-}
-
-function getCartSubtotal(){
-  return cart.reduce((a,b) => a + (b.price * b.qty), 0);
-}
-
-function getCartTotal(){
-  return getCartSubtotal() + getShippingAmount();
-}
-
-function saveCart(){
-  localStorage.setItem("cart_v2", JSON.stringify(cart));
-  renderCartCount();
-}
-
-function renderCartCount(){
-  const count = cart.reduce((a, b) => a + (b.qty || 0), 0);
-  document.getElementById("cartCount").textContent = count;
-}
-
-function setActiveTab(cat){
-  activeCategory = cat;
-
-  document.querySelectorAll(".tabBtn").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.cat === cat);
-  });
-
-  const url = new URL(window.location.href);
-  if (cat === "all") url.searchParams.delete("cat");
-  else url.searchParams.set("cat", cat);
-  window.history.replaceState({}, "", url.toString());
-
-  renderProducts();
-}
-
-/* ================= CATEGORY INIT (from URL) ================= */
-function initCategoryFromURL(){
-  const url = new URL(window.location.href);
-  const cat = (url.searchParams.get("cat") || "").toLowerCase();
-  if (cat === "radio" || cat === "flashlight") activeCategory = cat;
-  else activeCategory = "all";
-}
-
-/* ================= PRODUCTS FILTER/SORT ================= */
-function getFilteredSortedProducts(){
-  const q = document.getElementById("search").value.trim().toLowerCase();
-  const sort = document.getElementById("sort").value;
-
-  let list = PRODUCTS.slice();
-
-  if (activeCategory !== "all"){
-    list = list.filter(p => (p.category || "radio") === activeCategory);
-  }
-
-  if (q){
-    list = list.filter(p => {
-      const hay = [
-        p.name || "",
-        p.note || "",
-        (p.badges || []).join(" "),
-        (p.compatible_batteries || []).join(" "),
-        p.tiktok ? "Seen on TikTok" : ""
-      ].join(" ").toLowerCase();
-
-      return hay.includes(q);
-    });
-  }
-
-  if (sort === "price_asc") list.sort((a,b) => (a.price||0) - (b.price||0));
-  if (sort === "price_desc") list.sort((a,b) => (b.price||0) - (a.price||0));
-  if (sort === "name_asc") list.sort((a,b) => (a.name||"").localeCompare(b.name||""));
-
-  return list;
-}
-
-/* ================= RENDER PRODUCTS ================= */
-function renderProducts(){
-  const grid = document.getElementById("grid");
-  const list = getFilteredSortedProducts();
-
-  if (!list.length){
-    grid.innerHTML = `<p class="empty">No items found.</p>`;
-    return;
-  }
-
-  grid.innerHTML = list.map(p => {
-    const imgs = getProductImages(p);
-    const firstImg = imgs[0] || "";
-    const badges = getDisplayBadges(p);
-
-    const hasVariants = p.variants && (p.variants.models || p.variants.colors);
-    const models = (p.variants && Array.isArray(p.variants.models)) ? p.variants.models : [];
-    const colors = (p.variants && Array.isArray(p.variants.colors)) ? p.variants.colors : [];
-
-    const compatLine = Array.isArray(p.compatible_batteries) && p.compatible_batteries.length
-      ? `<div class="compatLine"><strong>Compatible Batteries:</strong> ${p.compatible_batteries.join(", ")}</div>`
-      : "";
-
-    return `
-      <article class="card">
-        <div class="thumb">
-          <img
-            src="${firstImg}"
-            alt="${p.name || "Item"}"
-            id="img-${p.id}"
-            loading="lazy"
-            onclick="openLightbox('${p.id}', 0)"
-          />
-        </div>
-
-        ${imgs.length > 1 ? `
-          <div class="thumbStrip">
-            ${imgs.map((src, i) => `
-              <button class="thumbBtn ${i===0?"active":""}" type="button" onclick="swapImg('${p.id}', ${i})" aria-label="View image ${i+1}">
-                <img src="${src}" alt="">
-              </button>
-            `).join("")}
-          </div>
-        ` : ""}
-
-        <div class="cardBody">
-          <div class="titleRow">
-            <h3>${p.name || "Untitled item"}</h3>
-            ${badges.length ? `
-              <div class="badgeRow">
-                ${badges.map(b => {
-                  const isGlow = /glow/i.test(b);
-                  return `<span class="badge ${isGlow ? "badge--glow" : ""}">${b}</span>`;
-                }).join("")}
-              </div>
-            ` : ""}
-          </div>
-
-          ${p.note ? `<div class="noteLine">${p.note}</div>` : ""}
-          ${compatLine}
-
-          <div class="metaRow">
-            <span class="price">${money(p.price || 0)}</span>
-          </div>
-
-          ${hasVariants ? `
-            <div class="variantWrap">
-              ${models.length ? `
-                <label class="variantField">
-                  <span>Model</span>
-                  <select id="model-${p.id}">
-                    ${models.map(m => `<option value="${m}">${m}</option>`).join("")}
-                  </select>
-                </label>
-              ` : ""}
-
-              ${colors.length ? `
-                <label class="variantField">
-                  <span>Color</span>
-                  <select id="color-${p.id}">
-                    ${colors.map(c => `<option value="${c}">${c}</option>`).join("")}
-                  </select>
-                </label>
-              ` : ""}
-            </div>
-          ` : ""}
-
-          <button class="primary" type="button" onclick="addToCart('${p.id}')">Add to cart</button>
-
-          ${p.tiktok ? `
-            <button class="ghost" type="button" onclick="openTikTok('${p.id}')">
-              Watch demo
-            </button>
-          ` : ""}
-        </div>
-      </article>
-    `;
-  }).join("");
-}
-
-/* ================= CART ================= */
-function addToCart(productId){
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!p) return;
-
-  const sel = getCurrentSelection(p);
-  const key = makeLineKey(p.id, sel.model, sel.color);
-
-  const existing = cart.find(x => x.key === key);
-  if (existing){
-    existing.qty += 1;
-  } else {
-    cart.push({
-      key,
-      id: p.id,
-      name: p.name,
-      price: Number(p.price || 0),
-      qty: 1,
-      selections: {
-        model: sel.model || "",
-        color: sel.color || ""
-      }
-    });
-  }
-
-  saveCart();
-  renderCart();
-}
-
-function decFromCart(key){
-  const item = cart.find(x => x.key === key);
-  if (!item) return;
-  item.qty -= 1;
-  if (item.qty <= 0) cart = cart.filter(x => x.key !== key);
-  saveCart();
-  renderCart();
-}
-
-function incFromCart(key){
-  const item = cart.find(x => x.key === key);
-  if (!item) return;
-  item.qty += 1;
-  saveCart();
-  renderCart();
-}
-
-function removeFromCart(key){
-  cart = cart.filter(x => x.key !== key);
-  saveCart();
-  renderCart();
-}
-
-function clearCart(){
-  cart = [];
-  saveCart();
-  renderCart();
-}
-
-function renderCart(){
-  const box = document.getElementById("cartItems");
-
-  if (!cart.length){
-    box.innerHTML = `<p class="empty">Your cart is empty.</p>`;
-    document.getElementById("subtotal").textContent = money(0);
-    document.getElementById("shippingAmount").textContent = money(0);
-    document.getElementById("grandTotal").textContent = money(0);
-    return;
-  }
-
-  box.innerHTML = cart.map(i => {
-    const selBits = [];
-    if (i.selections?.model) selBits.push(`Model: ${i.selections.model}`);
-    if (i.selections?.color) selBits.push(`Color: ${i.selections.color}`);
-    const selLine = selBits.length ? `<div class="muted">${selBits.join(" • ")}</div>` : "";
-
-    return `
-      <div class="cartRow">
-        <div class="cartTop">
-          <strong>${i.name}</strong>
-          <button class="link" type="button" onclick="removeFromCart('${i.key}')">Remove</button>
-        </div>
-        ${selLine}
-        <div class="muted">${money(i.price)} each</div>
-
-        <div class="qtyRow">
-          <div class="qty">
-            <button class="iconBtn" type="button" onclick="decFromCart('${i.key}')">−</button>
-            <span>${i.qty}</span>
-            <button class="iconBtn" type="button" onclick="incFromCart('${i.key}')">+</button>
-          </div>
-          <div class="lineTotal"><strong>${money(i.price * i.qty)}</strong></div>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  const subtotal = getCartSubtotal();
-  const shipping = getShippingAmount();
-  const total = subtotal + shipping;
-
-  document.getElementById("subtotal").textContent = money(subtotal);
-  document.getElementById("shippingAmount").textContent = money(shipping);
-  document.getElementById("grandTotal").textContent = money(total);
-}
-
-/* ================= ORDER ID (client-side) ================= */
-function makeOrderId(){
-  const d = new Date();
-  const pad = (n) => String(n).padStart(2,"0");
-  const yyyy = d.getFullYear();
-  const mm = pad(d.getMonth()+1);
-  const dd = pad(d.getDate());
-  const hh = pad(d.getHours());
-  const mi = pad(d.getMinutes());
-  const ss = pad(d.getSeconds());
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `EF-${yyyy}${mm}${dd}-${hh}${mi}${ss}-${rand}`;
-}
-
-/* ================= ORDER SUMMARY (for copy) ================= */
-function buildOrderSummaryText(orderIdMaybe){
-  const name = (document.getElementById("customerName")?.value || "").trim();
-  const email = (document.getElementById("customerEmail")?.value || "").trim();
-  const notes = (document.getElementById("orderNotes")?.value || "").trim();
-  const payment = document.getElementById("paymentMethod")?.value || "PayPal";
-
-  const country = document.getElementById("shippingCountry")?.value || "US";
-  const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
-
-  const subtotal = getCartSubtotal();
-  const shipping = getShippingAmount();
-  const total = subtotal + shipping;
-
-  const lines = [];
-  if (orderIdMaybe) lines.push(`Order ID: ${orderIdMaybe}`);
-  lines.push(`Name: ${name || "(not provided)"}`);
-  lines.push(`Email: ${email || "(not provided)"}`);
-  lines.push(`Preferred payment method: ${payment}`);
-  lines.push(`Shipping country: ${country === "US" ? "United States" : "International"}`);
-  lines.push("");
-
-  lines.push("Items:");
-  cart.forEach(i => {
-    const sel = [];
-    if (i.selections?.model) sel.push(i.selections.model);
-    if (i.selections?.color) sel.push(i.selections.color);
-    const selTxt = sel.length ? ` [${sel.join(" / ")}]` : "";
-    lines.push(`- ${i.name}${selTxt} (x${i.qty}) — $${(i.price*i.qty).toFixed(2)}`);
-  });
-
-  lines.push("");
-  lines.push(`Subtotal: $${subtotal.toFixed(2)}`);
-  lines.push(`Shipping: $${shipping.toFixed(2)}`);
-  lines.push(`Total: $${total.toFixed(2)}`);
-  lines.push("");
-
-  if (notes){
-    lines.push("Notes / customization:");
-    lines.push(notes);
-    lines.push("");
-  }
-
-  lines.push("Shipping address:");
-  lines.push(shipAddr || "(not provided)");
-
-  return lines.join("\n");
-}
-
-/* ================= WEBHOOK ORDER SUBMIT ================= */
-function buildOrderPayload(orderId){
-  const name = (document.getElementById("customerName")?.value || "").trim();
-  const email = (document.getElementById("customerEmail")?.value || "").trim();
-  const notes = (document.getElementById("orderNotes")?.value || "").trim();
-  const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
-
-  const country = document.getElementById("shippingCountry")?.value || "US";
-  const address = (document.getElementById("shippingAddress")?.value || "").trim();
-
-  const subtotal = getCartSubtotal();
-  const shipping = getShippingAmount();
-  const total = subtotal + shipping;
-
-  const items = cart.map(i => {
-    const sel = [];
-    if (i.selections?.model) sel.push(i.selections.model);
-    if (i.selections?.color) sel.push(i.selections.color);
-    const selTxt = sel.length ? ` [${sel.join(" / ")}]` : "";
-    return {
-      name: `${i.name}${selTxt}`,
-      qty: i.qty,
-      price: Number(i.price || 0)
-    };
-  });
-
-  return {
-    secret: SHARED_SECRET,
-    orderId,
-    name,
-    email,
-    paymentMethod,
-    notes,
-    country,
-    address,
-    items,
-    subtotal,
-    shipping,
-    total
-  };
-}
-
-/* avoids CORS preflight by NOT using application/json */
-async function sendOrder(payload){
-  const res = await fetch(WEBAPP_URL, {
-    method: "POST",
-    mode: "cors",
-    redirect: "follow",
-    cache: "no-store",
-    keepalive: true,
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  const text = await res.text();
-
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    throw new Error("Webhook returned non-JSON. First 200 chars: " + text.slice(0, 200));
-  }
-
-  if (!data || data.ok !== true){
-    throw new Error((data && data.error) ? data.error : "Order failed (no ok=true)");
-  }
-
-  return data;
-}
-
-/* ================= PAYMENT NOTICE ================= */
-function updatePaymentNotice(){
-  const pm = (document.getElementById("paymentMethod")?.value || "PayPal");
-  const country = document.getElementById("shippingCountry")?.value || "US";
-  const el = document.getElementById("paymentNotice");
-  if (!el) return;
-
-  if (pm === "Stripe"){
-    if (country === "US") {
-      el.textContent = "Card payments are processed securely via Stripe Checkout. U.S. shipping is $7 for 1–2 items, $10 for 3–4 items, and $15 for 5+ items. You’ll be redirected to Stripe to complete payment.";
-    } else {
-      el.textContent = "Card payments are processed securely via Stripe Checkout. International shipping is a flat $40 via UPS. You’ll be redirected to Stripe to complete payment.";
-    }
-  } else {
-    if (country === "US") {
-      el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. U.S. shipping is $7 for 1–2 items, $10 for 3–4 items, and $15 for 5+ items.";
-    } else {
-      el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. International shipping is a flat $40 via UPS.";
-    }
-  }
-}
-
-async function placeOrder(){
-  if (!cart.length) return;
-
-  const email = (document.getElementById("customerEmail")?.value || "").trim();
-  const name = (document.getElementById("customerName")?.value || "").trim();
-  const country = (document.getElementById("shippingCountry")?.value || "").trim();
-  const address = (document.getElementById("shippingAddress")?.value || "").trim();
-  const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
-
-  if (!name){
-    alert("Please enter your name.");
-    return;
-  }
-
-  if (!email || !/^\S+@\S+\.\S+$/.test(email)){
-    alert("Please enter a valid email address (required).");
-    return;
-  }
-
-  if (!country){
-    alert("Please select a shipping country.");
-    return;
-  }
-
-  if (!address){
-    alert("Please enter your shipping address (required).");
-    return;
-  }
-
-  if (!WEBAPP_URL){
-    alert("Shop is not configured yet (WEBAPP_URL missing). Please try again later.");
-    return;
-  }
-
-  if (!SHARED_SECRET){
-    alert("Shop is not configured yet (SHARED_SECRET missing). Please try again later.");
-    return;
-  }
-
-  const btn = document.getElementById("placeOrderBtn");
-  const oldText = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = (paymentMethod === "Stripe") ? "Redirecting to Stripe…" : "Placing order…";
-
-  const orderId = makeOrderId();
-
-  try{
-    const payload = buildOrderPayload(orderId);
-
-    const summary = buildOrderSummaryText(orderId);
-    localStorage.setItem("ef_last_order", JSON.stringify({
-      orderId,
-      at: new Date().toISOString(),
-      summary
-    }));
-
-    if (paymentMethod === "Stripe"){
-      payload.action = "createCheckout";
-      const result = await sendOrder(payload);
-
-      if (!result.checkoutUrl){
-        throw new Error("Stripe checkout URL missing.");
-      }
-
-      window.location.href = result.checkoutUrl;
-      return;
-    }
-
-    const result = await sendOrder(payload);
-
-    alert(
-      `Order placed! Order ID: ${result.orderId}\n\n` +
-      `You will receive an email with your total + payment link.\n` +
-      `If you don’t see it within a few minutes, check spam/junk.`
-    );
-
-    clearCart();
-    closeDrawer();
-
-  }catch(err){
-    const msg = String(err && err.message ? err.message : err);
-
-    const looksLikeSafariLoadFail =
-      /load failed/i.test(msg) ||
-      /failed to fetch/i.test(msg) ||
-      /networkerror/i.test(msg) ||
-      (err && err.name === "TypeError");
-
-    if (looksLikeSafariLoadFail && paymentMethod !== "Stripe"){
-      alert(
-        `Order submitted! Order ID: ${orderId}\n\n` +
-        `Safari sometimes can’t read the confirmation response, but your order was received.\n` +
-        `Check your email (and spam/junk) for the total + payment link.`
-      );
-      clearCart();
-      closeDrawer();
-      return;
-    }
-
-    const fallback = buildOrderSummaryText(orderId);
-    try{
-      await navigator.clipboard.writeText(fallback);
-      alert(
-        `ORDER DID NOT SUBMIT.\n\n` +
-        `Error: ${msg}\n\n` +
-        `I copied the full order details to your clipboard so you can take the order manually right now.\n\n` +
-        `Order ID: ${orderId}`
-      );
-    }catch{
-      alert(
-        `ORDER DID NOT SUBMIT.\n\n` +
-        `Error: ${msg}\n\n` +
-        `Copy these order details manually:\n\n` +
-        fallback
-      );
-    }
-  }finally{
-    btn.disabled = false;
-    btn.textContent = oldText;
-  }
-}
-
-/* ================= COPY ORDER DETAILS ================= */
-async function copyOrderDetails(){
-  if (!cart.length) return;
-
-  const text = buildOrderSummaryText("");
-
-  try{
-    await navigator.clipboard.writeText(text);
-    alert("Copied order details.");
-  }catch{
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "absolute";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    document.body.removeChild(ta);
-    alert("Copied order details.");
-  }
-}
-
-/* ================= DRAWER ================= */
-function openDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
-  drawer.classList.add("open");
-  drawer.setAttribute("aria-hidden","false");
-  backdrop.hidden = false;
-  renderCart();
-}
-
-function closeDrawer(){
-  const drawer = document.getElementById("drawer");
-  const backdrop = document.getElementById("backdrop");
-  drawer.classList.remove("open");
-  drawer.setAttribute("aria-hidden","true");
-  backdrop.hidden = true;
-}
-
-/* ================= IMAGE SWAP (card) ================= */
-function swapImg(productId, imgIndex){
-  const product = PRODUCTS.find(p => p.id === productId);
-  if (!product) return;
-
-  const imgs = getProductImages(product);
-  const imgEl = document.getElementById(`img-${productId}`);
-  if (imgEl && imgs[imgIndex]) imgEl.src = imgs[imgIndex];
-
-  const card = imgEl?.closest(".card");
-  if (card){
-    card.querySelectorAll(".thumbBtn").forEach((b, idx) => {
-      b.classList.toggle("active", idx === imgIndex);
-    });
-  }
-}
-
-/* ================= TIKTOK (MODAL) — IFRAME PLAYER ================= */
 function getTikTokId(url){
   const m = String(url || "").match(/\/video\/(\d+)/);
   return m ? m[1] : "";
@@ -903,46 +246,24 @@ function getTikTokId(url){
 function clearTikTokFromModal(){
   const media = document.getElementById("modalMedia");
   if (!media) return;
-  const wrap = media.querySelector(".tiktokWrap");
-  if (wrap) wrap.remove();
+  media.innerHTML = "";
 }
 
-function setModalToImageMode(){
-  const img = document.getElementById("imgModalImg");
-  if (img) img.style.display = "block";
-
-  document.getElementById("imgPrev").style.display = "";
-  document.getElementById("imgNext").style.display = "";
-  document.getElementById("imgModalThumbs").style.display = "";
-
-  clearTikTokFromModal();
-}
-
-async function openTikTok(productId){
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!p || !p.tiktok) return;
-
-  const postId = getTikTokId(p.tiktok);
+function openTikTokByUrl(title, url){
+  const postId = getTikTokId(url);
   if (!postId){
-    alert("TikTok link must look like https://www.tiktok.com/@user/video/###########");
+    alert("Invalid TikTok URL.");
     return;
   }
 
-  document.getElementById("imgModalTitle").textContent = `${p.name || "Demo"} — TikTok`;
+  document.getElementById("imgModalTitle").textContent = title || "TikTok Video";
   document.getElementById("imgModal").hidden = false;
   document.body.style.overflow = "hidden";
-
-  const img = document.getElementById("imgModalImg");
-  if (img) img.style.display = "none";
-
-  document.getElementById("imgPrev").style.display = "none";
-  document.getElementById("imgNext").style.display = "none";
-  document.getElementById("imgModalThumbs").style.display = "none";
 
   clearTikTokFromModal();
 
   const media = document.getElementById("modalMedia");
-  media.insertAdjacentHTML("beforeend", `
+  media.innerHTML = `
     <div class="tiktokWrap">
       <iframe
         src="https://www.tiktok.com/player/v1/${postId}?music_info=1&description=1"
@@ -952,151 +273,55 @@ async function openTikTok(productId){
         allowfullscreen
       ></iframe>
     </div>
-  `);
-}
-
-/* ================= LIGHTBOX ================= */
-let lbProductId = null;
-let lbIndex = 0;
-
-function openLightbox(productId, idx){
-  setModalToImageMode();
-
-  const p = PRODUCTS.find(x => x.id === productId);
-  if (!p) return;
-
-  const imgs = getProductImages(p);
-  if (!imgs.length) return;
-
-  lbProductId = productId;
-  lbIndex = idx;
-
-  document.getElementById("imgModalTitle").textContent = p.name || "Image";
-  document.getElementById("imgModalImg").src = imgs[lbIndex];
-  document.getElementById("imgModalImg").alt = p.name || "Image";
-
-  const thumbs = document.getElementById("imgModalThumbs");
-  thumbs.innerHTML = imgs.map((src, i) => `
-    <button class="imgModalThumb ${i===lbIndex?"active":""}" type="button" onclick="setLightboxIndex(${i})">
-      <img src="${src}" alt="">
-    </button>
-  `).join("");
-
-  document.getElementById("imgModal").hidden = false;
-  document.body.style.overflow = "hidden";
+  `;
 }
 
 function closeLightbox(){
   document.getElementById("imgModal").hidden = true;
   document.body.style.overflow = "";
-  lbProductId = null;
-  lbIndex = 0;
-
-  setModalToImageMode();
+  clearTikTokFromModal();
 }
 
-function setLightboxIndex(i){
-  const p = PRODUCTS.find(x => x.id === lbProductId);
-  if (!p) return;
-  const imgs = getProductImages(p);
-  if (!imgs[i]) return;
+function renderGallery(){
+  const grid = document.getElementById("galleryGrid");
+  if (!grid) return;
 
-  lbIndex = i;
-  document.getElementById("imgModalImg").src = imgs[lbIndex];
+  grid.innerHTML = FEATURED_VIDEOS.map(v => `
+    <article class="videoCard">
+      <div class="videoThumb" onclick="openTikTokByUrl(${JSON.stringify(v.title)}, ${JSON.stringify(v.tiktok)})">
+        <img src="${v.image}" alt="${v.title}" loading="lazy">
+      </div>
 
-  document.querySelectorAll(".imgModalThumb").forEach((b, idx) => {
-    b.classList.toggle("active", idx === lbIndex);
-  });
+      <div class="videoBody">
+        <h3 class="videoTitle">${v.title}</h3>
+        <div class="videoMeta">Watch the demo here on ElectricalFlo.</div>
+
+        <div class="videoActions">
+          <button class="primary" type="button" onclick="openTikTokByUrl(${JSON.stringify(v.title)}, ${JSON.stringify(v.tiktok)})">
+            Watch Demo
+          </button>
+
+          ${
+            v.productId
+              ? `<a class="ghost" href="../index.html?cat=radio#${v.productId}">Shop Item</a>`
+              : `<a class="ghost" href="../index.html">Shop Products</a>`
+          }
+        </div>
+      </div>
+    </article>
+  `).join("");
 }
 
-function stepLightbox(dir){
-  const p = PRODUCTS.find(x => x.id === lbProductId);
-  if (!p) return;
-  const imgs = getProductImages(p);
-  if (!imgs.length) return;
+document.getElementById("imgModalClose").addEventListener("click", closeLightbox);
+document.getElementById("imgModalBackdrop").addEventListener("click", closeLightbox);
+document.addEventListener("keydown", (e) => {
+  if (document.getElementById("imgModal").hidden) return;
+  if (e.key === "Escape") closeLightbox();
+});
 
-  lbIndex = (lbIndex + dir + imgs.length) % imgs.length;
-  setLightboxIndex(lbIndex);
-}
+window.openTikTokByUrl = openTikTokByUrl;
 
-/* MOBILE SWIPE (lightbox) */
-function wireLightboxSwipe(){
-  const img = document.getElementById("imgModalImg");
-  let startX = null;
-
-  img.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-  }, {passive:true});
-
-  img.addEventListener("touchend", (e) => {
-    if (startX === null) return;
-    const endX = e.changedTouches[0].clientX;
-    const dx = endX - startX;
-    startX = null;
-    if (Math.abs(dx) < 40) return;
-    if (dx < 0) stepLightbox(+1);
-    else stepLightbox(-1);
-  }, {passive:true});
-}
-
-/* ================= INIT ================= */
-async function init(){
-  initCategoryFromURL();
-
-  const res = await fetch("./products.json", { cache: "no-store" });
-  PRODUCTS = await res.json();
-
-  document.querySelectorAll(".tabBtn").forEach(btn => {
-    btn.addEventListener("click", () => setActiveTab(btn.dataset.cat));
-  });
-
-  setActiveTab(activeCategory);
-
-  document.getElementById("search").addEventListener("input", renderProducts);
-  document.getElementById("sort").addEventListener("change", renderProducts);
-
-  document.getElementById("openCartBtn").addEventListener("click", openDrawer);
-  document.getElementById("closeCartBtn").addEventListener("click", closeDrawer);
-  document.getElementById("backdrop").addEventListener("click", closeDrawer);
-
-  document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
-
-  document.getElementById("copyOrderBtn").addEventListener("click", copyOrderDetails);
-  document.getElementById("clearCartBtn").addEventListener("click", clearCart);
-
-  document.getElementById("paymentMethod").addEventListener("change", updatePaymentNotice);
-  document.getElementById("shippingCountry").addEventListener("change", () => {
-    renderCart();
-    updatePaymentNotice();
-  });
-
-  updatePaymentNotice();
-
-  document.getElementById("imgModalClose").addEventListener("click", closeLightbox);
-  document.getElementById("imgModalBackdrop").addEventListener("click", closeLightbox);
-  document.getElementById("imgPrev").addEventListener("click", () => stepLightbox(-1));
-  document.getElementById("imgNext").addEventListener("click", () => stepLightbox(+1));
-  document.addEventListener("keydown", (e) => {
-    if (document.getElementById("imgModal").hidden) return;
-    if (e.key === "Escape") closeLightbox();
-    if (e.key === "ArrowLeft") stepLightbox(-1);
-    if (e.key === "ArrowRight") stepLightbox(+1);
-  });
-
-  wireLightboxSwipe();
-
-  renderCartCount();
-  renderProducts();
-  renderCart();
-}
-
-/* expose a few functions to inline handlers */
-window.addToCart = addToCart;
-window.swapImg = swapImg;
-window.openLightbox = openLightbox;
-window.openTikTok = openTikTok;
-
-init();
+renderGallery();
 </script>
 
 </body>
