@@ -17,7 +17,7 @@
 
   <style>
     .galleryWrap{
-      max-width: 1200px;
+      max-width: 1240px;
       margin: 0 auto;
       padding: 20px 16px 48px;
     }
@@ -50,26 +50,38 @@
       margin-top:16px;
     }
 
+    .galleryHint{
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.5;
+    }
+
     .galleryGrid{
       display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 18px;
+      align-items: start;
     }
 
     .videoCard{
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
       background: rgba(255,255,255,0.02);
       display:flex;
       flex-direction:column;
+      scroll-snap-align: start;
     }
 
     .videoThumb{
-      aspect-ratio: 4 / 5;
+      position: relative;
+      aspect-ratio: 9 / 16;
       background: rgba(255,255,255,0.04);
       cursor: pointer;
       overflow: hidden;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .videoThumb img{
@@ -77,6 +89,52 @@
       height:100%;
       object-fit:cover;
       display:block;
+      transition: transform .22s ease;
+    }
+
+    .videoThumb:hover img{
+      transform: scale(1.03);
+    }
+
+    .videoOverlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      padding:14px;
+      background: linear-gradient(to top, rgba(0,0,0,.66), rgba(0,0,0,.12) 45%, rgba(0,0,0,0));
+      pointer-events:none;
+    }
+
+    .playBadge{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:54px;
+      height:54px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.42);
+      color:#fff;
+      font-size:1.2rem;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.32);
+    }
+
+    .overlayTag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      min-height: 34px;
+      padding: 0 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.42);
+      color:#fff;
+      font-size: 0.9rem;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,.2);
     }
 
     .videoBody{
@@ -149,8 +207,28 @@
       flex-wrap:wrap;
     }
 
+    .topNavActions .tabBtn,
+    .topNavActions .ghost{
+      text-decoration:none;
+    }
+
     .imgModal[hidden]{
       display:none !important;
+    }
+
+    .imgModalPanel.videoModalPanel{
+      width:min(1180px, 96vw);
+    }
+
+    .videoModalStage{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      width:100%;
+      min-height:min(78vh, 860px);
+      padding: 12px 58px;
+      box-sizing:border-box;
     }
 
     .tiktokWrap{
@@ -159,6 +237,96 @@
       justify-content:center;
       width:100%;
       min-height: 300px;
+    }
+
+    .tiktokFrame{
+      width:min(420px, 90vw);
+      height:min(78vh, 780px);
+      border:0;
+      border-radius:16px;
+      overflow:hidden;
+      background:#000;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+
+    .videoNavBtn{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      font-size: 1.25rem;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      z-index: 2;
+    }
+
+    .videoNavBtn:hover{
+      background: rgba(255,255,255,0.12);
+    }
+
+    .videoNavBtn--prev{ left: 10px; }
+    .videoNavBtn--next{ right: 10px; }
+
+    .videoModalFooter{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:16px;
+      flex-wrap:wrap;
+      padding: 0 16px 16px;
+    }
+
+    .videoModalMeta{
+      color: var(--muted);
+      line-height:1.5;
+      font-size:0.94rem;
+    }
+
+    .videoModalMeta strong{
+      color: var(--text);
+      display:block;
+      font-size:1rem;
+      margin-bottom:4px;
+    }
+
+    .videoModalActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    @media (max-width: 760px){
+      .galleryGrid{
+        grid-template-columns: 1fr;
+      }
+
+      .videoCard{
+        max-width: 420px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .videoModalStage{
+        padding: 10px 44px;
+        min-height: 70vh;
+      }
+
+      .tiktokFrame{
+        width:min(92vw, 420px);
+        height:min(72vh, 760px);
+      }
+
+      .videoNavBtn{
+        width:38px;
+        height:38px;
+      }
     }
   </style>
 </head>
@@ -175,20 +343,24 @@
       </a>
 
       <div class="topNavActions">
-        <a class="ghost" href="../index.html">Shop</a>
-        <a class="ghost" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Follow @N2CFX</a>
+        <a class="tabBtn" href="../index.html">Shop</a>
+        <a class="tabBtn" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Follow @N2CFX</a>
       </div>
     </div>
 
     <section class="galleryHero">
       <h2>Video Gallery</h2>
       <p>
-        Watch featured product demos without leaving the site. These are some of the best ElectricalFlo TikTok videos, embedded here for a cleaner shopping experience.
+        Watch featured product demos without leaving the site. Tap any video card to open a TikTok-style viewer, then swipe or use the arrows to move through the gallery.
       </p>
 
       <div class="galleryActions">
         <a class="primary" href="../index.html">Shop Products</a>
         <a class="ghost" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Open TikTok Profile</a>
+      </div>
+
+      <div class="galleryHint">
+        Tip: on mobile, open a video and swipe left or right to move through the featured demos.
       </div>
     </section>
 
@@ -198,14 +370,25 @@
   <!-- VIDEO MODAL -->
   <div class="imgModal" id="imgModal" hidden>
     <div class="imgModalBackdrop" id="imgModalBackdrop"></div>
-    <div class="imgModalPanel" role="dialog" aria-modal="true" aria-label="Video viewer">
+
+    <div class="imgModalPanel videoModalPanel" role="dialog" aria-modal="true" aria-label="Video viewer">
       <div class="imgModalHeader">
         <div class="imgModalTitle" id="imgModalTitle">Video</div>
         <button class="iconBtn" id="imgModalClose" type="button">✕</button>
       </div>
 
-      <div class="imgModalMain">
+      <div class="videoModalStage" id="videoModalStage">
+        <button class="videoNavBtn videoNavBtn--prev" id="videoPrevBtn" type="button" aria-label="Previous video">‹</button>
+
         <div id="modalMedia" class="modalMedia"></div>
+
+        <button class="videoNavBtn videoNavBtn--next" id="videoNextBtn" type="button" aria-label="Next video">›</button>
+      </div>
+
+      <div class="videoModalFooter">
+        <div class="videoModalMeta" id="videoModalMeta"></div>
+
+        <div class="videoModalActions" id="videoModalActions"></div>
       </div>
     </div>
   </div>
@@ -214,29 +397,35 @@
 const FEATURED_VIDEOS = [
   {
     title: "Motorola APX 6000 / 7000 / 8000 Cup Holder",
+    subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7608698894289079582",
     image: "../images/IMG_1085.jpeg",
-    productId: "apx-cupholder"
+    shopUrl: "../index.html?cat=radio"
   },
   {
     title: "Motorola APX 6000XE / 8000XE Belt Clip Holster Cup Holder",
+    subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7615730673558588703",
     image: "../images/APX_CLIP.jpg",
-    productId: "apx-cupholder-wclip"
+    shopUrl: "../index.html?cat=radio"
   },
   {
     title: "Motorola XTS2500 & XTS5000",
+    subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7610552793476189471",
     image: "../images/XTS5000.JPG",
-    productId: "xts5000-cupholder"
+    shopUrl: "../index.html?cat=radio"
   },
   {
     title: "Motorola XPR Cup Holder",
+    subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7604665291943054622",
     image: "../images/3A679986-23CA-4666-BBE3-BD70255B6A45_1_201_a.jpeg",
-    productId: "xpr7550-cupholder"
+    shopUrl: "../index.html?cat=radio"
   }
 ];
+
+let currentVideoIndex = 0;
 
 function getTikTokId(url){
   const m = String(url || "").match(/\/video\/(\d+)/);
@@ -249,14 +438,35 @@ function clearTikTokFromModal(){
   media.innerHTML = "";
 }
 
-function openTikTokByUrl(title, url){
-  const postId = getTikTokId(url);
+function renderModalFooter(video){
+  const meta = document.getElementById("videoModalMeta");
+  const actions = document.getElementById("videoModalActions");
+  if (!meta || !actions) return;
+
+  meta.innerHTML = `
+    <strong>${video.title}</strong>
+    <span>${video.subtitle || "Watch this featured demo on ElectricalFlo."}</span>
+  `;
+
+  actions.innerHTML = `
+    <a class="primary" href="${video.shopUrl || "../index.html"}">Shop Products</a>
+    <a class="ghost" href="${video.tiktok}" target="_blank" rel="noopener noreferrer">Open on TikTok</a>
+  `;
+}
+
+function openVideoAt(index){
+  const video = FEATURED_VIDEOS[index];
+  if (!video) return;
+
+  const postId = getTikTokId(video.tiktok);
   if (!postId){
     alert("Invalid TikTok URL.");
     return;
   }
 
-  document.getElementById("imgModalTitle").textContent = title || "TikTok Video";
+  currentVideoIndex = index;
+
+  document.getElementById("imgModalTitle").textContent = video.title || "TikTok Video";
   document.getElementById("imgModal").hidden = false;
   document.body.style.overflow = "hidden";
 
@@ -266,14 +476,21 @@ function openTikTokByUrl(title, url){
   media.innerHTML = `
     <div class="tiktokWrap">
       <iframe
-        src="https://www.tiktok.com/player/v1/${postId}?music_info=1&description=1"
+        class="tiktokFrame"
+        src="https://www.tiktok.com/player/v1/${postId}?autoplay=1&music_info=1&description=1"
         title="TikTok video player"
-        style="width:min(520px,92vw); height:min(740px,74vh); border:0; border-radius:14px; overflow:hidden;"
-        allow="fullscreen"
+        allow="autoplay; fullscreen"
         allowfullscreen
       ></iframe>
     </div>
   `;
+
+  renderModalFooter(video);
+}
+
+function stepVideo(dir){
+  const next = (currentVideoIndex + dir + FEATURED_VIDEOS.length) % FEATURED_VIDEOS.length;
+  openVideoAt(next);
 }
 
 function closeLightbox(){
@@ -286,41 +503,75 @@ function renderGallery(){
   const grid = document.getElementById("galleryGrid");
   if (!grid) return;
 
-  grid.innerHTML = FEATURED_VIDEOS.map(v => `
+  grid.innerHTML = FEATURED_VIDEOS.map((v, i) => `
     <article class="videoCard">
-      <div class="videoThumb" onclick="openTikTokByUrl(${JSON.stringify(v.title)}, ${JSON.stringify(v.tiktok)})">
+      <div class="videoThumb" onclick="openVideoAt(${i})">
         <img src="${v.image}" alt="${v.title}" loading="lazy">
+        <div class="videoOverlay">
+          <span class="playBadge">▶</span>
+          <span class="overlayTag">Watch Demo</span>
+        </div>
       </div>
 
       <div class="videoBody">
         <h3 class="videoTitle">${v.title}</h3>
-        <div class="videoMeta">Watch the demo here on ElectricalFlo.</div>
+        <div class="videoMeta">${v.subtitle || "Watch the demo here on ElectricalFlo."}</div>
 
         <div class="videoActions">
-          <button class="primary" type="button" onclick="openTikTokByUrl(${JSON.stringify(v.title)}, ${JSON.stringify(v.tiktok)})">
+          <button class="primary" type="button" onclick="openVideoAt(${i})">
             Watch Demo
           </button>
-
-          ${
-            v.productId
-              ? `<a class="ghost" href="../index.html?cat=radio#${v.productId}">Shop Item</a>`
-              : `<a class="ghost" href="../index.html">Shop Products</a>`
-          }
+          <a class="ghost" href="${v.shopUrl || "../index.html"}">Shop Products</a>
         </div>
       </div>
     </article>
   `).join("");
 }
 
+function wireModalSwipe(){
+  const stage = document.getElementById("videoModalStage");
+  let startX = null;
+
+  if (!stage) return;
+
+  stage.addEventListener("touchstart", (e) => {
+    if (!e.touches || !e.touches.length) return;
+    startX = e.touches[0].clientX;
+  }, { passive: true });
+
+  stage.addEventListener("touchend", (e) => {
+    if (startX === null) return;
+    if (!e.changedTouches || !e.changedTouches.length) {
+      startX = null;
+      return;
+    }
+
+    const endX = e.changedTouches[0].clientX;
+    const dx = endX - startX;
+    startX = null;
+
+    if (Math.abs(dx) < 50) return;
+
+    if (dx < 0) stepVideo(1);
+    else stepVideo(-1);
+  }, { passive: true });
+}
+
 document.getElementById("imgModalClose").addEventListener("click", closeLightbox);
 document.getElementById("imgModalBackdrop").addEventListener("click", closeLightbox);
+document.getElementById("videoPrevBtn").addEventListener("click", () => stepVideo(-1));
+document.getElementById("videoNextBtn").addEventListener("click", () => stepVideo(1));
+
 document.addEventListener("keydown", (e) => {
   if (document.getElementById("imgModal").hidden) return;
   if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowLeft") stepVideo(-1);
+  if (e.key === "ArrowRight") stepVideo(1);
 });
 
-window.openTikTokByUrl = openTikTokByUrl;
+window.openVideoAt = openVideoAt;
 
+wireModalSwipe();
 renderGallery();
 </script>
 
