@@ -10,6 +10,31 @@
   <link rel="stylesheet" href="/style.css" />
 
   <style>
+    .headerLinks{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .brandHome{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .headerLinks .tabBtn,
+    .headerLinks .miniNavLink{
+      text-decoration:none;
+    }
+
+    .miniNavLink.active{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0,230,118,.12);
+    }
+
     .wrap{
       max-width:900px;
       margin:0 auto;
@@ -17,7 +42,7 @@
     }
 
     h1{
-      margin-bottom:20px;
+      margin:0 0 20px;
     }
 
     .faq{
@@ -42,24 +67,39 @@
       color:var(--muted);
       line-height:1.6;
     }
-
-  
-    .miniNavLink:hover{
-      transform:translateY(-1px);
-      background:rgba(255,255,255,0.06);
-    }
   </style>
 </head>
 <body>
 
-<main class="wrap">
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-    <h1 style="margin:0;">Frequently Asked Questions</h1>
-    <a href="/" class="miniNavLink">Back to Shop</a>
+<header class="header">
+  <div class="brandWrap">
+    <a class="brandHome" href="/">
+      <img src="/images/Logo.png" alt="ElectricalFlo Logo" class="logo" />
+      <div class="brand">
+        <h1>ElectricalFlo</h1>
+        <p>3D Printed Gear</p>
+      </div>
+    </a>
   </div>
 
-  <div class="faq">
+  <div class="headerRight">
+    <div class="headerLinks">
+      <nav class="catTabs" aria-label="Categories">
+        <a class="tabBtn" href="/?cat=all">All</a>
+        <a class="tabBtn" href="/?cat=radio">Radio</a>
+        <a class="tabBtn" href="/?cat=flashlight">Flashlight</a>
+      </nav>
 
+      <a class="miniNavLink" href="/videos/">Video Gallery</a>
+      <a class="miniNavLink active" href="/faq/">FAQ</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Frequently Asked Questions</h1>
+
+  <div class="faq">
     <details>
       <summary>Will my radio fit in the cup holder you're selling?</summary>
       <p>Mostly yes. We try to include the compatible batteries that will work with the cup holders, but if your battery is not listed, we can customize the cup holder to your exact needs.</p>
@@ -89,7 +129,6 @@
       <summary>What payment methods do you accept?</summary>
       <p>We use Stripe as our payment processor, which accepts credit cards and digital wallets such as Apple Pay and Google Pay. PayPal and Venmo are also supported.</p>
     </details>
-
   </div>
 </main>
 
