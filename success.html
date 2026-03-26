@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Payment Successful – ElectricalFlo</title>
   <style>
     body {
@@ -48,11 +49,17 @@
 
 <div class="card">
   <h1>✅ Payment Successful</h1>
-  <p>Finalizing your order...</p>
+  <p>Your payment was successful and your order is being finalized.</p>
   <p id="status"></p>
+  <div class="small">
+    You will receive an email confirmation shortly with your order details.
+  </div>
+  <div class="small">
+    ElectricalFlo is operated by ElectricalFlo LLC.
+  </div>
   <div id="details" class="small"></div>
   <br>
-  <a href="https://electricalflo.com">Return to Home</a>
+  <a href="/">Return to Shop</a>
 </div>
 
 <script>
@@ -106,8 +113,8 @@
           : "Payment confirmed.";
 
         setTimeout(() => {
-          window.location.href = "https://electricalflo.com";
-        }, 1800);
+          window.location.href = "/";
+        }, 4000);
 
       } else {
         statusEl.innerText = "Payment received, but confirmation failed.";
