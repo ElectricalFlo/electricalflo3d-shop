@@ -16,6 +16,31 @@
   <link rel="stylesheet" href="../style.css" />
 
   <style>
+    .headerLinks{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .brandHome{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .headerLinks .tabBtn,
+    .headerLinks .miniNavLink{
+      text-decoration:none;
+    }
+
+    .miniNavLink.active{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0,230,118,.12);
+    }
+
     .galleryWrap{
       max-width: 1240px;
       margin: 0 auto;
@@ -163,55 +188,6 @@
       margin-top: 4px;
     }
 
-    .topNav{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      flex-wrap:wrap;
-      margin-bottom: 16px;
-    }
-
-    .topNav .brandMini{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      text-decoration:none;
-      color:inherit;
-    }
-
-    .topNav .brandMini img{
-      width:44px;
-      height:44px;
-      object-fit:contain;
-    }
-
-    .topNav .brandMiniText{
-      display:flex;
-      flex-direction:column;
-      line-height:1.1;
-    }
-
-    .topNav .brandMiniText strong{
-      font-size:1rem;
-    }
-
-    .topNav .brandMiniText span{
-      color:var(--muted);
-      font-size:0.9rem;
-    }
-
-    .topNavActions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    .topNavActions .tabBtn,
-    .topNavActions .ghost{
-      text-decoration:none;
-    }
-
     .imgModal[hidden]{
       display:none !important;
     }
@@ -332,66 +308,76 @@
 </head>
 <body>
 
-  <main class="galleryWrap">
-    <div class="topNav">
-      <a class="brandMini" href="../index.html" aria-label="Back to shop">
-        <img src="../images/Logo.png" alt="ElectricalFlo Logo" />
-        <div class="brandMiniText">
-          <strong>ElectricalFlo</strong>
-          <span>Back to Shop</span>
-        </div>
-      </a>
-
-      <div class="topNavActions">
-        <a class="tabBtn" href="../index.html">Shop</a>
-        <a class="tabBtn" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Follow @N2CFX</a>
+<header class="header">
+  <div class="brandWrap">
+    <a class="brandHome" href="/">
+      <img src="../images/Logo.png" alt="ElectricalFlo Logo" class="logo" />
+      <div class="brand">
+        <h1>ElectricalFlo</h1>
+        <p>3D Printed Gear</p>
       </div>
-    </div>
+    </a>
+  </div>
 
-    <section class="galleryHero">
-      <h2>Video Gallery</h2>
-      <p>
-        Watch featured product demos without leaving the site. Tap any video card to open a TikTok-style viewer, then swipe or use the arrows to move through the gallery.
-      </p>
+  <div class="headerRight">
+    <div class="headerLinks">
+      <nav class="catTabs" aria-label="Categories">
+        <a class="tabBtn" href="/?cat=all">All</a>
+        <a class="tabBtn" href="/?cat=radio">Radio</a>
+        <a class="tabBtn" href="/?cat=flashlight">Flashlight</a>
+      </nav>
 
-      <div class="galleryActions">
-        <a class="primary" href="../index.html">Shop Products</a>
-        <a class="ghost" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Open TikTok Profile</a>
-      </div>
-
-      <div class="galleryHint">
-        Tip: on mobile, open a video and swipe left or right to move through the featured demos.
-      </div>
-    </section>
-
-    <section class="galleryGrid" id="galleryGrid"></section>
-  </main>
-
-  <!-- VIDEO MODAL -->
-  <div class="imgModal" id="imgModal" hidden>
-    <div class="imgModalBackdrop" id="imgModalBackdrop"></div>
-
-    <div class="imgModalPanel videoModalPanel" role="dialog" aria-modal="true" aria-label="Video viewer">
-      <div class="imgModalHeader">
-        <div class="imgModalTitle" id="imgModalTitle">Video</div>
-        <button class="iconBtn" id="imgModalClose" type="button">✕</button>
-      </div>
-
-      <div class="videoModalStage" id="videoModalStage">
-        <button class="videoNavBtn videoNavBtn--prev" id="videoPrevBtn" type="button" aria-label="Previous video">‹</button>
-
-        <div id="modalMedia" class="modalMedia"></div>
-
-        <button class="videoNavBtn videoNavBtn--next" id="videoNextBtn" type="button" aria-label="Next video">›</button>
-      </div>
-
-      <div class="videoModalFooter">
-        <div class="videoModalMeta" id="videoModalMeta"></div>
-
-        <div class="videoModalActions" id="videoModalActions"></div>
-      </div>
+      <a class="miniNavLink active" href="/videos/">Video Gallery</a>
+      <a class="miniNavLink" href="/faq/">FAQ</a>
     </div>
   </div>
+</header>
+
+<main class="galleryWrap">
+  <section class="galleryHero">
+    <h2>Video Gallery</h2>
+    <p>
+      Watch featured product demos without leaving the site. Tap any video card to open a TikTok-style viewer, then swipe or use the arrows to move through the gallery.
+    </p>
+
+    <div class="galleryActions">
+      <a class="primary" href="/?cat=radio">Shop Radio Products</a>
+      <a class="ghost" href="https://www.tiktok.com/@n2cfx" target="_blank" rel="noopener noreferrer">Open TikTok Profile</a>
+    </div>
+
+    <div class="galleryHint">
+      Tip: on mobile, open a video and swipe left or right to move through the featured demos.
+    </div>
+  </section>
+
+  <section class="galleryGrid" id="galleryGrid"></section>
+</main>
+
+<!-- VIDEO MODAL -->
+<div class="imgModal" id="imgModal" hidden>
+  <div class="imgModalBackdrop" id="imgModalBackdrop"></div>
+
+  <div class="imgModalPanel videoModalPanel" role="dialog" aria-modal="true" aria-label="Video viewer">
+    <div class="imgModalHeader">
+      <div class="imgModalTitle" id="imgModalTitle">Video</div>
+      <button class="iconBtn" id="imgModalClose" type="button">✕</button>
+    </div>
+
+    <div class="videoModalStage" id="videoModalStage">
+      <button class="videoNavBtn videoNavBtn--prev" id="videoPrevBtn" type="button" aria-label="Previous video">‹</button>
+
+      <div id="modalMedia" class="modalMedia"></div>
+
+      <button class="videoNavBtn videoNavBtn--next" id="videoNextBtn" type="button" aria-label="Next video">›</button>
+    </div>
+
+    <div class="videoModalFooter">
+      <div class="videoModalMeta" id="videoModalMeta"></div>
+
+      <div class="videoModalActions" id="videoModalActions"></div>
+    </div>
+  </div>
+</div>
 
 <script>
 const FEATURED_VIDEOS = [
@@ -400,28 +386,28 @@ const FEATURED_VIDEOS = [
     subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7608698894289079582",
     image: "../images/IMG_1085.jpeg",
-    shopUrl: "../index.html?cat=radio"
+    shopUrl: "/?cat=radio"
   },
   {
     title: "Motorola APX 6000XE / 8000XE Belt Clip Holster Cup Holder",
     subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7615730673558588703",
     image: "../images/APX_CLIP.jpg",
-    shopUrl: "../index.html?cat=radio"
+    shopUrl: "/?cat=radio"
   },
   {
     title: "Motorola XTS2500 & XTS5000",
     subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7610552793476189471",
     image: "../images/XTS5000.JPG",
-    shopUrl: "../index.html?cat=radio"
+    shopUrl: "/?cat=radio"
   },
   {
     title: "Motorola XPR Cup Holder",
     subtitle: "Featured ElectricalFlo demo",
     tiktok: "https://www.tiktok.com/@n2cfx/video/7604665291943054622",
     image: "../images/3A679986-23CA-4666-BBE3-BD70255B6A45_1_201_a.jpeg",
-    shopUrl: "../index.html?cat=radio"
+    shopUrl: "/?cat=radio"
   }
 ];
 
@@ -449,7 +435,7 @@ function renderModalFooter(video){
   `;
 
   actions.innerHTML = `
-    <a class="primary" href="${video.shopUrl || "../index.html"}">Shop Products</a>
+    <a class="primary" href="${video.shopUrl || "/"}">Shop Products</a>
     <a class="ghost" href="${video.tiktok}" target="_blank" rel="noopener noreferrer">Open on TikTok</a>
   `;
 }
@@ -521,7 +507,7 @@ function renderGallery(){
           <button class="primary" type="button" onclick="openVideoAt(${i})">
             Watch Demo
           </button>
-          <a class="ghost" href="${v.shopUrl || "../index.html"}">Shop Products</a>
+          <a class="ghost" href="${v.shopUrl || "/"}">Shop Products</a>
         </div>
       </div>
     </article>
