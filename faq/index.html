@@ -42,43 +42,67 @@
       color:var(--muted);
       line-height:1.6;
     }
+
+    .miniNavLink{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:38px;
+      padding:0 14px;
+      border:1px solid var(--border);
+      border-radius:999px;
+      color:var(--text);
+      text-decoration:none;
+      background:rgba(255,255,255,0.03);
+      transition:transform .15s ease, background .15s ease, border-color .15s ease;
+      font-size:0.95rem;
+      white-space:nowrap;
+    }
+
+    .miniNavLink:hover{
+      transform:translateY(-1px);
+      background:rgba(255,255,255,0.06);
+    }
   </style>
 </head>
 <body>
 
 <main class="wrap">
-  <h1>Frequently Asked Questions</h1>
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <h1 style="margin:0;">Frequently Asked Questions</h1>
+    <a href="/" class="miniNavLink">Back to Shop</a>
+  </div>
 
   <div class="faq">
 
     <details>
       <summary>Will my radio fit in the cup holder you're selling?</summary>
-      <p>Mostly Yes. We try and include the compatible batteries that will work with the cup holders but if your battery is not listed, we can always customize the cup holder to your exact needs.</p>
+      <p>Mostly yes. We try to include the compatible batteries that will work with the cup holders, but if your battery is not listed, we can customize the cup holder to your exact needs.</p>
     </details>
 
-     <details>
-      <summary>Will the cup holder fit inside my vehicles cup holder?</summary>
-      <p>Our cup holders are made for standard sized cup holders. They are made between 78-81mm in diameter. We can always customize the cup holder to fit your exact needs. </p>
+    <details>
+      <summary>Will the cup holder fit inside my vehicle’s cup holder?</summary>
+      <p>Our cup holders are made for standard-sized cup holders. They are typically made between 78–81mm in diameter. We can also customize the cup holder to fit your exact needs.</p>
     </details>
 
     <details>
       <summary>Can I add my callsign?</summary>
-      <p>Yes. All of our cup holders support custom callsigns including glow-in-the-dark options in green, blue and red/orange. Include your color of choice in the notes section at checkout.</p>
+      <p>Yes. All of our cup holders support custom callsigns, including glow-in-the-dark options in green, blue, and red/orange. Include your color of choice in the notes section at checkout.</p>
     </details>
 
     <details>
       <summary>How long does shipping take?</summary>
-      <p>Processing time varies depending on order volume, but I aim to ship as quickly as possible. Typical leads times are 24-48hours after order is received. Custom orders can take up to 7 days depending on complexity.</p>
+      <p>Processing time varies depending on order volume, but I aim to ship as quickly as possible. Typical lead times are 24–48 hours after the order is received. Custom orders can take up to 7 days depending on complexity.</p>
     </details>
 
     <details>
       <summary>Do you support radios not listed?</summary>
-      <p>Definitely! There is an item availabe named "Custom Radio Cup Holder (Made to Order)". Place an order with that item and in the notes section at checkout, include all of your details. Radio Model, Battery Model, What callsign you'd like, What year and model vehicle the cup holder will be going in. I will follow up via email to get your cup holder dialed in to your exact needs.</p>
+      <p>Definitely. There is an item available named “Custom Radio Cup Holder (Made to Order).” Place an order for that item and include all of your details in the notes section at checkout: radio model, battery model, desired callsign, and the year and model of the vehicle the cup holder will be going in. I will follow up via email to get your cup holder dialed in to your exact needs.</p>
     </details>
 
     <details>
       <summary>What payment methods do you accept?</summary>
-      <p>We use Stripe as our payment processor which accepts credit cards and digital wallets (Apple/Google Pay). PayPal, and Venmo are also supported.</p>
+      <p>We use Stripe as our payment processor, which accepts credit cards and digital wallets such as Apple Pay and Google Pay. PayPal and Venmo are also supported.</p>
     </details>
 
   </div>
