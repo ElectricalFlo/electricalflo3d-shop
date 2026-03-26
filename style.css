@@ -81,6 +81,7 @@ body{
 
 .tabBtn:hover{
   border-color: rgba(0,230,118,0.5);
+  box-shadow: 0 0 0 2px rgba(0,230,118,.12);
 }
 
 .tabBtn.active{
