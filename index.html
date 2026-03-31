@@ -128,11 +128,9 @@
       </label>
 
       <label class="field">
-        <span>Preferred payment method</span>
+        <span>Payment method</span>
         <select id="paymentMethod">
-          <option value="Stripe" selected>Card (Stripe Checkout) — Recommended</option>
-          <option value="PayPal">PayPal (Manual Payment)</option>
-          <option value="Venmo">Venmo (Manual Payment)</option>
+          <option value="Stripe" selected>Card (Stripe Checkout)</option>
         </select>
       </label>
 
@@ -560,7 +558,7 @@ function buildOrderSummaryText(orderIdMaybe){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const email = (document.getElementById("customerEmail")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
-  const payment = document.getElementById("paymentMethod")?.value || "PayPal";
+  const payment = document.getElementById("paymentMethod")?.value || "Stripe";
 
   const country = document.getElementById("shippingCountry")?.value || "US";
   const shipAddr = (document.getElementById("shippingAddress")?.value || "").trim();
@@ -609,7 +607,7 @@ function buildOrderPayload(orderId){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const email = (document.getElementById("customerEmail")?.value || "").trim();
   const notes = (document.getElementById("orderNotes")?.value || "").trim();
-  const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
+  const paymentMethod = document.getElementById("paymentMethod")?.value || "Stripe";
 
   const country = document.getElementById("shippingCountry")?.value || "US";
   const address = (document.getElementById("shippingAddress")?.value || "").trim();
@@ -678,7 +676,7 @@ async function sendOrder(payload){
 
 /* ================= PAYMENT NOTICE ================= */
 function updatePaymentNotice(){
-  const pm = (document.getElementById("paymentMethod")?.value || "PayPal");
+  const pm = (document.getElementById("paymentMethod")?.value || "Stripe");
   const country = document.getElementById("shippingCountry")?.value || "US";
   const el = document.getElementById("paymentNotice");
   if (!el) return;
@@ -688,12 +686,6 @@ function updatePaymentNotice(){
       el.textContent = "Card payments are processed securely via Stripe Checkout. U.S. shipping is $7 for 1–2 items, $10 for 3–4 items, and $15 for 5+ items. You’ll be redirected to Stripe to complete payment.";
     } else {
       el.textContent = "Card payments are processed securely via Stripe Checkout. International shipping is a flat $40 via UPS. You’ll be redirected to Stripe to complete payment.";
-    }
-  } else {
-    if (country === "US") {
-      el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. U.S. shipping is $7 for 1–2 items, $10 for 3–4 items, and $15 for 5+ items.";
-    } else {
-      el.textContent = "No payment is taken on this site. After you place the order, you’ll receive an email with total + payment link. International shipping is a flat $40 via UPS.";
     }
   }
 }
@@ -705,7 +697,7 @@ async function placeOrder(){
   const name = (document.getElementById("customerName")?.value || "").trim();
   const country = (document.getElementById("shippingCountry")?.value || "").trim();
   const address = (document.getElementById("shippingAddress")?.value || "").trim();
-  const paymentMethod = document.getElementById("paymentMethod")?.value || "PayPal";
+  const paymentMethod = document.getElementById("paymentMethod")?.value || "Stripe";
 
   if (!name){
     alert("Please enter your name.");
