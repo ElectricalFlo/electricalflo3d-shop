@@ -233,6 +233,29 @@
       "images/Kenwood&APX_CupholderLOGO.png"
     ]
   },
+ {
+  "id": "LUMINTOP-FWAA-2026",
+  "category": "flashlight",
+  "name": "GITD Triple Emitter Gasket for Lumintop FWAA 2026",
+  "price": 35,
+  "note": "Choose model and color from the options.",
+  "badges": [
+    "Glow-in-the-Dark"
+  ],
+  "variants": {
+    "colors": [
+      "Green",
+      "Blue",
+      "Red-Orange"
+    ]
+  },
+  "images": [
+    "images/LumintopFWAA_1.jpg",
+    "images/LumintopFWAA_2.jpg",
+    "images/LumintopFWAA_3.jpg",
+    "images/LumintopFWAA_4.jpg"
+  ]
+},
   {
     "id": "okluma-gitd-tailrings",
     "category": "flashlight",
@@ -390,3 +413,5 @@
     ]
   }
 ]
+
+
