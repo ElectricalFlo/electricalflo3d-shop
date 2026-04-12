@@ -412,6 +412,58 @@
     "images": [
       "images/GITD_Orings.jpg"
     ]
+    },
+  {
+    "id": "okluma-DC0-Engine-Removal-Tool",
+    "category": "flashlight",
+    "name": "DC0 Engine Removal Tool",
+    "price": 39,
+    "note": "Easily remove the engine on your DC0 with this tool.",
+    "badges": [
+      "Okluma Compatible"
+    },
+    "images": [
+      "images/DC0 Engine Removal.jpg"
+    ]
+    },
+  {
+    "id": "okluma-DC1-Engine-Removal-Tool",
+    "category": "flashlight",
+    "name": "DC1 2025 Engine Removal Tool",
+    "price": 39,
+    "note": "Easily remove the engine on your 2025 DC1 with this tool.",
+    "badges": [
+      "Okluma Compatible"
+    },
+    "images": [
+      "images/DC1 2025 Engine Removal Tool.jpg"
+    ]
+        },
+  {
+    "id": "okluma-DC2-disassemble-Tools",
+    "category": "flashlight",
+    "name": "DC2 2025 Disassembly Tools",
+    "price": 90,
+    "note": "Easily disasemble your 2025 DC2 with these 3 tools. Sold as a package",
+    "badges": [
+      "Okluma Compatible"
+    },
+    "images": [
+      "images/DC2 2025 Disassembly Tools.jpg"
+    ]
+           },
+  {
+    "id": "okluma-DC2-OG-Removal-Tool",
+    "category": "flashlight",
+    "name": "DC2 OG (2020) Engine Removal Tool",
+    "price": 39,
+    "note": "Easily remove the engine on your OG DC2 (2020)",
+    "badges": [
+      "Okluma Compatible"
+    },
+    "images": [
+      "images/DC2 OG Engine Removal Tool.jpg"
+    ]
   }
 ]
 
