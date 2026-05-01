@@ -1,111 +1,242 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>Contact | ElectricalFlo</title>
-  <meta name="description" content="Contact ElectricalFlo for custom radio cup holders, order questions, and product support." />
+  <title>Contact — ElectricalFlo</title>
+  <meta name="description" content="Contact ElectricalFlo for order questions, custom radio cup holders, and product support." />
 
-  <!-- IMPORTANT: root-relative so it works from subfolder -->
   <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    .headerLinks{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .brandHome{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .headerLinks .tabBtn,
+    .headerLinks .miniNavLink{
+      text-decoration:none;
+    }
+
+    .miniNavLink.active{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0,230,118,.12);
+    }
+
+    .wrap{
+      max-width:900px;
+      margin:0 auto;
+      padding:32px 16px 64px;
+    }
+
+    h1{
+      margin:0 0 20px;
+    }
+
+    .contactIntro{
+      color:var(--muted);
+      line-height:1.6;
+      margin:12px 0 24px;
+    }
+
+    .contactBox{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(255,255,255,0.03);
+      padding:18px;
+      margin-bottom:16px;
+    }
+
+    .contactBox h2{
+      margin:0 0 10px;
+      font-size:1.15rem;
+    }
+
+    .contactBox p{
+      color:var(--muted);
+      line-height:1.6;
+      margin:0 0 14px;
+    }
+
+    .contactBox a{
+      color:var(--accent);
+      text-decoration:none;
+      font-weight:600;
+    }
+
+    .contactBox a:hover{
+      text-decoration:underline;
+    }
+
+    .contactForm{
+      display:grid;
+      gap:14px;
+      margin-top:14px;
+    }
+
+    .contactForm label{
+      display:grid;
+      gap:8px;
+      font-weight:600;
+    }
+
+    .contactForm input,
+    .contactForm textarea{
+      width:100%;
+      box-sizing:border-box;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:rgba(0,0,0,.22);
+      color:inherit;
+      padding:12px 14px;
+      font:inherit;
+      outline:none;
+    }
+
+    .contactForm input:focus,
+    .contactForm textarea:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 2px rgba(0,230,118,.12);
+    }
+
+    .contactForm textarea{
+      resize:vertical;
+      min-height:140px;
+    }
+
+    .contactActions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .contactNote{
+      font-size:.92rem;
+      color:var(--muted);
+      margin:0;
+    }
+
+    @media (max-width:700px){
+      .wrap{
+        padding-top:24px;
+      }
+
+      .contactActions .tabBtn{
+        width:100%;
+        text-align:center;
+      }
+    }
+  </style>
 </head>
-
 <body>
-  <header class="siteHeader">
-    <div class="brandWrap">
-      <a href="/" class="brand">
-        <span class="brandMark">EF</span>
-        <span class="brandText">
-          <strong>ElectricalFlo</strong>
-          <small>Custom 3D Printed Radio Accessories</small>
-        </span>
-      </a>
-    </div>
 
-    <nav class="miniNav">
-      <a class="miniNavLink tabBtn" href="/">All</a>
-      <a class="miniNavLink tabBtn" href="/?category=radio">Radio</a>
-      <a class="miniNavLink tabBtn" href="/?category=flashlight">Flashlight</a>
-      <a class="miniNavLink tabBtn" href="/video/">Video Gallery</a>
-      <a class="miniNavLink tabBtn" href="/faq/">FAQ</a>
-      <a class="miniNavLink tabBtn active" href="/Contact/">Contact</a>
-    </nav>
-  </header>
-
-  <main class="pageShell">
-    <section class="pageHero">
-      <p class="eyebrow">ElectricalFlo Support</p>
-      <h1>Contact Me</h1>
-      <p>
-        Questions about an order, compatibility, or a custom radio cup holder?
-        Send a message and I’ll get back to you.
-      </p>
-    </section>
-
-    <section class="contentCard contactCard">
-      <h2>Send a Message</h2>
-
-      <!-- NOTE: mailto works but isn't ideal long-term -->
-      <form class="contactForm"
-            action="mailto:support@electricalflo.com"
-            method="post"
-            enctype="text/plain">
-
-        <label>
-          Name
-          <input type="text" name="name" required />
-        </label>
-
-        <label>
-          Email
-          <input type="email" name="email" required />
-        </label>
-
-        <label>
-          Order Number
-          <input type="text" name="order_number" />
-        </label>
-
-        <label>
-          Message
-          <textarea name="message" rows="7" required></textarea>
-        </label>
-
-        <button type="submit" class="primaryBtn">Send Message</button>
-      </form>
-    </section>
-
-    <section class="contentCard">
-      <h2>Other Ways to Reach Me</h2>
-
-      <div class="contactGrid">
-        <div>
-          <h3>Email</h3>
-          <p>
-            <a href="mailto:support@electricalflo.com">support@electricalflo.com</a>
-          </p>
-        </div>
-
-        <div>
-          <h3>TikTok</h3>
-          <p>
-            <a href="https://www.tiktok.com/@N2CFX" target="_blank">@N2CFX</a>
-          </p>
-        </div>
-
-        <div>
-          <h3>Custom Requests</h3>
-          <p>
-            Include radio model, battery, and if you use a belt clip.
-          </p>
-        </div>
+<header class="header">
+  <div class="brandWrap">
+    <a class="brandHome" href="/">
+      <img src="/images/Logo.png" alt="ElectricalFlo Logo" class="logo" />
+      <div class="brand">
+        <h1>ElectricalFlo</h1>
+        <p>3D Printed Gear</p>
       </div>
-    </section>
-  </main>
+    </a>
+  </div>
 
-  <footer class="siteFooter">
-    <p>&copy; 2026 ElectricalFlo LLC</p>
-  </footer>
+  <div class="headerRight">
+    <div class="headerLinks">
+      <nav class="catTabs" aria-label="Categories">
+        <a class="tabBtn" href="/?cat=all">All</a>
+        <a class="tabBtn" href="/?cat=radio">Radio</a>
+        <a class="tabBtn" href="/?cat=flashlight">Flashlight</a>
+      </nav>
+
+      <a class="miniNavLink" href="/videos/">Video Gallery</a>
+      <a class="miniNavLink" href="/faq/">FAQ</a>
+      <a class="miniNavLink active" href="/Contact/">Contact</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Contact ElectricalFlo</h1>
+
+  <p class="contactIntro">
+    Have a question about an order, radio compatibility, a custom cup holder, or a product you saw online?
+    Send a message and we’ll get back to you as soon as possible.
+  </p>
+
+  <section class="contactBox">
+    <h2>Email</h2>
+    <p>
+      For order questions, custom requests, or general support, email us directly.
+    </p>
+    <p>
+      <a href="mailto:support@electricalflo.com">support@electricalflo.com</a>
+    </p>
+  </section>
+
+  <section class="contactBox">
+    <h2>Send a Message</h2>
+    <p>
+      Include your radio model, battery model, callsign, and whether you use a belt clip or holster if you are requesting a custom fit.
+    </p>
+
+    <form class="contactForm" action="mailto:support@electricalflo.com" method="post" enctype="text/plain">
+      <label>
+        Name
+        <input type="text" name="Name" required>
+      </label>
+
+      <label>
+        Email
+        <input type="email" name="Email" required>
+      </label>
+
+      <label>
+        Order Number
+        <input type="text" name="Order Number" placeholder="Optional">
+      </label>
+
+      <label>
+        Message
+        <textarea name="Message" required></textarea>
+      </label>
+
+      <div class="contactActions">
+        <button class="tabBtn" type="submit">Send Message</button>
+        <p class="contactNote">This will open your email app to send the message.</p>
+      </div>
+    </form>
+  </section>
+
+  <section class="contactBox">
+    <h2>TikTok</h2>
+    <p>
+      You can also find ElectricalFlo product videos and demos on TikTok.
+    </p>
+    <p>
+      <a href="https://www.tiktok.com/@N2CFX" target="_blank" rel="noopener">@N2CFX</a>
+    </p>
+  </section>
+</main>
+
+<footer class="siteFooter">
+  <div class="siteFooterInner">
+    <p>© 2026 ElectricalFlo LLC. All rights reserved.</p>
+  </div>
+</footer>
+
 </body>
 </html>
