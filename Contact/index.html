@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Contact | ElectricalFlo</title>
+  <meta name="description" content="Contact ElectricalFlo for custom radio cup holders, order questions, and product support." />
+
+  <!-- IMPORTANT: root-relative so it works from subfolder -->
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+  <header class="siteHeader">
+    <div class="brandWrap">
+      <a href="/" class="brand">
+        <span class="brandMark">EF</span>
+        <span class="brandText">
+          <strong>ElectricalFlo</strong>
+          <small>Custom 3D Printed Radio Accessories</small>
+        </span>
+      </a>
+    </div>
+
+    <nav class="miniNav">
+      <a class="miniNavLink tabBtn" href="/">All</a>
+      <a class="miniNavLink tabBtn" href="/?category=radio">Radio</a>
+      <a class="miniNavLink tabBtn" href="/?category=flashlight">Flashlight</a>
+      <a class="miniNavLink tabBtn" href="/video/">Video Gallery</a>
+      <a class="miniNavLink tabBtn" href="/faq/">FAQ</a>
+      <a class="miniNavLink tabBtn active" href="/Contact/">Contact</a>
+    </nav>
+  </header>
+
+  <main class="pageShell">
+    <section class="pageHero">
+      <p class="eyebrow">ElectricalFlo Support</p>
+      <h1>Contact Me</h1>
+      <p>
+        Questions about an order, compatibility, or a custom radio cup holder?
+        Send a message and I’ll get back to you.
+      </p>
+    </section>
+
+    <section class="contentCard contactCard">
+      <h2>Send a Message</h2>
+
+      <!-- NOTE: mailto works but isn't ideal long-term -->
+      <form class="contactForm"
+            action="mailto:support@electricalflo.com"
+            method="post"
+            enctype="text/plain">
+
+        <label>
+          Name
+          <input type="text" name="name" required />
+        </label>
+
+        <label>
+          Email
+          <input type="email" name="email" required />
+        </label>
+
+        <label>
+          Order Number
+          <input type="text" name="order_number" />
+        </label>
+
+        <label>
+          Message
+          <textarea name="message" rows="7" required></textarea>
+        </label>
+
+        <button type="submit" class="primaryBtn">Send Message</button>
+      </form>
+    </section>
+
+    <section class="contentCard">
+      <h2>Other Ways to Reach Me</h2>
+
+      <div class="contactGrid">
+        <div>
+          <h3>Email</h3>
+          <p>
+            <a href="mailto:support@electricalflo.com">support@electricalflo.com</a>
+          </p>
+        </div>
+
+        <div>
+          <h3>TikTok</h3>
+          <p>
+            <a href="https://www.tiktok.com/@N2CFX" target="_blank">@N2CFX</a>
+          </p>
+        </div>
+
+        <div>
+          <h3>Custom Requests</h3>
+          <p>
+            Include radio model, battery, and if you use a belt clip.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="siteFooter">
+    <p>&copy; 2026 ElectricalFlo LLC</p>
+  </footer>
+</body>
+</html>
