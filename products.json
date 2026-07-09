@@ -218,6 +218,26 @@
       "images/XTS5000.JPG"
     ]
   },
+   {
+    "id": "motorola-minitorvi",
+    "category": "radio",
+    "name": "Cup Holder for Motorola Minitor VI",
+    "price": 42,
+    "compatible_batteries": [
+      "standard battery"
+    ],
+    "note": "Made to order. Custom callsign in glow-in-the-dark.",
+    "badges": [
+      "Made to Order",
+      "Custom Callsign",
+      "Glow-in-the-Dark Callsign"
+    ],
+    "images": [
+      "images/IMG_2709.jpg",
+      "images/IMG_2710.jpg",
+      "images/IMG_2711.jpg"
+    ]
+  },
   {
     "id": "radio-custom-generic",
     "category": "radio",
