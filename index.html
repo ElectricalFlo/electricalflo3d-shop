@@ -254,9 +254,9 @@ function getShippingAmount(){
   const itemCount = cart.reduce((sum, item) => sum + Number(item.qty || 0), 0);
 
   if (country === "US") {
-    if (itemCount <= 2) return 7.00;
-    if (itemCount <= 4) return 10.00;
-    return 15.00;
+    if (itemCount <= 2) return 10.00;
+    if (itemCount <= 4) return 15.00;
+    return 20.00;
   }
 
   return 40.00; // International flat UPS rate
