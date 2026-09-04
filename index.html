@@ -60,6 +60,7 @@
         <button class="tabBtn" id="tabAll" type="button" data-cat="all">All</button>
         <button class="tabBtn" id="tabRadio" type="button" data-cat="radio">Radio</button>
         <button class="tabBtn" id="tabFlashlight" type="button" data-cat="flashlight">Flashlight</button>
+        <button class="tabBtn" id="tabToolStorage" type="button" data-cat="tool-storage">Tool Storage</button>
       </nav>
 
       <a class="miniNavLink" href="videos/">Video Gallery</a>
@@ -202,16 +203,16 @@ const SHARED_SECRET = "sfoshdfsjknfsldneuqdghaiudbdijfbkjfbaoshdEBFDJBFSJDFB";
 
 /* ================= STATE ================= */
 let PRODUCTS = [];
-let activeCategory = "all"; // all | radio | flashlight
+let activeCategory = "all"; // all | radio | flashlight | tool-storage
 
 let cart = JSON.parse(localStorage.getItem("cart_v2") || "[]");
 /*
   cart item shape:
   {
-    key: "id|model|color",
+    key: "id|selected-option-values",
     id, name, price,
     qty,
-    selections: { model, color }
+    selections: { optionKey: optionValue }
   }
 */
 
@@ -224,17 +225,74 @@ function getProductImages(p){
   return [];
 }
 
-function makeLineKey(id, model, color){
-  return [id || "", model || "", color || ""].join("|");
+function getProductOptionFields(product){
+  const configuredOptions = Array.isArray(product.options)
+    ? product.options
+    : (Array.isArray(product.variants?.options) ? product.variants.options : []);
+
+  if (configuredOptions.length){
+    return configuredOptions
+      .map(option => ({
+        ...option,
+        choices: Array.isArray(option?.choices) ? option.choices : product.option_choices
+      }))
+      .filter(option => option && option.key && Array.isArray(option.choices) && option.choices.length)
+      .map(option => ({
+        key: String(option.key),
+        label: String(option.label || option.key),
+        choices: option.choices.map(choice => String(choice)),
+        placeholder: String(option.placeholder || "")
+      }));
+  }
+
+  // Backward compatibility for the existing flashlight products.
+  const fields = [];
+  const models = Array.isArray(product.variants?.models) ? product.variants.models : [];
+  const colors = Array.isArray(product.variants?.colors) ? product.variants.colors : [];
+
+  if (models.length){
+    fields.push({ key: "model", label: "Model", choices: models });
+  }
+
+  if (colors.length){
+    fields.push({ key: "color", label: "Color", choices: colors });
+  }
+
+  return fields;
+}
+
+function makeLineKey(id, selections = {}){
+  const selectedValues = Object.keys(selections)
+    .sort()
+    .map(key => `${key}:${selections[key] || ""}`);
+
+  return [id || "", ...selectedValues].join("|");
 }
 
 function getCurrentSelection(product){
-  const modelSel = document.getElementById(`model-${product.id}`);
-  const colorSel = document.getElementById(`color-${product.id}`);
-  return {
-    model: modelSel ? modelSel.value : "",
-    color: colorSel ? colorSel.value : ""
-  };
+  const selections = {};
+
+  getProductOptionFields(product).forEach(option => {
+    const select = document.getElementById(`option-${product.id}-${option.key}`);
+    selections[option.key] = select ? select.value : "";
+  });
+
+  return selections;
+}
+
+function getSelectionDisplayParts(item, includeLabels = true){
+  const selections = item?.selections || {};
+  const product = PRODUCTS.find(product => product.id === item.id);
+  const fields = product ? getProductOptionFields(product) : [];
+  const labelsByKey = Object.fromEntries(fields.map(field => [field.key, field.label]));
+
+  return Object.entries(selections)
+    .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== "")
+    .map(([key, value]) => {
+      if (!includeLabels) return String(value);
+      const fallbackLabel = key.charAt(0).toUpperCase() + key.slice(1);
+      return `${labelsByKey[key] || fallbackLabel}: ${value}`;
+    });
 }
 
 function getDisplayBadges(product){
@@ -299,7 +357,7 @@ function setActiveTab(cat){
 function initCategoryFromURL(){
   const url = new URL(window.location.href);
   const cat = (url.searchParams.get("cat") || "").toLowerCase();
-  if (cat === "radio" || cat === "flashlight") activeCategory = cat;
+  if (cat === "radio" || cat === "flashlight" || cat === "tool-storage") activeCategory = cat;
   else activeCategory = "all";
 }
 
@@ -321,6 +379,7 @@ function getFilteredSortedProducts(){
         p.note || "",
         (p.badges || []).join(" "),
         (p.compatible_batteries || []).join(" "),
+        getProductOptionFields(p).flatMap(option => [option.label, ...option.choices]).join(" "),
         p.tiktok ? "Seen on TikTok" : ""
       ].join(" ").toLowerCase();
 
@@ -350,9 +409,7 @@ function renderProducts(){
     const firstImg = imgs[0] || "";
     const badges = getDisplayBadges(p);
 
-    const hasVariants = p.variants && (p.variants.models || p.variants.colors);
-    const models = (p.variants && Array.isArray(p.variants.models)) ? p.variants.models : [];
-    const colors = (p.variants && Array.isArray(p.variants.colors)) ? p.variants.colors : [];
+    const optionFields = getProductOptionFields(p);
 
     const compatLine = Array.isArray(p.compatible_batteries) && p.compatible_batteries.length
       ? `<div class="compatLine"><strong>Compatible Batteries:</strong> ${p.compatible_batteries.join(", ")}</div>`
@@ -400,25 +457,17 @@ function renderProducts(){
             <span class="price">${money(p.price || 0)}</span>
           </div>
 
-          ${hasVariants ? `
+          ${optionFields.length ? `
             <div class="variantWrap">
-              ${models.length ? `
+              ${optionFields.map(option => `
                 <label class="variantField">
-                  <span>Model</span>
-                  <select id="model-${p.id}">
-                    ${models.map(m => `<option value="${m}">${m}</option>`).join("")}
+                  <span>${option.label}</span>
+                  <select id="option-${p.id}-${option.key}">
+                    ${option.placeholder ? `<option value="" disabled selected>${option.placeholder}</option>` : ""}
+                    ${option.choices.map(choice => `<option value="${choice}">${choice}</option>`).join("")}
                   </select>
                 </label>
-              ` : ""}
-
-              ${colors.length ? `
-                <label class="variantField">
-                  <span>Color</span>
-                  <select id="color-${p.id}">
-                    ${colors.map(c => `<option value="${c}">${c}</option>`).join("")}
-                  </select>
-                </label>
-              ` : ""}
+              `).join("")}
             </div>
           ` : ""}
 
@@ -441,7 +490,14 @@ function addToCart(productId){
   if (!p) return;
 
   const sel = getCurrentSelection(p);
-  const key = makeLineKey(p.id, sel.model, sel.color);
+  const missingOption = getProductOptionFields(p).find(option => !sel[option.key]);
+
+  if (missingOption){
+    alert(`Please select ${missingOption.label}.`);
+    return;
+  }
+
+  const key = makeLineKey(p.id, sel);
 
   const existing = cart.find(x => x.key === key);
   if (existing){
@@ -453,10 +509,7 @@ function addToCart(productId){
       name: p.name,
       price: Number(p.price || 0),
       qty: 1,
-      selections: {
-        model: sel.model || "",
-        color: sel.color || ""
-      }
+      selections: sel
     });
   }
 
@@ -505,9 +558,7 @@ function renderCart(){
   }
 
   box.innerHTML = cart.map(i => {
-    const selBits = [];
-    if (i.selections?.model) selBits.push(`Model: ${i.selections.model}`);
-    if (i.selections?.color) selBits.push(`Color: ${i.selections.color}`);
+    const selBits = getSelectionDisplayParts(i, true);
     const selLine = selBits.length ? `<div class="muted">${selBits.join(" • ")}</div>` : "";
 
     return `
@@ -578,9 +629,7 @@ function buildOrderSummaryText(orderIdMaybe){
 
   lines.push("Items:");
   cart.forEach(i => {
-    const sel = [];
-    if (i.selections?.model) sel.push(i.selections.model);
-    if (i.selections?.color) sel.push(i.selections.color);
+    const sel = getSelectionDisplayParts(i, true);
     const selTxt = sel.length ? ` [${sel.join(" / ")}]` : "";
     lines.push(`- ${i.name}${selTxt} (x${i.qty}) — $${(i.price*i.qty).toFixed(2)}`);
   });
@@ -618,9 +667,7 @@ function buildOrderPayload(orderId){
   const total = subtotal + shipping;
 
   const items = cart.map(i => {
-    const sel = [];
-    if (i.selections?.model) sel.push(i.selections.model);
-    if (i.selections?.color) sel.push(i.selections.color);
+    const sel = getSelectionDisplayParts(i, true);
     const selTxt = sel.length ? ` [${sel.join(" / ")}]` : "";
     return {
       name: `${i.name}${selTxt}`,
