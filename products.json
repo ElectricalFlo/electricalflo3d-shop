@@ -1,5 +1,180 @@
 [
   {
+    "id": "veto-mb2-two-full-inserts",
+    "category": "tool-storage",
+    "name": "Custom Modular Insert Set for Veto MB2 — Two Full Inserts",
+    "price": 65,
+    "note": "Best-value set for organizing both exterior side pockets of any color Veto MB2. Includes four made-to-order half inserts, which combine to form two complete inserts. Choose one tested driver configuration for each half insert. Printed in black PETG. Veto MB2 bag and tools are not included.",
+    "badges": [
+      "Best Value",
+      "Made to Order",
+      "Custom Configuration"
+    ],
+    "option_choices": [
+      "Single Driver — Klein 32313HD",
+      "Single Driver — Klein 32500HD",
+      "Single Driver — Klein 32291",
+      "Single Driver — Klein 32305HD",
+      "Single Driver — Klein 32317HD",
+      "Single Driver — Klein 614-4",
+      "Single Driver — Klein 6254INS",
+      "Single Driver — Klein 6264INS",
+      "Single Driver — Wiha 32012",
+      "Single Driver — Vessel 220USB-P5U",
+      "Single Driver — Vessel 220USB-P1",
+      "Single Driver — Vessel 220USB-1U",
+      "Single Driver — Wera 3.5 × 100 Driver",
+      "Single Driver — Wera 838 RA-R M",
+      "Dual Driver — Klein 614-4 + Klein 614-4",
+      "Dual Driver — Klein 614-4 + Klein 6254INS",
+      "Dual Driver — Klein 614-4 + Klein 6264INS",
+      "Dual Driver — Klein 614-4 + Wiha 32012",
+      "Dual Driver — Klein 6254INS + Klein 6254INS",
+      "Dual Driver — Klein 6254INS + Klein 6264INS",
+      "Dual Driver — Klein 6254INS + Wiha 32012",
+      "Dual Driver — Klein 6264INS + Klein 6264INS",
+      "Dual Driver — Klein 6264INS + Wiha 32012",
+      "Dual Driver — Wiha 32012 + Wiha 32012"
+    ],
+    "options": [
+      {
+        "key": "full_insert_1_half_1",
+        "label": "Full Insert 1 — Half 1",
+        "placeholder": "Select configuration"
+      },
+      {
+        "key": "full_insert_1_half_2",
+        "label": "Full Insert 1 — Half 2",
+        "placeholder": "Select configuration"
+      },
+      {
+        "key": "full_insert_2_half_1",
+        "label": "Full Insert 2 — Half 1",
+        "placeholder": "Select configuration"
+      },
+      {
+        "key": "full_insert_2_half_2",
+        "label": "Full Insert 2 — Half 2",
+        "placeholder": "Select configuration"
+      }
+    ],
+    "images": [
+      "images/Mb2-inserts.jpg",
+      "images/32291-32500hd.jpg",
+      "images/32305hd-6144-32012.jpg",
+      "images/32313hd-6254-6264.jpg",
+      "images/vessel-32317hd.jpg"
+    ]
+  },
+  {
+    "id": "veto-mb2-one-full-insert",
+    "category": "tool-storage",
+    "name": "Custom Modular Insert for Veto MB2 — One Full Insert",
+    "price": 39,
+    "note": "Organizes one exterior side pocket of any color Veto MB2. Includes two made-to-order half inserts, which combine to form one complete insert. Choose one tested driver configuration for each half insert. Printed in black PETG. Veto MB2 bag and tools are not included.",
+    "badges": [
+      "Made to Order",
+      "Custom Configuration"
+    ],
+    "option_choices": [
+      "Single Driver — Klein 32313HD",
+      "Single Driver — Klein 32500HD",
+      "Single Driver — Klein 32291",
+      "Single Driver — Klein 32305HD",
+      "Single Driver — Klein 32317HD",
+      "Single Driver — Klein 614-4",
+      "Single Driver — Klein 6254INS",
+      "Single Driver — Klein 6264INS",
+      "Single Driver — Wiha 32012",
+      "Single Driver — Vessel 220USB-P5U",
+      "Single Driver — Vessel 220USB-P1",
+      "Single Driver — Vessel 220USB-1U",
+      "Single Driver — Wera 3.5 × 100 Driver",
+      "Single Driver — Wera 838 RA-R M",
+      "Dual Driver — Klein 614-4 + Klein 614-4",
+      "Dual Driver — Klein 614-4 + Klein 6254INS",
+      "Dual Driver — Klein 614-4 + Klein 6264INS",
+      "Dual Driver — Klein 614-4 + Wiha 32012",
+      "Dual Driver — Klein 6254INS + Klein 6254INS",
+      "Dual Driver — Klein 6254INS + Klein 6264INS",
+      "Dual Driver — Klein 6254INS + Wiha 32012",
+      "Dual Driver — Klein 6264INS + Klein 6264INS",
+      "Dual Driver — Klein 6264INS + Wiha 32012",
+      "Dual Driver — Wiha 32012 + Wiha 32012"
+    ],
+    "options": [
+      {
+        "key": "half_1",
+        "label": "Half Insert 1",
+        "placeholder": "Select configuration"
+      },
+      {
+        "key": "half_2",
+        "label": "Half Insert 2",
+        "placeholder": "Select configuration"
+      }
+    ],
+    "images": [
+      "images/32291-32500hd.jpg",
+      "images/32305hd-6144-32012.jpg",
+      "images/32313hd-6254-6264.jpg",
+      "images/vessel-32317hd.jpg",
+      "images/Mb2-inserts.jpg"
+    ]
+  },
+  {
+    "id": "veto-mb2-expansion-half-insert",
+    "category": "tool-storage",
+    "name": "Expansion Half Insert for Veto MB2",
+    "price": 20,
+    "note": "Includes one made-to-order half insert for changing an existing Veto MB2 configuration. Select one tested driver configuration. This half insert cannot fill an MB2 pocket by itself; two compatible half inserts are required to form one complete insert. Printed in black PETG. Veto MB2 bag and tools are not included.",
+    "badges": [
+      "Expansion Add-On",
+      "Made to Order",
+      "Custom Configuration"
+    ],
+    "option_choices": [
+      "Single Driver — Klein 32313HD",
+      "Single Driver — Klein 32500HD",
+      "Single Driver — Klein 32291",
+      "Single Driver — Klein 32305HD",
+      "Single Driver — Klein 32317HD",
+      "Single Driver — Klein 614-4",
+      "Single Driver — Klein 6254INS",
+      "Single Driver — Klein 6264INS",
+      "Single Driver — Wiha 32012",
+      "Single Driver — Vessel 220USB-P5U",
+      "Single Driver — Vessel 220USB-P1",
+      "Single Driver — Vessel 220USB-1U",
+      "Single Driver — Wera 3.5 × 100 Driver",
+      "Single Driver — Wera 838 RA-R M",
+      "Dual Driver — Klein 614-4 + Klein 614-4",
+      "Dual Driver — Klein 614-4 + Klein 6254INS",
+      "Dual Driver — Klein 614-4 + Klein 6264INS",
+      "Dual Driver — Klein 614-4 + Wiha 32012",
+      "Dual Driver — Klein 6254INS + Klein 6254INS",
+      "Dual Driver — Klein 6254INS + Klein 6264INS",
+      "Dual Driver — Klein 6254INS + Wiha 32012",
+      "Dual Driver — Klein 6264INS + Klein 6264INS",
+      "Dual Driver — Klein 6264INS + Wiha 32012",
+      "Dual Driver — Wiha 32012 + Wiha 32012"
+    ],
+    "options": [
+      {
+        "key": "half_insert",
+        "label": "Half Insert Configuration",
+        "placeholder": "Select configuration"
+      }
+    ],
+    "images": [
+      "images/vessel-32317hd.jpg",
+      "images/32313hd-6254-6264.jpg",
+      "images/32305hd-6144-32012.jpg",
+      "images/32291-32500hd.jpg",
+      "images/Mb2-inserts.jpg"
+    ]
+  },
+  {
     "id": "apx-cupholder",
     "category": "radio",
     "name": "Cup Holder for Motorola APX 6000, 7000 & 8000",
@@ -487,5 +662,3 @@
     ]
   }
 ]
-
-
