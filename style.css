@@ -115,6 +115,62 @@ body{
   margin-bottom:14px;
 }
 
+/* Tool Storage explainer */
+.categoryIntro{
+  margin:0 0 18px;
+  padding:18px;
+  border:1px solid rgba(0,230,118,.35);
+  border-radius:18px;
+  background:linear-gradient(145deg, rgba(0,230,118,.10), rgba(21,26,34,.95));
+}
+
+.categoryIntroEyebrow{
+  display:block;
+  margin-bottom:6px;
+  color:var(--accent);
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.categoryIntro h2{
+  margin:0 0 8px;
+  font-size:22px;
+}
+
+.categoryIntro p{
+  margin:0;
+  color:var(--text);
+  line-height:1.5;
+}
+
+.categoryIntroSteps{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:14px 0;
+}
+
+.categoryIntroSteps span{
+  padding:8px 11px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:var(--card);
+  font-size:13px;
+  font-weight:750;
+}
+
+.categoryIntroSteps strong{
+  color:var(--accent);
+}
+
+.categoryIntro .categoryIntroFine{
+  color:var(--muted);
+  font-size:13px;
+}
+
 /* ================= FORMS ================= */
 
 input, select, textarea{
@@ -203,6 +259,36 @@ input, select, textarea{
   display:flex;
   flex-direction:column;
   gap:10px;
+}
+
+.selectionHelp{
+  margin:0;
+  padding:10px 12px;
+  border-left:3px solid var(--accent);
+  border-radius:8px;
+  background:rgba(0,230,118,.07);
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.45;
+}
+
+@media (max-width:600px){
+  .categoryIntro{
+    padding:15px;
+  }
+
+  .categoryIntro h2{
+    font-size:19px;
+  }
+
+  .categoryIntroSteps{
+    gap:6px;
+  }
+
+  .categoryIntroSteps span{
+    padding:7px 9px;
+    font-size:12px;
+  }
 }
 
 .titleRow{
@@ -636,4 +722,3 @@ input, select, textarea{
   border-color: rgba(0,230,118,0.5);
   box-shadow: 0 0 0 2px rgba(0,230,118,.12);
 }
-
