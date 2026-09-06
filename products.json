@@ -2,11 +2,14 @@
   {
     "id": "veto-mb2-two-full-inserts",
     "category": "tool-storage",
-    "name": "Custom Modular Insert Set for Veto MB2 — Two Full Inserts",
-    "price": 59.99,
-    "note": "Best-value set for organizing both exterior side pockets of any color Veto MB2. Includes four made-to-order half inserts, which combine to form two complete inserts. Choose one tested driver configuration for each half insert. Printed in black. Veto MB2 bag and tools are not included.",
+    "featured_order": 2,
+    "name": "Veto MB2 Screwdriver Insert Set — Both Side Pockets",
+    "price": 54.99,
+    "note": "Organize both exterior side pockets of your Veto MB2. You will receive four made-to-order halves: two halves for the left pocket and two halves for the right pocket. Choose one tested driver setup for each half. Fits any color Veto MB2 and is printed in black. Veto MB2 bag and tools are not included.",
+    "selection_help": "Make four selections below. Selections 1 and 2 make the first pocket insert; selections 3 and 4 make the second pocket insert.",
     "badges": [
-      "Best Value",
+      "Save $5",
+      "Organizes Both Pockets",
       "Made to Order",
       "Custom Configuration"
     ],
@@ -39,23 +42,23 @@
     "options": [
       {
         "key": "full_insert_1_half_1",
-        "label": "Full Insert 1 — Half 1",
-        "placeholder": "Select configuration"
+        "label": "Pocket 1 — Choose setup for Half 1",
+        "placeholder": "Choose a driver setup"
       },
       {
         "key": "full_insert_1_half_2",
-        "label": "Full Insert 1 — Half 2",
-        "placeholder": "Select configuration"
+        "label": "Pocket 1 — Choose setup for Half 2",
+        "placeholder": "Choose a driver setup"
       },
       {
         "key": "full_insert_2_half_1",
-        "label": "Full Insert 2 — Half 1",
-        "placeholder": "Select configuration"
+        "label": "Pocket 2 — Choose setup for Half 1",
+        "placeholder": "Choose a driver setup"
       },
       {
         "key": "full_insert_2_half_2",
-        "label": "Full Insert 2 — Half 2",
-        "placeholder": "Select configuration"
+        "label": "Pocket 2 — Choose setup for Half 2",
+        "placeholder": "Choose a driver setup"
       }
     ],
     "images": [
@@ -69,10 +72,13 @@
   {
     "id": "veto-mb2-one-full-insert",
     "category": "tool-storage",
-    "name": "Custom Modular Insert for Veto MB2 — One Full Insert",
+    "featured_order": 1,
+    "name": "Veto MB2 Screwdriver Insert — One Side Pocket",
     "price": 29.99,
-    "note": "Organizes one exterior side pocket of any color Veto MB2. Includes two made-to-order half inserts, which combine to form one complete insert. Choose one tested driver configuration for each half insert. Printed in black. Veto MB2 bag and tools are not included.",
+    "note": "Organize one exterior side pocket of your Veto MB2. You will receive two made-to-order halves that combine to form one complete pocket insert. Choose one tested driver setup for each half. Fits any color Veto MB2 and is printed in black. Veto MB2 bag and tools are not included.",
+    "selection_help": "Make two selections below. Half 1 and Half 2 combine to organize one MB2 side pocket.",
     "badges": [
+      "Organizes One Pocket",
       "Made to Order",
       "Custom Configuration"
     ],
@@ -105,13 +111,13 @@
     "options": [
       {
         "key": "half_1",
-        "label": "Half Insert 1",
-        "placeholder": "Select configuration"
+        "label": "Choose setup for Half 1",
+        "placeholder": "Choose a driver setup"
       },
       {
         "key": "half_2",
-        "label": "Half Insert 2",
-        "placeholder": "Select configuration"
+        "label": "Choose setup for Half 2",
+        "placeholder": "Choose a driver setup"
       }
     ],
     "images": [
@@ -125,11 +131,14 @@
   {
     "id": "veto-mb2-expansion-half-insert",
     "category": "tool-storage",
-    "name": "Expansion Half Insert for Veto MB2",
+    "featured_order": 3,
+    "name": "Veto MB2 Swap Half — For Existing Insert Owners",
     "price": 19.99,
-    "note": "Includes one made-to-order half insert for changing an existing Veto MB2 configuration. Select one tested driver configuration. This half insert cannot fill an MB2 pocket by itself; two compatible half inserts are required to form one complete insert. Printed in black. Veto MB2 bag and tools are not included.",
+    "note": "For customers who already own an ElectricalFlo MB2 insert and want to change one half of their setup. You will receive one made-to-order half. It cannot organize a pocket by itself; one additional compatible half is required. Printed in black. Veto MB2 bag and tools are not included.",
+    "selection_help": "Choose this only when you already have another compatible ElectricalFlo half insert to pair with it.",
     "badges": [
-      "Expansion Add-On",
+      "Existing Customers",
+      "One Half Only",
       "Made to Order",
       "Custom Configuration"
     ],
@@ -162,8 +171,8 @@
     "options": [
       {
         "key": "half_insert",
-        "label": "Half Insert Configuration",
-        "placeholder": "Select configuration"
+        "label": "Choose your replacement half setup",
+        "placeholder": "Choose a driver setup"
       }
     ],
     "images": [
