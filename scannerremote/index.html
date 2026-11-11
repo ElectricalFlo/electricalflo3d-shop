@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <title>Scanner Remote — Support | ElectricalFlo</title>
+  <meta name="description" content="Support for Scanner Remote, an iPhone app that controls your radio scanner over Bluetooth." />
+
+  <link rel="stylesheet" href="/style.css" />
+
+  <style>
+    .headerLinks{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .brandHome{ display:flex; align-items:center; gap:14px; color:inherit; text-decoration:none; }
+    .headerLinks .tabBtn, .headerLinks .miniNavLink{ text-decoration:none; }
+
+    .wrap{ max-width:900px; margin:0 auto; padding:32px 16px 64px; }
+    h1{ margin:0 0 8px; }
+    h2{ margin:36px 0 12px; font-size:1.3rem; }
+    .lead{ color:var(--muted); line-height:1.6; margin:8px 0 20px; }
+    .wrap p, .wrap li{ line-height:1.6; }
+    .wrap li{ margin:6px 0; }
+    .wrap a{ color:var(--accent); }
+    .muted{ color:var(--muted); }
+
+    .faq{ display:grid; gap:12px; }
+    .faq details{
+      border:1px solid var(--border);
+      border-radius:16px;
+      background:rgba(255,255,255,0.03);
+      padding:14px 18px;
+    }
+    .faq summary{ cursor:pointer; font-weight:600; }
+    .faq details > *:not(summary){ color:var(--muted); }
+    .faq ul{ padding-left:20px; margin:10px 0 0; }
+    .faq p{ margin:10px 0 0; }
+
+    .note{ margin-top:32px; font-size:.92rem; color:var(--muted); line-height:1.6; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="brandWrap">
+    <a class="brandHome" href="/">
+      <img src="/images/Logo.png" alt="ElectricalFlo Logo" class="logo" />
+      <div class="brand">
+        <h1>ElectricalFlo</h1>
+        <p>3D Printed Gear</p>
+      </div>
+    </a>
+  </div>
+
+  <div class="headerRight">
+    <div class="headerLinks">
+      <nav class="catTabs" aria-label="Categories">
+        <a class="tabBtn" href="/?cat=all">All</a>
+        <a class="tabBtn" href="/?cat=radio">Radio</a>
+        <a class="tabBtn" href="/?cat=flashlight">Flashlight</a>
+      </nav>
+
+      <a class="miniNavLink" href="/videos/">Video Gallery</a>
+      <a class="miniNavLink" href="/faq/">FAQ</a>
+      <a class="miniNavLink" href="/Contact/">Contact</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Scanner Remote — Support</h1>
+  <p class="lead">Control your scanner and hear it on your iPhone.</p>
+
+  <p>Scanner Remote connects to your radio scanner over Bluetooth. You can hold channels, change the volume and
+  squelch, open the scanner's menu, skip a channel, listen to the audio on your phone, and look back at the calls you
+  heard. It was built and tested with the SDS150.</p>
+
+  <h2>Getting started</h2>
+  <ol>
+    <li>Turn <strong>Bluetooth on at the scanner</strong>.</li>
+    <li>If you use the scanner maker's own phone app, <strong>close it</strong>. The scanner talks to one app at a time.</li>
+    <li>Open Scanner Remote and tap <strong>Continue</strong>. Allow Bluetooth when your phone asks.</li>
+    <li>Tap <strong>Look for the scanner</strong>, then tap your scanner in the list.</li>
+    <li>Tap <strong>Listen</strong> to hear it. Next time you open the app, it reconnects by itself.</li>
+  </ol>
+
+  <h2>Common questions</h2>
+  <div class="faq">
+
+    <details>
+      <summary>The app can't find my scanner</summary>
+      <ul>
+        <li>Check that Bluetooth is on at the scanner and on your phone.</li>
+        <li>Close the scanner maker's own app, and any other app that connects to the scanner.</li>
+        <li>Move the phone closer, and try Look for the scanner again.</li>
+        <li>Check that Scanner Remote is allowed to use Bluetooth: Settings, then Privacy &amp; Security, then Bluetooth.</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>It connects, then drops</summary>
+      <p>The scanner sometimes drops the Bluetooth link. The app reconnects by itself within a few seconds. If it keeps
+      dropping, check the scanner's battery and move closer.</p>
+    </details>
+
+    <details>
+      <summary>I can't hear anything</summary>
+      <ul>
+        <li>Tap <strong>Listen</strong>. Audio plays only while Listen is on. (You can switch on "Listen when the scanner connects" in Settings.)</li>
+        <li>Check the phone's volume and silent switch, and the scanner's own volume and squelch.</li>
+        <li>Encrypted transmissions can't be heard on a scanner.</li>
+      </ul>
+    </details>
+
+    <details>
+      <summary>History is empty, or a call is missing</summary>
+      <p>Calls are recorded <strong>only while the app is open and connected to the scanner</strong>. Calls heard while the
+      app was closed or the phone was locked are not saved. Calls older than the time you chose in Settings are deleted,
+      unless you starred them.</p>
+    </details>
+
+    <details>
+      <summary>How do I keep calls for longer?</summary>
+      <p>Open Settings and change <strong>Keep calls for</strong> (1, 3, 7, 14 or 30 days). Star a call to keep it permanently.</p>
+    </details>
+
+    <details>
+      <summary>How do I name a radio?</summary>
+      <p>In History, swipe a call to the right and tap <strong>Name unit</strong>. You can also manage names, and import or
+      export them as a CSV file, in Settings under Unit names.</p>
+    </details>
+
+    <details>
+      <summary>What does AVOID do?</summary>
+      <p>It sends your scanner's own AVOID key. The scanner avoids the channel it is on, and that channel stops coming
+      up. To bring a channel back, use your scanner's own controls.</p>
+    </details>
+
+    <details>
+      <summary>How do I delete my information?</summary>
+      <p>Swipe a call in History to delete it, or delete the app to remove everything it saved. See the
+      <a href="/scannerremote/privacy/">privacy policy</a>.</p>
+    </details>
+
+  </div>
+
+  <h2>Contact us</h2>
+  <p>Need help, or found a problem? Email <a href="mailto:admin@electricalflo.com">admin@electricalflo.com</a> and tell us:</p>
+  <ul>
+    <li>your iPhone model and iOS version,</li>
+    <li>your scanner model,</li>
+    <li>what you did and what happened.</li>
+  </ul>
+
+  <p class="note">Rules about listening to, recording and sharing radio traffic differ by place. You are responsible for
+  following the laws where you are. Scanner Remote is not affiliated with, endorsed by or sponsored by any scanner
+  manufacturer. Product names belong to their owners. See also the <a href="/scannerremote/privacy/">privacy policy</a>.</p>
+</main>
+
+<footer class="siteFooter">
+  <div class="siteFooterInner">
+    <p>© 2026 ElectricalFlo LLC. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
